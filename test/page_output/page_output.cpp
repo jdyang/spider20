@@ -8,15 +8,12 @@
 
 using namespace std;
 
-int CPageOutput::init(void)
+int CPageOutput::init(string dir)
 {
-    CSpiderConf& conf = mp_spider->m_spider_conf;
-
 	m_fd = -1;
 	m_cur_day = -1;
 	m_cur_min = -1;
-	m_base_dir = conf->page_output_path;
-
+	m_base_dir = dir;
     if (0 != pthread_mutex_init(&m_mutex, NULL))
 	{
 		return -1;
@@ -39,22 +36,15 @@ int CPageOutput::destroy(void)
 	return 0;
 }
 
-void CPageOutput::set_spider(CSpider* sp)
-{
-	mp_spider = sp;
-}
 
 int CPageOutput::append(const char*page, int len, bool need_write)
 {
-
-    CSpiderConf& conf = mp_spider->m_spider_conf;
 
     char buf[4096];
 
 	if (0 != pthread_mutex_lock(&m_mutex))
 	{
 		printf("lock fail\n");
-		return -1;
 	}
 	time_t now = time(NULL);
 	struct tm* p_now = localtime(&now);
@@ -63,7 +53,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	int month = p_now->tm_mon;
 	int day = p_now->tm_mday;
 	int hour = p_now->tm_hour;
-	int min = p_now->tm_min / conf.page_output_change_interval;
+	int min = p_now->tm_min / 30;
 
 
     if (day != m_cur_day)
@@ -73,8 +63,6 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 		m_cur_day = day;
 		if (0 != mkdir(buf, 0777))
 		{
-			printf("mkdir error\n");
-			return -1;
 		}
 	}
 
@@ -91,7 +79,6 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 		if (-1 == m_fd)
 		{
 			printf("open file err\n");
-			return -1;
 		}
 		m_cur_min = min;
 	}
@@ -100,11 +87,13 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 		if (-1 == write(m_fd, page, len))
 		{
 			printf("write err\n");
-			return -1;
 		}
 	}
 
-	pthread_mutex_unlock(&m_mutex);
+	if (0 != pthread_mutex_unlock(&m_mutex))
+	{
+		printf("unlock fail\n");
+	}
 
 	return 0;
 }
