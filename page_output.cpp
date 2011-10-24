@@ -8,14 +8,12 @@
 
 using namespace std;
 
-int CPageOutput::init(void)
+int CPageOutput::init(string dir)
 {
-    CSpiderConf& conf = mp_spider->m_spider_conf;
-
 	m_fd = -1;
 	m_cur_day = -1;
 	m_cur_min = -1;
-	m_base_dir = conf->page_output_path;
+	m_base_dir = dir;
 
     if (0 != pthread_mutex_init(&m_mutex, NULL))
 	{
@@ -47,7 +45,7 @@ void CPageOutput::set_spider(CSpider* sp)
 int CPageOutput::append(const char*page, int len, bool need_write)
 {
 
-    CSpiderConf& conf = mp_spider->m_spider_conf;
+    //CSpiderConf& conf = mp_spider->m_spider_conf;
 
     char buf[4096];
 
@@ -63,7 +61,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	int month = p_now->tm_mon;
 	int day = p_now->tm_mday;
 	int hour = p_now->tm_hour;
-	int min = p_now->tm_min / conf.page_output_change_interval;
+	int min = p_now->tm_min / 30;
 
 
     if (day != m_cur_day)
