@@ -1,6 +1,7 @@
 #ifndef __FANFAN_PAGE_OUTPUT_H__
 #define __FANFAN_PAGE_OUTPUT_H__
 
+#include "spider.h"
 #include <string>
 #include <pthread.h>
 

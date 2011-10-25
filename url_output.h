@@ -11,13 +11,13 @@ class CUrlOutput
 public:
     CUrlOutput(void){}
 	~CUrlOutput(void){}
-	int init(string dir);
+	int init(string file_name);
 	int destroy(void);
 	int append(string& url);
 
 
 private:
-	string m_base_dir;
+    int m_fd;
 	pthread_mutex_t m_mutex;
 	char m_buf[5120];
 

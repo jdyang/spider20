@@ -9,12 +9,12 @@ FLAGS=-g $(INCLUDES)
 
 LIB= -lpthread
 
-all : test_page_output
+all : test_url_output
 
-OBJS= ../../page_output.o \
-      test_page_output.o
+OBJS= ../../url_output.o \
+      test_url_output.o
 
 clean :
-	rm -rf *.o *~ test_page_output
-test_page_output : $(OBJS) 
+	rm -rf *.o *~ test_url_output
+test_url_output : $(OBJS) 
 	$(CPP) $(FLAGS) -o $@ $^ $(LIB)

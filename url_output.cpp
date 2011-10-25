@@ -13,7 +13,7 @@ int CUrlOutput::init(string file_name)
 
 	m_fd = -1;
 
-	if (-1 == (m_fd=open(file_name.c_str(), O_CREAT | O_RDWR)))
+	if (-1 == (m_fd=open(file_name.c_str(), O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR | S_IROTH | S_IRGRP)))
 	{
 		printf("open file error.\n");
 		return -1;
@@ -44,23 +44,20 @@ int CUrlOutput::destroy(void)
 
 int CUrlOutput::append(string& url)
 {
-	if (0 != pthread_mutex_lock(&m_mutex))
-	{
-		printf("lock fail\n");
-	}
+	pthread_mutex_lock(&m_mutex);
+
 	memset(m_buf, 0, sizeof(m_buf));
 	sprintf(m_buf, "%s\t", url.c_str());
-	sprintf(m_buf, "%llu\n", time(NULL));
+	sprintf(m_buf+url.length()+1, "%lu\n", time(NULL));
+
 	if (-1 == write(m_fd, m_buf, strlen(m_buf)))
 	{
 		printf("write err\n");
+	    pthread_mutex_unlock(&m_mutex);
+		return -1;
 	}
 
-	if (0 != pthread_mutex_unlock(&m_mutex))
-	{
-		printf("unlock fail\n");
-	}
-
+	pthread_mutex_unlock(&m_mutex);
 	return 0;
 }
 

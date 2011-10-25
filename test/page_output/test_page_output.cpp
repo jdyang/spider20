@@ -1,4 +1,4 @@
-#include "page_output.h"
+#include "../../page_output.h"
 #include <string>
 #include <unistd.h>
 #include <pthread.h>
@@ -20,8 +20,6 @@ int main(int argc, char** argv)
 	pthread_t ths[5];
 	int i;
 
-    printf("%d\n", sizeof(long));
-	exit(0);
     CPageOutput page_output;
 	if (-1 == page_output.init(string("./")))
 	{

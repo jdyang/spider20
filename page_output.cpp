@@ -85,7 +85,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 			close(m_fd);
 			m_fd = -1;
 		}
-		m_fd = open(buf, O_RDWR | O_APPEND | O_CREAT);
+		m_fd = open(buf, O_RDWR | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IROTH | S_IRGRP);
 		if (-1 == m_fd)
 		{
 			printf("open file err\n");
