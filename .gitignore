@@ -1,0 +1,16 @@
+*.o
+*.a
+*.log
+*.so
+*.htm
+*.html
+.*.swp
+*.txt
+*.tar.gz
+*.bak
+run
+*.price
+*.jpg
+*.js
+*.css
+
