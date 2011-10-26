@@ -139,6 +139,7 @@ FuncRet CSpiderStatis::update_domain_cate_done(string domain)
 {
 	if(pthread_mutex_lock(&m_cate_mutex) != 0)
 	{
+        // TODO change printf to log
 		printf("update_domain_cate_done error->pthread_mutex_lock error: lock fail.\n");
 		return FR_FALSE;
 	}

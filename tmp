@@ -1,0 +1,165 @@
+../../../spider/spider_lib/lib/libextractor.a(extractor.o): In function `CExtractor::load_conf(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:209: undefined reference to `CHtmlTree::init(char*)'
+../../../spider/spider_lib/lib/libextractor.a(extractor.o): In function `CExtractor::extract_link()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:193: undefined reference to `CHtmlTree::set_html(std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:194: undefined reference to `CHtmlTree::build()'
+../../../spider/spider_lib/lib/libextractor.a(extractor.o): In function `CExtractor::init_task_saver(char const*, char const*)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:175: undefined reference to `CTaskSaver::CTaskSaver(int)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:180: undefined reference to `CTaskSaver::init(char const*, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(extractor.o): In function `CExtractor::extract(EcSwitch)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:105: undefined reference to `CHtmlTree::set_html(std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:106: undefined reference to `CHtmlTree::build()'
+../../../spider/spider_lib/lib/libextractor.a(extractor.o): In function `CExtractor::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:62: undefined reference to `CHtmlTree::set_html(std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:63: undefined reference to `CHtmlTree::build()'
+../../../spider/spider_lib/lib/libextractor.a(extractor.o): In function `~CExtractor':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:47: undefined reference to `CTaskSaver::~CTaskSaver()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:49: undefined reference to `CHtmlTree::~CHtmlTree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:49: undefined reference to `CHtmlTree::~CHtmlTree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:47: undefined reference to `CTaskSaver::~CTaskSaver()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:49: undefined reference to `CHtmlTree::~CHtmlTree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:49: undefined reference to `CHtmlTree::~CHtmlTree()'
+../../../spider/spider_lib/lib/libextractor.a(extractor.o): In function `CExtractor':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:34: undefined reference to `CHtmlTree::CHtmlTree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:42: undefined reference to `CHtmlTree::~CHtmlTree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:34: undefined reference to `CHtmlTree::CHtmlTree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/extractor.cpp:42: undefined reference to `CHtmlTree::~CHtmlTree()'
+../../../spider/spider_lib/lib/libextractor.a(ec_link.o): In function `CEcLink::extract_content()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_link.cpp:274: undefined reference to `CHtmlTree::visit_tree(VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_link.o): In function `end_visit_link(void*)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_link.cpp:221: undefined reference to `CHtmlTree::get_url()'
+../../../spider/spider_lib/lib/libextractor.a(ec_link.o): In function `CEcLink::extract_link()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_link.cpp:143: undefined reference to `CHtmlTree::visit_tree(VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_link.o): In function `start_visit_link(void*)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_link.cpp:179: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_link.cpp:193: undefined reference to `CHtmlTree::merge_link(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_link.cpp:194: undefined reference to `CUrlUndup::process(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&)'
+../../../spider/spider_lib/lib/libextractor.a(ec_link.o): In function `CEcLink::load_conf(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_link.cpp:100: undefined reference to `CUrlUndup::load_conf(char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_title.o): In function `CEcTitle::cleanup()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:920: undefined reference to `htmlcxx::HTML::decode_entities(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:922: undefined reference to `htmlcxx::HTML::decode_entities(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:924: undefined reference to `htmlcxx::HTML::decode_entities(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+../../../spider/spider_lib/lib/libextractor.a(ec_title.o): In function `CEcTitle::extract_page_title()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:428: undefined reference to `CHtmlTree::visit_tree(VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_title.o): In function `CEcTitle::extract_navigation()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:312: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:327: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:367: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:370: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_title.o): In function `CEcTitle::extract_commodity_title()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:218: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:231: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:292: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:298: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_title.o): In function `CEcTitle::extract_description()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:146: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:162: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:202: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:205: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_title.o): In function `CEcTitle::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:690: undefined reference to `CHtmlTree::get_url()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:730: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:799: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_title.cpp:865: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_kv.o): In function `CEcKV::extract_kv_text(int)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:637: undefined reference to `CHtmlTree::get_url()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:645: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:668: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:697: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:703: undefined reference to `htmlcxx::HTML::decode_entities(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:711: undefined reference to `htmlcxx::HTML::decode_entities(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:719: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:726: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_kv.o): In function `CEcKV::extract_text()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:977: undefined reference to `CHtmlTree::get_url()'
+../../../spider/spider_lib/lib/libextractor.a(ec_kv.o): In function `CEcKV::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:879: undefined reference to `CHtmlTree::get_url()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:914: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:949: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_kv.cpp:963: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_tool.o): In function `boost::basic_regex<char, boost::regex_traits<char, boost::cpp_regex_traits<char> > >::assign(char const*, char const*, unsigned int)':
+/usr/include/boost/regex/v4/basic_regex.hpp:254: undefined reference to `boost::basic_regex<char, boost::regex_traits<char, boost::cpp_regex_traits<char> > >::do_assign(char const*, char const*, unsigned int)'
+../../../spider/spider_lib/lib/libextractor.a(ec_tool.o): In function `perl_matcher':
+/usr/include/boost/regex/v4/perl_matcher_common.hpp:44: undefined reference to `boost::re_detail::perl_matcher<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<boost::sub_match<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, boost::regex_traits<char, boost::cpp_regex_traits<char> > >::construct_init(boost::basic_regex<char, boost::regex_traits<char, boost::cpp_regex_traits<char> > > const&, boost::regex_constants::_match_flags)'
+../../../spider/spider_lib/lib/libextractor.a(ec_tool.o): In function `bool boost::regex_search<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<boost::sub_match<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, char, boost::regex_traits<char, boost::cpp_regex_traits<char> > >(__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, __gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, boost::match_results<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<boost::sub_match<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > >&, boost::basic_regex<char, boost::regex_traits<char, boost::cpp_regex_traits<char> > > const&, boost::regex_constants::_match_flags, __gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >)':
+/usr/include/boost/regex/v4/regex_search.hpp:49: undefined reference to `boost::re_detail::perl_matcher<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<boost::sub_match<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, boost::regex_traits<char, boost::cpp_regex_traits<char> > >::find()'
+../../../spider/spider_lib/lib/libextractor.a(ec_tool.o): In function `bool boost::regex_search<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, char, boost::regex_traits<char, boost::cpp_regex_traits<char> > >(__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, __gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, boost::basic_regex<char, boost::regex_traits<char, boost::cpp_regex_traits<char> > > const&, boost::regex_constants::_match_flags)':
+/usr/include/boost/regex/v4/regex_search.hpp:138: undefined reference to `boost::re_detail::perl_matcher<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<boost::sub_match<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, boost::regex_traits<char, boost::cpp_regex_traits<char> > >::find()'
+../../../spider/spider_lib/lib/libextractor.a(ec_tool.o): In function `boost::re_detail::basic_regex_formatter<boost::re_detail::string_out_iterator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, boost::match_results<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<boost::sub_match<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > >, boost::regex_traits_wrapper<boost::regex_traits<char, boost::cpp_regex_traits<char> > > >::format_escape()':
+/usr/include/boost/regex/v4/regex_format.hpp:308: undefined reference to `boost::cpp_regex_traits<char>::toi(char const*&, char const*, int) const'
+/usr/include/boost/regex/v4/regex_format.hpp:331: undefined reference to `boost::cpp_regex_traits<char>::toi(char const*&, char const*, int) const'
+/usr/include/boost/regex/v4/regex_format.hpp:391: undefined reference to `boost::cpp_regex_traits<char>::toi(char const*&, char const*, int) const'
+/usr/include/boost/regex/v4/regex_format.hpp:402: undefined reference to `boost::cpp_regex_traits<char>::toi(char const*&, char const*, int) const'
+../../../spider/spider_lib/lib/libextractor.a(ec_tool.o): In function `boost::re_detail::basic_regex_formatter<boost::re_detail::string_out_iterator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, boost::match_results<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<boost::sub_match<__gnu_cxx::__normal_iterator<char const*, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > >, boost::regex_traits_wrapper<boost::regex_traits<char, boost::cpp_regex_traits<char> > > >::format_perl()':
+/usr/include/boost/regex/v4/regex_format.hpp:247: undefined reference to `boost::cpp_regex_traits<char>::toi(char const*&, char const*, int) const'
+../../../spider/spider_lib/lib/libextractor.a(ec_tool.o):/usr/include/boost/regex/v4/regex_format.hpp:423: more undefined references to `boost::cpp_regex_traits<char>::toi(char const*&, char const*, int) const' follow
+../../../spider/spider_lib/lib/libextractor.a(ec_img.o): In function `CEcImg::extract_img_text(int)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:732: undefined reference to `CHtmlTree::get_url()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:742: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:765: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:796: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:803: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:808: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_img.o): In function `CEcImg::extract_js_bigimg_text()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:670: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:682: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+../../../spider/spider_lib/lib/libextractor.a(ec_img.o): In function `CEcImg::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:532: undefined reference to `CHtmlTree::get_url()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:533: undefined reference to `CHtmlTree::get_content()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:609: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_img.o): In function `start_visit_ec_img_text(void*)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_img.cpp:513: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+../../../spider/spider_lib/lib/libextractor.a(ec_price_img.o): In function `CEcPriceImg::extract_img_text()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:335: undefined reference to `CHtmlTree::get_url()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:342: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:365: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:395: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:399: undefined reference to `CTaskSaver::add(std::basic_string<char, std::char_traits<char>, std::allocator<char> >&, int, int, char const*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_price_img.o): In function `CEcPriceImg::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:299: undefined reference to `CHtmlTree::get_url()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:300: undefined reference to `CHtmlTree::get_content()'
+../../../spider/spider_lib/lib/libextractor.a(ec_price_img.o): In function `start_visit_ec_price_img_text(void*)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_price_img.cpp:268: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+../../../spider/spider_lib/lib/libextractor.a(ec_light_price.o): In function `CEcLightPrice::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_light_price.cpp:316: undefined reference to `CHtmlTree::get_url()'
+../../../spider/spider_lib/lib/libextractor.a(ec_cmt.o): In function `CEcCmt::extract_cmt_text()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:153: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:201: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:218: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:226: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:243: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:251: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:268: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:276: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:293: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_cmt.o): In function `CEcCmt::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_cmt.cpp:318: undefined reference to `CHtmlTree::get_url()'
+../../../spider/spider_lib/lib/libextractor.a(ec_qa.o): In function `CEcQa::extract_qa_text()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_qa.cpp:145: undefined reference to `CHtmlTree::get_tree()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_qa.cpp:168: undefined reference to `htmlcxx::HTML::Node::parseAttributes()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_qa.cpp:185: undefined reference to `CHtmlTree::visit_node(tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, tree<htmlcxx::HTML::Node, std::allocator<tree_node_<htmlcxx::HTML::Node> > >::pre_order_iterator, VisitResult (*)(void*), VisitResult (*)(void*), HtmlTreeData*)'
+../../../spider/spider_lib/lib/libextractor.a(ec_qa.o): In function `CEcQa::extract()':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/ec_qa.cpp:208: undefined reference to `CHtmlTree::get_url()'
+../../../spider/spider_lib/lib/libextractor.a(recognizer.o): In function `CRecognizer::is_item_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:85: undefined reference to `ucUrlPattern::is_profile_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+../../../spider/spider_lib/lib/libextractor.a(recognizer.o): In function `CRecognizer::is_item_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >, CExtractor*)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:126: undefined reference to `ucUrlPattern::is_profile_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:129: undefined reference to `ucUrlPattern::is_profile_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+../../../spider/spider_lib/lib/libextractor.a(recognizer.o): In function `CRecognizer::is_category_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:79: undefined reference to `ucUrlPattern::is_category_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+../../../spider/spider_lib/lib/libextractor.a(recognizer.o): In function `CRecognizer::is_category_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >, CExtractor*)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:97: undefined reference to `ucUrlPattern::is_category_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:102: undefined reference to `ucUrlPattern::is_category_page(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+../../../spider/spider_lib/lib/libextractor.a(recognizer.o): In function `CRecognizer::load_conf(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:48: undefined reference to `ucUrlPattern::build(std::basic_string<char, std::char_traits<char>, std::allocator<char> >)'
+../../../spider/spider_lib/lib/libextractor.a(recognizer.o): In function `~CRecognizer':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:40: undefined reference to `ucUrlPattern::~ucUrlPattern()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:40: undefined reference to `ucUrlPattern::~ucUrlPattern()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:40: undefined reference to `ucUrlPattern::~ucUrlPattern()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:40: undefined reference to `ucUrlPattern::~ucUrlPattern()'
+../../../spider/spider_lib/lib/libextractor.a(recognizer.o): In function `CRecognizer':
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:34: undefined reference to `ucUrlPattern::ucUrlPattern()'
+/home/yangjiandong/spider/spider_lib/src/base_extractor/recognizer.cpp:34: undefined reference to `ucUrlPattern::ucUrlPattern()'
+collect2: ld returned 1 exit status
+make: *** [predator] Error 1
