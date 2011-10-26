@@ -13,3 +13,6 @@ run
 *.jpg
 *.js
 *.css
+predator*
+test_page_output
+test_urlpool
