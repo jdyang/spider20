@@ -1,6 +1,13 @@
 #ifndef _FANFAN_LEVEL_POOL_H__
 #define _FANFAN_LEVEL_POOL_H__
 
+#include "spider.h"
+#include <pthread.h>
+#include <string>
+#include <map>
+
+using namespace std;
+
 struct SLevelInfo
 {
 	int max_crawl_thread_count;
@@ -20,9 +27,13 @@ public:
     void set_spider(CSpider* sp);
     void insert_level_info(string& site, SLevelInfo li);
 	bool is_crawl_enabled(string& site);
-	void finish_crawl(string& site)
+	void finish_crawl(string& site);
+
+	//for debug
+	void print(void);
+
 private:
-    time_t get_time_now(void)
+    time_t get_time_now(void);
 
     CSpider* mp_spider;
     pthread_mutex_t m_mutex;
