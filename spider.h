@@ -3,7 +3,11 @@
 
 class CSpiderConf
 {
+public:
 	int default_max_concurrent_thread_count;  // 每个站点默认最大线程并发度
+	int urlpool_empty_sleep_time;
+	int max_url_len;
+	
 };
 
 class CSpider

@@ -1,11 +1,4 @@
-/*
- @file: test_spider_statis.cpp
- @brief: 测试程序，测试spider统计部分功能
- @author: stanshen
- @create date: 2011.10.25
-*/
-
-#include "../../spider_statis.h"
+#include "../../urlpool.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -22,7 +15,7 @@ void end_handler(int sig)
 
 void* select_thread(void* arg)
 {
-	CSpiderStatis* spider_statis = (CSpiderStatis*)arg;
+	UrlPool* pool = (UrlPool*)arg;
 	int cpq_url_num, coq_url_num, ipq_url_num, ioq_url_num, sq_url_num, cate_select_num, item_select_num;
 
 	while(true)
@@ -60,7 +53,7 @@ void* select_thread(void* arg)
 }
 void* work_thread(void* arg)
 {
-	CSpiderStatis* spider_statis = (CSpiderStatis*)arg;
+	UrlPool* pool = (UrlPool*)arg;
 
 	while(true)
 	{
@@ -85,19 +78,28 @@ int main(int argc, char* argv[])
 	pthread_t ths[6];
 	int i;
 
-	CSpiderStatis spider_statis;
-	spider_statis.init();
+	if (argc < 2){
+		cout << "./test_urlpool ./input.url" << endl;
+		exit(-1);
+	}
+
+	SpiderConf conf;
+	conf.urlpool_empty_sleep_time = 500;
+	conf.max_url_len = 4096;
+	UrlPool pool;
+	pool.set_conf(&conf);
+	pool.load_urls(argv[1]);
 	
 	signal(SIGINT, end_handler);
 	printf("%lld\n", time(NULL));
-	if(pthread_create(&ths[0], NULL, select_thread, &spider_statis) != 0)
+	if(pthread_create(&ths[0], NULL, select_thread, &pool) != 0)
 	{
 		printf("pthread_create error: select_thread error.\n");
 		return 0;
 	}
 	for(i = 1; i < 5; i++)
 	{
-		if(pthread_create(&ths[i], NULL, work_thread, &spider_statis) != 0)
+		if(pthread_create(&ths[i], NULL, work_thread, &pool) != 0)
 		{
 			printf("pthread_create error: work_thread error.\n");
 			return 0;

@@ -38,12 +38,16 @@ public:
 class UrlPool {
 public:
     SpiderConf& get_conf();
+	FuncRet load_urls(const char *path);
+
 	void set_conf(SpiderConf *conf);
     deque<UrlInfo>& get_url_queue();
+	set<string>& get_url_set();
 
 	bool url_empty();
 	void push_url(UrlInfo ui);
 	UrlInfo pop_url();
+	
 	
 private:
     deque<UrlInfo> m_url_queue;
