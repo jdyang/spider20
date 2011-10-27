@@ -72,6 +72,7 @@ void* crawl_thread(void* arg)
 	{
 		if (!psq->pop(qi))
 		{
+			printf("selected queue is empty\n");
             sleep(1);
 			continue;
 		}

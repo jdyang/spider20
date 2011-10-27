@@ -13,6 +13,7 @@ public:
 class CSpider
 {
 public:
+    FuncRet load_conf(const char* conf_path);
 	CSpiderConf m_spider_conf;
 };
 
