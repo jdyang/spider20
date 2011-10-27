@@ -1,4 +1,5 @@
 #include "../../urlpool.h"
+#include "../../spider.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -46,7 +47,7 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	SpiderConf conf;
+	CSpiderConf conf;
 	conf.urlpool_empty_sleep_time = 500;
 	conf.max_url_len = 4096;
 	UrlPool pool;

@@ -1,4 +1,5 @@
 #include "urlpool.h"
+#include "spider.h"
 
 #include "sdlog.h"
 
@@ -14,7 +15,7 @@ PredatorConf& UrlPool::get_conf() {
 }
 
 
-void UrlPool::set_conf(SpiderConf *conf) {
+void UrlPool::set_conf(CSpiderConf *conf) {
 	m_conf = conf;
 }
 
@@ -49,7 +50,7 @@ void UrlPool::push_url(UrlInfo ui) {
 
 UrlInfo UrlPool::pop_url(void) {
 	UrlInfo ui;
-    SpiderConf& conf = get_conf();
+    CSpiderConf& conf = get_conf();
 
 	while (true) {
 		m_url_mutex.lock();
@@ -72,7 +73,7 @@ UrlInfo UrlPool::pop_url(void) {
 FuncRet UrlPool::load_urls(const char *path) {
 	deque<UrlInfo>& url_queue = get_url_queue();
 	set<string>& url_set = get_url_set();
-    SpiderConf& conf = m_conf;
+    CSpiderConf& conf = m_conf;
 
     char url_buf[conf->max_url_len+1];
 	int url_len;
