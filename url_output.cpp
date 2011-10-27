@@ -44,12 +44,12 @@ int CUrlOutput::destroy(void)
 
 int CUrlOutput::append(string& url)
 {
-	pthread_mutex_lock(&m_mutex);
 
 	memset(m_buf, 0, sizeof(m_buf));
 	sprintf(m_buf, "%s\t", url.c_str());
 	sprintf(m_buf+url.length()+1, "%lu\n", time(NULL));
 
+	pthread_mutex_lock(&m_mutex);
 	if (-1 == write(m_fd, m_buf, strlen(m_buf)))
 	{
 		printf("write err\n");

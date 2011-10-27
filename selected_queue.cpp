@@ -1,8 +1,7 @@
 #include "selected_queue.h"
 
-int CSelectedQueue::init(int size)
+int CSelectedQueue::init(void)
 {
-	m_size = size;
 	if (0 != pthread_mutex_init(&m_mutex, NULL))
 	{
 		return -1;
@@ -19,7 +18,7 @@ int CSelectedQueue::destroy(void)
 	return 0;
 }
 
-bool CSelectedQueue::push(SQueueItem qi)
+bool CSelectedQueue::push(SSQItem qi)
 {
     pthread_mutex_lock(&m_mutex);
 	m_queue.push_back(qi);
@@ -28,7 +27,7 @@ bool CSelectedQueue::push(SQueueItem qi)
 	return true;
 }
 
-bool CSelectedQueue::pop(SQueueItem& qi)
+bool CSelectedQueue::pop(SSQItem& qi)
 {
 	pthread_mutex_lock(&m_mutex);
 
