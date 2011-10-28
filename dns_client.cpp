@@ -72,7 +72,7 @@ string DnsClient::query_real_dns(string site)
 	
 	
 	char dns_host[32];
-	strncpy(dns_host, get_conf()->dns_host.c_str(), strlen(get_conf()->dns_host.c_str()));
+	strncpy(dns_host, m_conf->dns_host.c_str(), strlen(m_conf->dns_host.c_str()));
 	
 	for (int i = 3; i < 6 && udp_dns.gethostipbyname_r_o(dns_host, get_conf()->dns_port, site.c_str(), ip, i, 0) < 0; ++i){
 		usleep(get_conf()->dns_sleep_interval*1000);
