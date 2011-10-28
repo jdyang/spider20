@@ -13,6 +13,10 @@ public:
 	
 	time_t default_site_crawl_interval;       // 站点默认抓取间隔
 	int max_url_fail_count;                   // URL抓取最大失败次数
+	
+	string dns_host;
+	int dns_port;
+	int dns_sleep_interval; //ms
 };
 
 class CSpider
