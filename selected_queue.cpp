@@ -1,7 +1,9 @@
 #include "selected_queue.h"
 
-int CSelectedQueue::init(void)
+int CSelectedQueue::init(int size)
 {
+	m_size = size;
+	m_count = 0;
 	if (0 != pthread_mutex_init(&m_mutex, NULL))
 	{
 		return -1;
@@ -21,6 +23,12 @@ int CSelectedQueue::destroy(void)
 bool CSelectedQueue::push(SSQItem qi)
 {
     pthread_mutex_lock(&m_mutex);
+	if (m_count == m_size)  // 若队列已满，则push失败
+	{
+	    pthread_mutex_unlock(&m_mutex);
+		return false;
+	}
+	m_count++;
 	m_queue.push_back(qi);
 	pthread_mutex_unlock(&m_mutex);
 
@@ -31,7 +39,7 @@ bool CSelectedQueue::pop(SSQItem& qi)
 {
 	pthread_mutex_lock(&m_mutex);
 
-	if (m_queue.empty())
+	if (m_queue.empty())  // 若队列已空，则pop失败
 	{
 		pthread_mutex_unlock(&m_mutex);
 		return false;
@@ -39,6 +47,7 @@ bool CSelectedQueue::pop(SSQItem& qi)
 
 	qi = m_queue.front();
 	m_queue.pop_front();
+	m_count--;
 	pthread_mutex_unlock(&m_mutex);
 
 	return true;
@@ -47,9 +56,8 @@ bool CSelectedQueue::pop(SSQItem& qi)
 int CSelectedQueue::size(void)
 {
 	int size = 0;
-
 	pthread_mutex_lock(&m_mutex);
-	size = m_queue.size();
+	size = m_size;
 	pthread_mutex_unlock(&m_mutex);
 
 	return size;

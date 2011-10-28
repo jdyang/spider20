@@ -5,6 +5,7 @@
 #include "page_output.h"
 #include "sdconf.h"
 #include "Http.h"
+#include "uc_url.h"
 #include <string>
 
 bool stopped = false;
@@ -16,6 +17,8 @@ void* crawl_thread(void* arg)
 	CSelectedQueue& sq = psp->m_selected_queue;
 	CUrlOutput& fail_output = psp->m_fail_output;
 	CPageOutput& page_output = psp->m_page_output;
+	CDnsClient& dns_client = psp->m_dns_client;
+
 	SSQItem qi;
 
 	int file_length = -1;
@@ -53,11 +56,10 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 
-		ip = ip_pool.get_ip(site);
+		ip = dns_client.get_ip(site);
 		if (ip == "NO_IP")
 		{
 			qi.dns_count++;
-			// query ip, insert into ip_pool
 			sq.push(qi);
 		}
 
@@ -71,7 +73,7 @@ void* crawl_thread(void* arg)
 		ucUrl uc_url(url);
 		if (uc_url.build() != FR_OK)
 		{
-			level_pool.finish_crawl(site);
+			level_pool.finish_crawl(site, false);
 			fail_output.append_error(qi.url, "FORMAT_ERROR");
 			continue;
 		}
@@ -125,7 +127,11 @@ void* crawl_thread(void* arg)
 				}
 				if (red_url.get_site() != site)
 				{
-					// look up ip, and insert into ip_pool
+					ip = dns_client.get_ip(red_url.get_site());
+					if (ip == "NO_IP")
+					{
+						break;
+					}
 					ehconfig.ip_str = ip.c_str();
 
 				}
@@ -164,9 +170,9 @@ void* crawl_thread(void* arg)
 			fail_output.append_error(url, err_str.c_str());
 			continue;
 		}
-		level_pool.finish_crawl(site);
+		level_pool.finish_crawl(site, true);
 
-        if (qi.type == QUEUE_TYPE_PQ)  // category写入cate.list
+        if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue)  // category写入cate.list
 		{
 			cate_output.append(qi.url);
 		}
@@ -179,9 +185,9 @@ void* crawl_thread(void* arg)
 
         // transfer content-encoding
 		// base64 encoding
-		if (0 != page_output.append())
+		if (0 != page_output.append(downloaded_file, strlen(downloaded_file)))
 		{
-
+            printf("write page error\n");
 		}
 	}
 
@@ -189,7 +195,7 @@ void* crawl_thread(void* arg)
 }
 
 
-FuncRet CSpider::load_conf(const char* conf_path)
+int CSpider::load_conf(const char* conf_path)
 {
 	sdConf conf;
 	string str_result;
@@ -198,14 +204,14 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	if (FR_OK != conf.load_conf(conf_path))
 	{
 		printf("load conf error: %s\n", conf_path);
-		return FR_FALSE;
+		return -1;
 	}
 
     // 站点最大线程并发度
 	if ((int_result=conf.get_int_item("DEFAULT_MAX_CONCURRENT_THREAD_COUNT")) <=0)
 	{
 		printf("get item DEFAULT_MAX_CONCURRENT_THREAD_COUNT error\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.default_max_concurrent_thread_count= int_result;
 
@@ -213,7 +219,7 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	if ((int_result=conf.get_int_item("DEFAULT_SITE_CRAWL_INTERVAL")) <= 0)
 	{
         printf("get item DEFAULT_SITE_CRAWL_INTERVAL error\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.default_site_crawl_interval = int_result;
 
@@ -221,7 +227,7 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	if ((int_result=conf.get_int_item("MAX_URL_FAIL_COUNT")) <= 0)
 	{
         printf("get item MAX_URL_FAIL_COUNT error\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.max_url_fail_count = int_result;
 
@@ -229,7 +235,7 @@ FuncRet CSpider::load_conf(const char* conf_path)
     if ((int_result=conf.get_int_item("MAX_PAGE_LEN")) <=0)
 	{
 		printf("get item MAX_PAGE_LEN error\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.max_page_len = int_result;
 
@@ -237,9 +243,9 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	if ((int_result=conf.get_int_item("SELECTED_QUEUE_EMPTY_SLEEP_TIME")) <= 0)
 	{
 		printf("get item SELECTED_QUEUE_EMPTY_SLEEP_TIME\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.selected_queue_empty_sleep_time = int_result;
 
-	return FR_OK;
+	return 0;
 }

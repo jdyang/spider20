@@ -60,19 +60,24 @@ bool CLevelPool::is_crawl_enabled(string& site)
 		return false;
 	}
 	it->second.crawl_thread_count++;
-	it->second.last_crawl_time = now;
 	pthread_mutex_unlock(&m_mutex);
 	return true;
 }
 
-void CLevelPool::finish_crawl(string& site)
+void CLevelPool::finish_crawl(string& site, bool change_time)
 {
+    time_t now = get_time_now();
+
 	pthread_mutex_lock(&m_mutex);
 	map<string, SLevelInfo>::iterator it = m_pool.find(site);
 	if (it == m_pool.end())
 	{
 		pthread_mutex_unlock(&m_mutex);
 		return;
+	}
+	if (change_time)
+	{
+	    it->second.last_crawl_time = now;
 	}
 	it->second.crawl_thread_count--;
 	pthread_mutex_unlock(&m_mutex);

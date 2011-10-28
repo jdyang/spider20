@@ -1,7 +1,6 @@
 #ifndef __FANFAN_SPIDER_H__
 #define __FANFAN_SPIDER_H__
 
-#include "../public/selib/include/sse_common.h"
 #include <time.h>
 #include "url_output.h"
 #include "selected_queue.h"
@@ -30,7 +29,7 @@ public:
 class CSpider
 {
 public:
-    FuncRet load_conf(const char* conf_path);
+    int load_conf(const char* conf_path);
 
 	CSpiderConf m_spider_conf;
 
