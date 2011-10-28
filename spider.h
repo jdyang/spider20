@@ -21,6 +21,10 @@ public:
 	int max_url_fail_count;                   // URL抓取最大失败次数
 	int max_dns_query_count;                  // 一个URL重查IP的最大次数
 	int selected_queue_empty_sleep_time;      // 抓取线程的休眠时间，单位是毫秒
+
+	string dns_host;
+	int dns_port;
+	int dns_sleep_interval; //ms
 };
 
 class CSpider
