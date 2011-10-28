@@ -14,6 +14,7 @@ public:
 	int init(string file_name);
 	int destroy(void);
 	int append(string& url);
+	int append_error(string& url, const char* err_str);
 
 
 private:

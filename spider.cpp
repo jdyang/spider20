@@ -1,3 +1,4 @@
+#include "sse_common.h"
 #include "spider.h"
 #include "selected_queue.h"
 #include "url_output.h"
@@ -6,12 +7,15 @@
 #include "Http.h"
 #include <string>
 
+bool stopped = false;
+
 void* crawl_thread(void* arg)
 {
 	CSpider* psp = (CSpider*)arg;
 	CSpiderConf& conf = psp->m_spider_conf;
 	CSelectedQueue& sq = psp->m_selected_queue;
 	CUrlOutput& fail_output = psp->m_fail_output;
+	CPageOutput& page_output = psp->m_page_output;
 	SSQItem qi;
 
 	int file_length = -1;
@@ -26,26 +30,29 @@ void* crawl_thread(void* arg)
 	ehconfig.proxy_str = NULL;
 
 	string redirect_url;
+	string site = "";
+	string ip = "";
 
 	while (!stopped)
 	{
         if (!sq.pop(qi))  // SelectedQueue为空
 		{
-			page_output.append(NULL, 0, false); // 为了满足即使没有抓到URL也写一个page.list空文件
-			usleep(3000);
+			page_output.append(NULL, 0, false); // 为了满足即使没有抓到网页也写一个page.list空文件
+			usleep(conf.selected_queue_empty_sleep_time*1000);
 			continue;
 		}
 
-        if (qi.fail_count > conf.MAX_URL_FAIL_COUNT)  // 此URL多次抓取失败，丢弃
+        if (qi.fail_count > conf.max_url_fail_count)  // 此URL多次抓取失败，丢弃
 		{
-            fail_output.append(qi.url, "CRAWL_FAIL");
+            fail_output.append_error(qi.url, "CRAWL_FAIL");
 			continue;
 		}
-		if (qi.dns_count > conf.MAX_DNS_QUERY_COUNT)  // 此URL无IP，丢弃
+		if (qi.dns_count > conf.max_dns_query_count)  // 此URL无IP，丢弃
 		{
-			fail_output.append(qi.url, "DNS_FAIL");
+			fail_output.append_error(qi.url, "DNS_FAIL");
 			continue;
 		}
+
 		ip = ip_pool.get_ip(site);
 		if (ip == "NO_IP")
 		{
@@ -64,8 +71,8 @@ void* crawl_thread(void* arg)
 		ucUrl uc_url(url);
 		if (uc_url.build() != FR_OK)
 		{
-			printf("url build error\n");
-			level_pool.finish(site);
+			level_pool.finish_crawl(site);
+			fail_output.append_error(qi.url, "FORMAT_ERROR");
 			continue;
 		}
 		site = uc_url.get_site();
@@ -92,7 +99,7 @@ void* crawl_thread(void* arg)
 		if (-404 == file_length)
 		{
 			printf("download 404\n");
-			fail_output.append(url, "NOT_FOUND");
+			fail_output.append_error(url, "NOT_FOUND");
 			level_pool.finish_crawl(site);
 			continue;
 		}
@@ -145,26 +152,37 @@ void* crawl_thread(void* arg)
 
 		if (-404 == file_length) // 重定向到了一个404的页面
 		{
-			printf("redirect 404\n");
-			fail_output.append(url, "NOT_FOUND_REDIRECT");
+			level_pool.finish_crawl(site);
+			fail_output.append_error(url, "NOT_FOUND_REDIRECT");
 			continue;
 		}
 
 		if (file_length <= 0 && file_length > conf.max_page_len)
 		{
-			printf("page length invalid\n");
+			level_pool.finish_crawl(site);
 			err_str = "CONTENT_LEN_INVALID (" + file_length + ")";
-			fail_output.append(url, err_str.c_str());
+			fail_output.append_error(url, err_str.c_str());
 			continue;
 		}
+		level_pool.finish_crawl(site);
+
+        if (qi.type == QUEUE_TYPE_PQ)  // category写入cate.list
+		{
+			cate_output.append(qi.url);
+		}
+		else                           // item写入item.list
+		{
+			item_output.append(qi.url);
+		}
+
+        // extractor links and enter queue
 
         // transfer content-encoding
 		// base64 encoding
-
 		if (0 != page_output.append())
 		{
+
 		}
-		level_pool.finish_crawl(site);
 	}
 
 	return NULL;
@@ -192,7 +210,7 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	m_spider_conf.default_max_concurrent_thread_count= int_result;
 
     // 站点抓取间隔
-	if ((int_result=conf.get_int_item("DEFAULT_SITE_CRAWL_INTERVAL")) < 0)
+	if ((int_result=conf.get_int_item("DEFAULT_SITE_CRAWL_INTERVAL")) <= 0)
 	{
         printf("get item DEFAULT_SITE_CRAWL_INTERVAL error\n");
 		return FR_FALSE;
@@ -200,13 +218,28 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	m_spider_conf.default_site_crawl_interval = int_result;
 
     // URL抓取所允许的最多失败次数
-	if ((int_result=conf.get_int_item("MAX_URL_FAIL_COUNT")) < 0)
+	if ((int_result=conf.get_int_item("MAX_URL_FAIL_COUNT")) <= 0)
 	{
         printf("get item MAX_URL_FAIL_COUNT error\n");
 		return FR_FALSE;
 	}
 	m_spider_conf.max_url_fail_count = int_result;
 
+    // 最大网页长度
+    if ((int_result=conf.get_int_item("MAX_PAGE_LEN")) <=0)
+	{
+		printf("get item MAX_PAGE_LEN error\n");
+		return FR_FALSE;
+	}
+	m_spider_conf.max_page_len = int_result;
+
+    // crawl线程发现选取队列为空时要休眠一段时间，单位是毫秒
+	if ((int_result=conf.get_int_item("SELECTED_QUEUE_EMPTY_SLEEP_TIME")) <= 0)
+	{
+		printf("get item SELECTED_QUEUE_EMPTY_SLEEP_TIME\n");
+		return FR_FALSE;
+	}
+	m_spider_conf.selected_queue_empty_sleep_time = int_result;
 
 	return FR_OK;
 }
