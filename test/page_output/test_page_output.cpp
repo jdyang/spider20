@@ -14,7 +14,6 @@ void end_handler(int sig)
 	exit(0);
 }
 
-
 int main(int argc, char** argv)
 {
 	pthread_t ths[5];

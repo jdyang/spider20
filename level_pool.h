@@ -27,7 +27,7 @@ public:
     void set_spider(CSpider* sp);
     void insert_level_info(string& site, SLevelInfo li);
 	bool is_crawl_enabled(string& site);
-	void finish_crawl(string& site);
+	void finish_crawl(string& site, bool change_time=true);
 
 	//for debug
 	void print(void);

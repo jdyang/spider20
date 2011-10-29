@@ -1,10 +1,13 @@
+SELIB=../../../public/selib
+
 CPP=g++
 AR=ar
 
-vpath %.h ../..
+vpath %.h ../.. $(SELIB)/include
 vpath %.cpp ../..
 
 INCLUDES= -I./ \
+          -I$(SELIB)/include
 
 FLAGS=-g $(INCLUDES)
 
