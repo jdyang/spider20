@@ -201,7 +201,7 @@ int CSpider::load_conf(const char* conf_path)
 	string str_result;
 	int int_result;
 
-	if (FR_OK != conf.load_conf(conf_path))
+	if (0 != conf.load_conf(conf_path))
 	{
 		printf("load conf error: %s\n", conf_path);
 		return -1;

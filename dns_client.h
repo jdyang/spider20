@@ -5,15 +5,24 @@
 #include "map"
 #include "string"
 #include "vector"
-#include "set"
+#include <set>
 #include "spider.h"
+#include <iostream>
+
+#include "ncarch.h"
+#include "ncenums.h"
+#include "ncconsts.h"
+#include "ncmutex.h"
+#include "ncsocket.h"
+#include "ncpack.h"
+#include "ncthread.h"
 
 class DnsClient {
 public:
 	int init(CSpiderConf *conf); // 0 for ok ; -1 for error
 	void query_site_ip(set<string> &sites);
 	
-    CSpiderConf& get_conf();
+    CSpiderConf* get_conf();
 	void set_conf(CSpiderConf *conf);
     
  	map<string, string>& get_ip_map();
@@ -23,7 +32,7 @@ public:
 	string get_ip(string site);
 
 private:
-	string query_real_dns(string site)
+	string query_real_dns(string site);
 	
     map<string, string> m_ip_list;
     ncMutex m_ip_mutex;
@@ -34,3 +43,4 @@ private:
 };
 
 #endif
+

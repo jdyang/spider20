@@ -2,6 +2,7 @@
 #define __FANFAN_SPIDER_H__
 
 #include <time.h>
+#include <string>
 #include "url_output.h"
 #include "selected_queue.h"
 #include "page_output.h"
@@ -16,7 +17,7 @@ public:
 	int max_url_len;
 	int max_page_len;                         // 页面最大长度
 	
-	time_t default_site_crawl_interval;       // 站点默认抓取间隔
+	int default_site_crawl_interval;       // 站点默认抓取间隔
 	int max_url_fail_count;                   // URL抓取最大失败次数
 	int max_dns_query_count;                  // 一个URL重查IP的最大次数
 	int selected_queue_empty_sleep_time;      // 抓取线程的休眠时间，单位是毫秒

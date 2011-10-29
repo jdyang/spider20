@@ -1,3 +1,9 @@
+WORKROOT=../../../public/
+SELIBPATH=$(WORKROOT)/selib
+LIBPATH=$(SELIBPATH)/lib
+SPIDERLIBPATH=../../../spider/spider_lib
+NLPLIBPATH=$(WORKROOT)/../nlp
+
 CPP=g++
 AR=ar
 
@@ -5,6 +11,7 @@ vpath %.h ../..
 vpath %.cpp ../..
 
 INCLUDES= -I./ \
+		  -I$(SELIBPATH)/include \
 
 FLAGS=-g $(INCLUDES)
 

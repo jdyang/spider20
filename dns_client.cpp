@@ -1,19 +1,11 @@
 #include "dns_client.h"
 using namespace std;
 
-DnsClient::DnsClient()
-{
-
-}
-DnsClient::~DnsClient()
-{
-
-}
 void DnsClient::set_conf(CSpiderConf *conf){
 	m_conf = conf;
 }
 
-CSpiderConf DnsClient::get_conf()
+CSpiderConf* DnsClient::get_conf()
 {
 	return m_conf;
 }
@@ -32,7 +24,7 @@ void DnsClient::put_ip(string site, string ip)
 {
 	m_ip_mutex.lock();
 	m_ip_list.insert(make_pair(site, ip));
-	m_ip_mutext.unlock();
+	m_ip_mutex.unlock();
 }
 
 string DnsClient::get_ip(string site)
@@ -81,3 +73,4 @@ string DnsClient::query_real_dns(string site)
 
 	return string(ip);
 }
+
