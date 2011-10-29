@@ -2,6 +2,8 @@
 #define __FANFAN_SPIDER_H__
 
 #include <time.h>
+#include <string>
+using namespace std;
 
 class CSpiderConf
 {
@@ -22,7 +24,7 @@ public:
 class CSpider
 {
 public:
-    FuncRet load_conf(const char* conf_path);
+    int load_conf(const char* conf_path);
 	CSpiderConf m_spider_conf;
 };
 

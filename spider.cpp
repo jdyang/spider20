@@ -171,23 +171,23 @@ void* crawl_thread(void* arg)
 }
 
 
-FuncRet CSpider::load_conf(const char* conf_path)
+int CSpider::load_conf(const char* conf_path)
 {
 	sdConf conf;
 	string str_result;
 	int int_result;
 
-	if (FR_OK != conf.load_conf(conf_path))
+	if (0 != conf.load_conf(conf_path))
 	{
 		printf("load conf error: %s\n", conf_path);
-		return FR_FALSE;
+		return -1;;
 	}
 
     // 站点最大线程并发度
 	if ((int_result=conf.get_int_item("DEFAULT_MAX_CONCURRENT_THREAD_COUNT")) <=0)
 	{
 		printf("get item DEFAULT_MAX_CONCURRENT_THREAD_COUNT error\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.default_max_concurrent_thread_count= int_result;
 
@@ -195,7 +195,7 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	if ((int_result=conf.get_int_item("DEFAULT_SITE_CRAWL_INTERVAL")) < 0)
 	{
         printf("get item DEFAULT_SITE_CRAWL_INTERVAL error\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.default_site_crawl_interval = int_result;
 
@@ -203,10 +203,10 @@ FuncRet CSpider::load_conf(const char* conf_path)
 	if ((int_result=conf.get_int_item("MAX_URL_FAIL_COUNT")) < 0)
 	{
         printf("get item MAX_URL_FAIL_COUNT error\n");
-		return FR_FALSE;
+		return -1;
 	}
 	m_spider_conf.max_url_fail_count = int_result;
 
 
-	return FR_OK;
+	return 0;
 }
