@@ -32,6 +32,21 @@ void* crawl_thread(void* arg)
 	UTF8Converter utf8_converter;
 
 	SSQItem qi;
+	
+	CExtractor extractor;
+	CRecognizer recognizer;
+	
+	if (extractor.load_conf(conf.extractor_conf_path)!=FR_OK){
+		cerr << "LOAD extractor configuration failed." << endl;
+		exit(1);
+	}
+	
+	if (recognizer.load_conf(conf.recognizer_conf_path)!=FR_OK){
+		cerr << "LOAD recognizer configuration failed." << endl;
+		exit(1);
+	}
+	
+	extractor.set_recognizer(&(recognizer));
 
 	int file_length = -1;
 	int redirect_count = 0;
@@ -232,6 +247,29 @@ void* crawl_thread(void* arg)
 				continue;
 			}
 		}
+		
+		//extract links
+		extractor.set_html(url,downloaded_file);
+	    EcSwitch swi;
+		swi.sw_link = true;
+	    swi.sw_title = false;
+	    swi.sw_kv = false;
+	    swi.sw_img = false;
+	    swi.sw_qa = false;
+		swi.sw_cmt = false;
+	    swi.sw_dead = false;
+		swi.sw_price_img = false;
+		swi.sw_light_price = false;	
+		
+		extractor.extract(swi);
+		
+		map<string,CEcUrlLink> links = extractor.get_links();
+
+		for(map<string,CEcUrlLink>::iterator it = links.begin(); it != links.end(); ++it) 
+	    {
+			//TODO add link to urlpool
+		}
+		SDLOG_INFO(conf.log_path, "finish extracting links "<<url);
 
 
         utf8_converter.set_input(downloaded_file, strlen(downloaded_file));

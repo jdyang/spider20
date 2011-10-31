@@ -1,6 +1,21 @@
 #ifndef __FANFAN_SPIDER_H__
 #define __FANFAN_SPIDER_H__
 
+#include <string>
+#include <vector>
+#include <queue>
+#include <map>
+#include "sse_common.h"
+#include "ncarch.h"
+#include "ncenums.h"
+#include "ncconsts.h"
+#include "ncmutex.h"
+#include "ncsocket.h"
+#include "ncpack.h"
+#include "ncthread.h"
+#include "util.h"
+#include "uc_url.h"
+
 #include <time.h>
 #include <string>
 #include "spider_common.h"
@@ -9,6 +24,9 @@
 #include "page_output.h"
 #include "dns_client.h"
 #include "level_pool.h"
+
+#include "extractor.h"
+#include "recognizer.h"
 
 class CSpider
 {

@@ -34,6 +34,10 @@ public:
 	int dns_port;
 	int dns_sleep_interval; //ms
 	
+	//crawler thread
+	string extractor_conf_path;
+	string recognizer_conf_path;
+	
 	//select thread
 	int min_select_interval;
 };
