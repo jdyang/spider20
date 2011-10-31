@@ -6,7 +6,6 @@
 #include "vector"
 #include <set>
 #include <string>
-#include "spider.h"
 #include <iostream>
 
 #include "ncarch.h"
@@ -16,6 +15,8 @@
 #include "ncsocket.h"
 #include "ncpack.h"
 #include "ncthread.h"
+
+#include "spider_common.h"
 
 class CDnsClient {
 public:

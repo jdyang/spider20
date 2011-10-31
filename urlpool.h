@@ -24,7 +24,7 @@
 #include "util.h"
 #include "uc_url.h"
 
-#include "spider.h"
+#include "spider_common.h"
 
 using namespace std;
 

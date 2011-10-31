@@ -1,5 +1,5 @@
 #include "../../urlpool.h"
-#include "../../spider.h"
+#include "../../spider_common.h"
 
 #include <iostream>
 #include <unistd.h>
