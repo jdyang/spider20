@@ -54,6 +54,8 @@ int main(int argc, char** argv)
 	}
 	signal(SIGINT, end_handler);
     printf("start in %ld\n", time(NULL));
+	write_thread(&dns_client);
+
 	for (i=0; i<5; i++)
 	{
 		if (pthread_create(&ths[i], NULL, write_thread, &dns_client) != 0)
