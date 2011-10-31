@@ -16,7 +16,7 @@ void* write_thread(void* arg);
 
 void end_handler(int sig)
 {
-	printf("%lld\n", time(NULL));
+	printf("%ld\n", time(NULL));
 	exit(0);
 }
 
@@ -38,8 +38,8 @@ int main(int argc, char** argv)
 	conf.dns_sleep_interval = 300;
 	
 	g_site_set.insert("0591.doido.com");
-	g_site_set.insert("1010622191.paipai.com");
-	g_site_set.insert("10milligram.prd.am-img.com");
+	g_site_set.insert("search.paipai.com");
+	g_site_set.insert("http://www.baidu.com/");
 	g_site_set.insert("categoryb.dangdang.com");
 	
 	set<string>::iterator it;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 		return 0;
 	}
 	signal(SIGINT, end_handler);
-    printf("start in %lld\n", time(NULL));
+    printf("start in %ld\n", time(NULL));
 	for (i=0; i<5; i++)
 	{
 		if (pthread_create(&ths[i], NULL, write_thread, &dns_client) != 0)
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 			return 0;
 		}
 	}
-	dns_client.query_site_ip(g_site_set);
+	dns_client.query_site_ip(&g_site_set);
 	
 	pthread_join(ths[0], NULL);
 
@@ -75,7 +75,7 @@ void* write_thread(void* arg)
 	while (true)
 	{
 		usleep(300000);
-		cout << dns->get_ip(g_site_vector[rand()%g_site_vector.length()]) << endl;
+		cout << dns->get_ip(g_site_vector[rand()%g_site_vector.size()]) << endl;
 		
 	}
 
