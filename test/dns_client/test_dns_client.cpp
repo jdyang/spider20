@@ -1,9 +1,14 @@
 #include "../../dns_client.h"
 #include "../../spider.h"
 #include <string>
+#include <set>
+#include <vector>
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
@@ -15,19 +20,32 @@ void end_handler(int sig)
 	exit(0);
 }
 
+set<string> g_site_set;
+vector<string> g_site_vector;
 
 int main(int argc, char** argv)
 {
 	pthread_t ths[5];
 	int i;
+	srand(time(0));
 
-    DnsClient dns_client;
+    CDnsClient dns_client;
 	CSpiderConf conf;
 	conf.urlpool_empty_sleep_time = 500;
 	conf.max_url_len = 4096;
 	conf.dns_host = "61.130.254.34";
 	conf.dns_port = 53;
 	conf.dns_sleep_interval = 300;
+	
+	g_site_set.insert("0591.doido.com");
+	g_site_set.insert("1010622191.paipai.com");
+	g_site_set.insert("10milligram.prd.am-img.com");
+	g_site_set.insert("categoryb.dangdang.com");
+	
+	set<string>::iterator it;
+	it = g_site_set.begin();
+	
+	g_site_vector.assign(it, g_site_set.end());
 	
 	if (-1 == dns_client.init(&conf))
 	{
@@ -44,6 +62,8 @@ int main(int argc, char** argv)
 			return 0;
 		}
 	}
+	dns_client.query_site_ip(g_site_set);
+	
 	pthread_join(ths[0], NULL);
 
 	return 0;
@@ -51,10 +71,12 @@ int main(int argc, char** argv)
 
 void* write_thread(void* arg)
 {
-
+	CDnsClient* dns = (CDnsClient*)arg;
 	while (true)
 	{
 		usleep(300000);
+		cout << dns->get_ip(g_site_vector[rand()%g_site_vector.length()]) << endl;
+		
 	}
 
 	return NULL;
