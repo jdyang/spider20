@@ -30,7 +30,7 @@ public:
 
 	bool url_empty();
 	void put_ip(string site, string ip);
-	string get_ip(string site); //if the site do not query yet, it will update the ip map(adding a new record)
+	string get_ip(string site); //if the site haven't been queried yet, it will update the ip map(adding a new record)
 
 private:
 	string query_real_dns(string site);
