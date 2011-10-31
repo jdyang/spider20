@@ -267,9 +267,9 @@ void* crawl_thread(void* arg)
 
 		for(map<string,CEcUrlLink>::iterator it = links.begin(); it != links.end(); ++it) 
 	    {
-			//TODO add link to urlpool
+			//TODO add links to urlpool
 		}
-		SDLOG_INFO(conf.log_path, "finish extracting links "<<url);
+		SDLOG_INFO(SP_LOGNAME, "finish extracting links "<<url);
 
 
         utf8_converter.set_input(downloaded_file, strlen(downloaded_file));
