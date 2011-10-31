@@ -3,14 +3,13 @@
 
 #include "sdlog.h"
 
-
 using namespace std;
 
-struct PredatorConf;
+struct CSpiderConf;
 
 //=============== UrlPool ================================
 
-PredatorConf& UrlPool::get_conf() {
+CSpiderConf& UrlPool::get_conf() {
 	return *m_conf;
 }
 
@@ -34,17 +33,17 @@ bool UrlPool::url_empty() {
 
 void UrlPool::push_url(UrlInfo ui) {
 	
-	if(null == ui.url)
+	if(ui.url.length() < 4)
 		return;
-    m_url_pool.m_url_set_mutex.lock();
+    m_url_set_mutex.lock();
 	if (m_url_set.find(ui.url) == m_url_set.end()){
-		m_url_pool.m_url_set.insert(ui.url);
-		m_url_pool.m_url_set_mutex.unlock();
+		m_url_set.insert(ui.url);
+		m_url_set_mutex.unlock();
 		m_url_mutex.lock();
 		m_url_queue.push_back(ui);
 		m_url_mutex.unlock();
 	} else{
-		m_url_pool.m_url_set_mutex.unlock();
+		m_url_set_mutex.unlock();
 	}
 }
 
@@ -60,7 +59,7 @@ UrlInfo UrlPool::pop_url(void) {
 			continue;
 		}
 		ui = m_url_queue.front();
-		if(NULL == ui.url || ui.url.length() < 4){
+		if(ui.url.length() < 4){
 			m_url_mutex.unlock();
 			continue;
 		}	
@@ -70,12 +69,18 @@ UrlInfo UrlPool::pop_url(void) {
 		return ui;
 	}
 }
+
+int UrlPool::print_pool()
+{
+	cout << "queue size: " << m_url_queue.size() << " set size: " << m_url_set.size() << endl;
+}
+
 FuncRet UrlPool::load_urls(const char *path) {
 	deque<UrlInfo>& url_queue = get_url_queue();
 	set<string>& url_set = get_url_set();
-    CSpiderConf& conf = m_conf;
+    CSpiderConf& conf = *m_conf;
 
-    char url_buf[conf->max_url_len+1];
+    char url_buf[conf.max_url_len+1];
 	int url_len;
 
     FILE *file = fopen(path, "r");
@@ -95,10 +100,10 @@ FuncRet UrlPool::load_urls(const char *path) {
 		if (strlen(url_buf) > 4) {
             UrlInfo ui;
             ui.url.assign(url_buf);
-			UcUrl ucUrl(ui.url);
-			ucUrl.build();
-			ui.domain = ucUrl.get_domain();
-			ui.site = ucUrl.get_site();
+			ucUrl ucurl(ui.url);
+			ucurl.build();
+			ui.domain = ucurl.get_domain();
+			ui.site = ucurl.get_site();
             ui.last_crawl_time = 0;
             url_queue.push_back(ui);
 			url_set.insert(ui.url);

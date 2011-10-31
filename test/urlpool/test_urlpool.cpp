@@ -5,12 +5,13 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
+#include "uc_url.h"
 
 using namespace std;
 
 void end_handler(int sig)
 {
-	printf("%lld\n", time(NULL));
+	printf("%ld\n", time(NULL));
 	exit(0);
 }
 
@@ -20,18 +21,39 @@ void* select_thread(void* arg)
 	
 	while(true)
 	{
-		
+		pool->pop_url();
 		usleep(100000);
 
 	}
 }
+
+void* count_thread(void* arg)
+{
+    UrlPool* pool = (UrlPool*)arg;
+
+    while(true)
+    {
+        usleep(1000000);
+		pool->print_pool();
+    }
+}
+
+
 void* work_thread(void* arg)
 {
 	UrlPool* pool = (UrlPool*)arg;
 
 	while(true)
 	{
-		usleep(300000);
+		string url = "http://list.wooha.com/da8/da845446c2964bab.html";
+			ucUrl ucurl(url);
+            ucurl.build();
+			UrlInfo ui;
+            ui.domain = ucurl.get_domain();
+            ui.site = ucurl.get_site();
+            ui.last_crawl_time = 0;
+		pool->push_url(ui);
+		usleep(30000);
 	}
 	return NULL;
 }
@@ -55,12 +77,20 @@ int main(int argc, char* argv[])
 	pool.load_urls(argv[1]);
 	
 	signal(SIGINT, end_handler);
-	printf("%lld\n", time(NULL));
+	printf("%ld\n", time(NULL));
 	if(pthread_create(&ths[0], NULL, select_thread, &pool) != 0)
 	{
 		printf("pthread_create error: select_thread error.\n");
 		return 0;
 	}
+
+	if(pthread_create(&ths[0], NULL, count_thread, &pool) != 0)
+    {
+        printf("pthread_create error: select_thread error.\n");
+        return 0;
+    }
+
+
 	for(i = 1; i < 5; i++)
 	{
 		if(pthread_create(&ths[i], NULL, work_thread, &pool) != 0)

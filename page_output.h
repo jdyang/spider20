@@ -7,6 +7,8 @@
 
 using namespace std;
 
+class CSpider;
+
 class CPageOutput
 {
 public:
