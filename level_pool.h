@@ -1,6 +1,7 @@
 #ifndef _FANFAN_LEVEL_POOL_H__
 #define _FANFAN_LEVEL_POOL_H__
 
+#include "spider_common.h"
 #include <pthread.h>
 #include <string>
 #include <map>

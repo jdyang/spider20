@@ -29,7 +29,7 @@ void CLevelPool::insert_level_info(string& site, SLevelInfo li)
 
 bool CLevelPool::is_crawl_enabled(string& site)
 {
-	CSpiderConf& conf = mp_conf;
+	CSpiderConf& conf = *mp_conf;
 
     time_t now = get_time_now();
 

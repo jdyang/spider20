@@ -38,18 +38,22 @@ endif
 
 LIB= -L $(SELIB)/lib \
      -L $(NLP)/lib \
+	 -ltse \
 	 -lcode \
 	 -lurl \
 	 -lnet \
 	 -lutil \
-	 -lpthread
+	 -lpthread \
+	 -lcrypto
 
 all : test_crawl_thread
 
 OBJS= url_output.o \
       page_output.o \
 	  level_pool.o \
+	  selected_queue.o \
 	  utf8_converter.o \
+	  dns_client.o \
       spider.o \
       test_crawl_thread.o
 

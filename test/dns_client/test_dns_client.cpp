@@ -1,5 +1,5 @@
 #include "../../dns_client.h"
-#include "../../spider.h"
+#include "../../spider_common.h"
 #include <string>
 #include <set>
 #include <vector>
