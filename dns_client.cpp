@@ -42,11 +42,11 @@ string CDnsClient::get_ip(string site)
 	return ip;
 }
 
-int CDnsClient::query_site_ip(set *sites)
+int CDnsClient::query_site_ip(set<string> *sites)
 {
-	vector<string>::iterator it;
+	set<string>::iterator it;
 	string ip;
-	for (it = sites.begin(); it != sites.end(); ++it){
+	for (it = sites->begin(); it != sites->end(); ++it){
 		ip = query_real_dns(*it);
 		put_ip(*it, ip);
 		usleep(100*1000);
