@@ -4,6 +4,10 @@
  @author: stanshen
  @create date: 2011.10.25
 */
+#include <iostream>
+
+#include "spider_common.h"
+#include "sdlog.h"
 
 #include "spider_statis.h"
 
@@ -16,10 +20,11 @@ CSpiderStatis::CSpiderStatis()
 
 CSpiderStatis::~CSpiderStatis()
 {
-
+	if(m_fp != NULL)
+		fclose(m_fp);
 }
 
-int CSpiderStatis::init()
+int CSpiderStatis::init(const char* file_path)
 {
 	m_CPQ_url_num = 0;
 	m_IPQ_url_num = 0;
@@ -30,38 +35,73 @@ int CSpiderStatis::init()
 	pthread_mutex_init(&m_cate_mutex, NULL);
 	pthread_mutex_init(&m_item_mutex, NULL);
 	
+	
+	if(file_path == NULL)
+	{
+		cerr<< "set_statis_to_file error: file_path may be illegal"<<endl;
+		return -1;
+	}
+
+	m_fp = fopen(file_path, "a");
+	if(m_fp == NULL)
+	{
+		cerr<< "set_statis_to_file error: can not open/create file:"<<file_path<<endl;
+		return -1;
+	}
+
+
 	return 0;
 }
 
-int CSpiderStatis::set_statis_to_file(char* file_path)
+int CSpiderStatis::set_statis_to_file()
+{
+
+	fprintf(m_fp, "%ld\t", time(NULL));
+	fprintf(m_fp, "CPQ=%d\tCOQ=%d\tIPQ=%d\tIOQ=%d\tSQ=%d\n", get_cpq_url_num(), get_coq_url_num(),
+	             get_ipq_url_num(), get_ioq_url_num(), get_sq_url_num());
+	
+	set<string>::iterator set_iter;
+	for(set_iter = m_domain.begin(); set_iter != m_domain.end(); set_iter++)
+	{
+		fprintf(m_fp, "domain=%s\tcate_done=%d\tcate_sel=%d\titem_done=%d\titem_sel=%d\n",(*set_iter).c_str(),
+		            get_domain_cate_done_num(*set_iter), get_domain_cate_select_num(*set_iter),
+					get_domain_item_done_num(*set_iter), get_domain_item_select_num(*set_iter));
+	}
+	fprintf(m_fp, "\n");
+	return 0;
+}
+
+int CSpiderStatis::set_statis_to_file(const char* file_path)
 {
 	if(file_path == NULL)
 	{
-		printf("set_statis_to_file error: file_path may be illegal");
+		//printf("set_statis_to_file error: file_path may be illegal");
+		SDLOG_WARN(SP_WFNAME, "set_statis_to_file error: file_path may be illegal");
 		return -1;
 	}
 
 	FILE* fp = fopen(file_path, "a");
 	if(fp == NULL)
 	{
-		printf("set_statis_to_file error: can not open/create file: %s", file_path);
+		//printf("set_statis_to_file error: can not open/create file: %s", file_path);
+		SDLOG_WARN(SP_WFNAME, "set_statis_to_file error: can not open/create file:"<<file_path);
 		return -1;
 	}
 	
 	
 
-	fprintf(fp, "%lld\t", time(NULL));
+	fprintf(fp, "%ld\t", time(NULL));
 	fprintf(fp, "CPQ=%d\tCOQ=%d\tIPQ=%d\tIOQ=%d\tSQ=%d\n", get_cpq_url_num(), get_coq_url_num(),
 	             get_ipq_url_num(), get_ioq_url_num(), get_sq_url_num());
 	
 	set<string>::iterator set_iter;
 	for(set_iter = m_domain.begin(); set_iter != m_domain.end(); set_iter++)
 	{
-		fprintf(fp, "domain=%s\tcate_done=%d\tcate_sel=%d\titem_done=%d\titem_sel=%d\n",(*set_iter).c_str(),
+		fprintf(fp, "domain=%s\tcate_done=%d\tcate_sel=%d\titem_done=%d\titem_sel=%d\n\n",(*set_iter).c_str(),
 		            get_domain_cate_done_num(*set_iter), get_domain_cate_select_num(*set_iter),
 					get_domain_item_done_num(*set_iter), get_domain_item_select_num(*set_iter));
 	}
-	
+	fclose(fp);	
 	return 0;
 }
 
@@ -193,9 +233,8 @@ int CSpiderStatis::update_domain_cate_done(string domain)
 
 	if(pthread_mutex_lock(&m_cate_mutex) != 0)
 	{
-        // TODO change printf to log
-		printf("update_domain_cate_done error->pthread_mutex_lock error: lock fail.\n");
-		//SDLOG_WARNING(SP_IFNAME, "update_domain_cate_done error->pthread_mutex_lock error: lock fail.");
+		//printf("update_domain_cate_done error->pthread_mutex_lock error: lock fail.\n");
+		SDLOG_WARN(SP_WFNAME, "update_domain_cate_done error->pthread_mutex_lock error: lock fail.");
 		return -1;
 	}
 
@@ -222,7 +261,8 @@ int CSpiderStatis::update_domain_item_done(string domain)
 
 	if(pthread_mutex_lock(&m_item_mutex) != 0)
 	{
-		printf("update_domain_item_done error->pthread_mutex_lock error: lock fail.\n");
+		//printf("update_domain_item_done error->pthread_mutex_lock error: lock fail.\n");
+		SDLOG_WARN(SP_WFNAME, "update_domain_item_done error->pthread_mutex_lock error: lock fail.");
 		return -1;
 	}
 

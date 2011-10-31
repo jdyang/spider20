@@ -17,6 +17,7 @@
 #include <set>
 #include <pthread.h>
 
+//#include "spider.h"
 
 using namespace std;
 
@@ -31,8 +32,10 @@ public:
 	CSpiderStatis();
 	~CSpiderStatis();
 	
-	int init();
-	int set_statis_to_file(char* file_path);
+	int init(const char* file_path);
+
+	int set_statis_to_file();
+	int set_statis_to_file(const char* file_path);
 
 	int get_domain_cate_done_num(string domain);
 	int get_domain_item_done_num(string domain);
@@ -82,7 +85,7 @@ private:
 	int m_IOQ_url_num;//IOQ中url数
 	int m_SQ_url_num; //SQ中url数
 
-
+	FILE* m_fp;
 };
 
 

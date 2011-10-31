@@ -18,7 +18,7 @@ string domain_list[5]={"aaa.com", "bbb.com", "ccc.com", "ddd.com", "eee.com"};
 
 void end_handler(int sig)
 {
-	printf("%lld\n", time(NULL));
+	printf("%ld\n", time(NULL));
 	exit(0);
 }
 
@@ -54,7 +54,7 @@ void* select_thread(void* arg)
 		spider_statis->set_ioq_url_num(ioq_url_num);
 		spider_statis->set_sq_url_num(sq_url_num);
 
-		cout<<time(NULL)<<" select_thread [domain="<<domain<<"] "
+	/*	cout<<time(NULL)<<" select_thread [domain="<<domain<<"] "
 		    <<"cpq="<<spider_statis->get_cpq_url_num()<<" "
 		    <<"ipq="<<spider_statis->get_ipq_url_num()<<" "
 		    <<"coq="<<spider_statis->get_coq_url_num()<<" "
@@ -64,11 +64,11 @@ void* select_thread(void* arg)
 		    <<"item_sel="<<spider_statis->get_domain_item_select_num(domain)<<" "
 		    <<"cate_done="<<spider_statis->get_domain_cate_done_num(domain)<<" "
 		    <<"item_done="<<spider_statis->get_domain_item_done_num(domain)<<endl;
-
+*/
 
 //		fprintf(fp, "%lld domain=%s cpq=%d ipq=%d coq=%d ioq=%d sq=%d cate_sel=%d item_sel=%d cate_done=%d item_done=%d.\n");
 
-
+		spider_statis->set_statis_to_file();
 
 		usleep(100000);
 
@@ -103,10 +103,11 @@ int main(int argc, char* argv[])
 	int i;
 
 	CSpiderStatis spider_statis;
-	spider_statis.init();
-	
+	spider_statis.init("./log");
+	for(i = 0; i < 5; i++)
+	spider_statis.m_domain.insert(domain_list[i]);
 	signal(SIGINT, end_handler);
-	printf("%lld\n", time(NULL));
+	printf("%ld\n", time(NULL));
 	if(pthread_create(&ths[0], NULL, select_thread, &spider_statis) != 0)
 	{
 		printf("pthread_create error: select_thread error.\n");
