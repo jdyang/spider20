@@ -17,7 +17,7 @@
 #include "ncpack.h"
 #include "ncthread.h"
 
-class DnsClient {
+class CDnsClient {
 public:
 	int init(CSpiderConf *conf); // 0 for ok ; -1 for error
 	int query_site_ip(set<string> *sites);
@@ -29,13 +29,15 @@ public:
 
 	bool url_empty();
 	void put_ip(string site, string ip);
-	string get_ip(string site);
+	string get_ip(string site); //if the site do not query yet, it will update the ip map(adding a new record)
 
 private:
 	string query_real_dns(string site);
 	
     map<string, string> m_ip_list;
     ncMutex m_ip_mutex;
+
+	ncMutex m_singleton_mutex;
 
 	CUdpDns udp_dns;
 
