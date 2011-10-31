@@ -15,8 +15,9 @@
 #include "ncsocket.h"
 #include "ncpack.h"
 #include "ncthread.h"
-
 #include "spider_common.h"
+
+using namespace std;
 
 class CDnsClient {
 public:

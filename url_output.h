@@ -6,12 +6,14 @@
 
 using namespace std;
 
+class CSpiderConf;
+
 class CUrlOutput
 {
 public:
     CUrlOutput(void){}
 	~CUrlOutput(void){}
-	int init(string file_name);
+	int init(CSpiderConf* p_conf);
 	int destroy(void);
 	int append(string& url);
 	int append_error(string& url, const char* err_str);

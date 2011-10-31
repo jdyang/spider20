@@ -27,7 +27,7 @@ struct SSQItem
 class CSelectedQueue
 {
 public:
-    int init(void);
+    int init(int size);
 	int destroy(void);
 	bool push(SSQItem qi);
 	bool pop(SSQItem& qi);
@@ -35,6 +35,9 @@ public:
 private:
     deque<SSQItem> m_queue;
 	pthread_mutex_t m_mutex;
+
+	int m_size;
+	int m_count;
 };
 
 #endif

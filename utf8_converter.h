@@ -6,6 +6,7 @@
 #include "code_converter.h"
 
 #define CONVERTER_MAX_CONTENT_LEN (1024*1024*2)
+
 using namespace std;
 
 class UTF8Converter

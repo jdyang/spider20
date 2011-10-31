@@ -1,4 +1,5 @@
 #include "url_output.h"
+#include "spider.h"
 #include <cstring>
 #include <string>
 #include <sys/types.h>
@@ -8,12 +9,12 @@
 
 using namespace std;
 
-int CUrlOutput::init(string file_name)
+int CUrlOutput::init(CSpiderConf* p_conf)
 {
 
 	m_fd = -1;
 
-	if (-1 == (m_fd=open(file_name.c_str(), O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR | S_IROTH | S_IRGRP)))
+	if (-1 == (m_fd=open(p_conf->item_output_path.c_str(), O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR | S_IROTH | S_IRGRP)))
 	{
 		printf("open file error.\n");
 		return -1;
@@ -45,11 +46,12 @@ int CUrlOutput::destroy(void)
 int CUrlOutput::append(string& url)
 {
 
+	pthread_mutex_lock(&m_mutex);
+
 	memset(m_buf, 0, sizeof(m_buf));
 	sprintf(m_buf, "%s\t", url.c_str());
 	sprintf(m_buf+url.length()+1, "%lu\n", time(NULL));
 
-	pthread_mutex_lock(&m_mutex);
 	if (-1 == write(m_fd, m_buf, strlen(m_buf)))
 	{
 		printf("write err\n");
