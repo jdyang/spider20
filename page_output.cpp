@@ -1,6 +1,7 @@
 #include "page_output.h"
 #include <cstring>
 #include <string>
+#include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -8,12 +9,13 @@
 
 using namespace std;
 
-int CPageOutput::init(string dir)
+int CPageOutput::init(CSpiderConf* p_conf)
 {
 	m_fd = -1;
 	m_cur_day = -1;
 	m_cur_min = -1;
-	m_base_dir = dir;
+
+    mp_conf = p_conf;
 
     if (0 != pthread_mutex_init(&m_mutex, NULL))
 	{
@@ -37,15 +39,10 @@ int CPageOutput::destroy(void)
 	return 0;
 }
 
-void CPageOutput::set_spider(CSpider* sp)
-{
-	mp_spider = sp;
-}
-
 int CPageOutput::append(const char*page, int len, bool need_write)
 {
 
-    //CSpiderConf& conf = mp_spider->m_spider_conf;
+    CSpiderConf& conf = *mp_conf;
 
     char buf[4096];
 
@@ -61,14 +58,15 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	int month = p_now->tm_mon;
 	int day = p_now->tm_mday;
 	int hour = p_now->tm_hour;
-	int min = p_now->tm_min / 30;
+	int min = p_now->tm_min / conf.page_name_change_interval;
 
 
     if (day != m_cur_day)
 	{
 		memset(buf, 0, sizeof(buf));
-        sprintf(buf, "%s/%d%02d%02d", m_base_dir.c_str(), year, month, day);
+        sprintf(buf, "%s/%d%02d%02d", conf.page_dir.c_str(), year, month, day);
 		m_cur_day = day;
+		cout << buf << endl;
 		if (0 != mkdir(buf, 0777))
 		{
 			printf("mkdir error\n");
@@ -79,7 +77,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	if (min != m_cur_min)
 	{
 		memset(buf, 0, sizeof(buf));
-		sprintf(buf, "%s/%d%02d%02d/page.list.%d%02d%02d%02d%02d", m_base_dir.c_str(), year, month, m_cur_day, year, month, m_cur_day, hour, min*30);
+		sprintf(buf, "%s/%d%02d%02d/page.%s.%d%02d%02d%02d%02d", conf.page_dir.c_str(), year, month, m_cur_day, conf.spider_name.c_str(), year, month, m_cur_day, hour, min*30);
 		if (-1 == m_fd)
 		{
 			close(m_fd);

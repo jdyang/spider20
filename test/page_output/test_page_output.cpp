@@ -19,8 +19,13 @@ int main(int argc, char** argv)
 	pthread_t ths[5];
 	int i;
 
+    CSpiderConf conf;
+	conf.spider_name = "spider02";
+	conf.page_dir = "./";
+    conf.page_name_change_interval = 30;
+
     CPageOutput page_output;
-	if (-1 == page_output.init(string("./")))
+	if (-1 == page_output.init(&conf))
 	{
 		printf("page output init error.\n");
 		return 0;

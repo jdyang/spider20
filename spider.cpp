@@ -1,32 +1,35 @@
 #include <string>
 #include "sse_common.h"
+#include "sign.h"
 #include "spider.h"
 #include "selected_queue.h"
 #include "url_output.h"
 #include "page_output.h"
 #include "sdconf.h"
-#include "Http.h"
+#include "tse/Http.h"
 #include "uc_url.h"
 #include "base64.h"
+#include "utf8_converter.h"
 
-bool stopped = false;
+using namespace std;
 
-void* select_thread(void* arg)
-{
-	CSpider* psp = (CSpider*)arg;
-	CSpiderConf& conf = psp->m_spider_conf;
-	CSelectedQueue& sq = psp->m_selected_queue;
-	CDnsClient& dns_client = psp->m_dns_client;
-}
+static bool stopped = false;
 
 void* crawl_thread(void* arg)
 {
 	CSpider* psp = (CSpider*)arg;
-	CSpiderConf& conf = *(psp->m_spider_conf);
+	CSpiderConf& conf = (psp->m_spider_conf);
 	CSelectedQueue& sq = *(psp->m_selected_queue);
-	CUrlOutput& fail_output = *(psp->m_fail_output);
-	CPageOutput& page_output = *(psp->m_page_output);
-	CDnsClient& dns_client = *(psp->m_dns_client);
+	CDnsClient& dns_client = psp->m_dns_client;
+	CLevelPool* p_level_pool = psp->mp_level_pool;
+
+	CUrlOutput* p_cate_output = psp->mp_cate_output;
+	CUrlOutput* p_item_output = psp->mp_item_output;
+	CUrlOutput* p_fail_output = psp->mp_fail_output;
+	CPageOutput* p_page_output = psp->mp_page_output;
+
+	CHttp http;
+	UTF8Converter utf8_converter;
 
 	SSQItem qi;
 
@@ -42,30 +45,44 @@ void* crawl_thread(void* arg)
 	ehconfig.proxy_str = NULL;
 
 	string redirect_url;
+	string url = "";
 	string site = "";
 	string domain = "";
 	string ip = "";
 
     string converted_content = "";
 	string base64_content = "";
+	int flag;
+
+    char err_buf[4096];
+	char page_list_buf[2097152];
 
 	while (!stopped)
 	{
         if (!sq.pop(qi))  // SelectedQueue为空
 		{
-			page_output.append(NULL, 0, false); // 为了满足即使没有抓到网页也写一个page.list空文件
+			if (-1 == p_page_output->append(NULL, 0, false)) // 为了满足即使没有抓到网页也写一个page.list空文件
+			{
+				printf("page append null error\n");
+			}
 			usleep(conf.selected_queue_empty_sleep_time*1000);
 			continue;
 		}
 
         if (qi.fail_count > conf.max_url_fail_count)  // 此URL多次抓取失败，丢弃
 		{
-            fail_output.append_error(qi.url, "CRAWL_FAIL");
+            if (-1 == p_fail_output->append_error(qi.url, "CRAWL_FAIL"))
+			{
+				printf("fail append error\n");
+			}
 			continue;
 		}
 		if (qi.dns_count > conf.max_dns_query_count)  // 此URL无IP，丢弃
 		{
-			fail_output.append_error(qi.url, "DNS_FAIL");
+			if (-1 == p_fail_output->append_error(qi.url, "DNS_FAIL"))
+			{
+				printf("fail append error\n");
+			}
 			continue;
 		}
 
@@ -76,7 +93,7 @@ void* crawl_thread(void* arg)
 			sq.push(qi);
 		}
 
-		if (!level_pool.is_crawl_enabled(qi.url))  // 不符合压力控制规则
+		if (!p_level_pool->is_crawl_enabled(qi.url))  // 不符合压力控制规则
 		{
 			sq.push(qi);
 			continue;
@@ -86,8 +103,11 @@ void* crawl_thread(void* arg)
 		ucUrl uc_url(url);
 		if (uc_url.build() != FR_OK)
 		{
-			level_pool.finish_crawl(site, false);
-			fail_output.append_error(qi.url, "FORMAT_ERROR");
+			p_level_pool->finish_crawl(site, false);
+			if (-1 == p_fail_output->append_error(qi.url, "FORMAT_ERROR"))
+			{
+				printf("fail append error\n");
+			}
 			continue;
 		}
 		site = uc_url.get_site();
@@ -109,14 +129,17 @@ void* crawl_thread(void* arg)
 			location = NULL;
 		}
 
-        ehconfig.ip_str = ip.c_str();
+        ehconfig.ipstr = ip.c_str();
 	    file_length = http.Fetch(url, &downloaded_file, &file_head, &location, &ncSock, &ehconfig);
 
 		if (-404 == file_length)
 		{
 			printf("download 404\n");
-			fail_output.append_error(url, "NOT_FOUND");
-			level_pool.finish_crawl(site);
+			if (-1 == p_fail_output->append_error(url, "NOT_FOUND"))
+			{
+				printf("fail append error\n");
+			}
+			p_level_pool->finish_crawl(site);
 			continue;
 		}
 
@@ -146,7 +169,7 @@ void* crawl_thread(void* arg)
 					{
 						break;
 					}
-					ehconfig.ip_str = ip.c_str();
+					ehconfig.ipstr = ip.c_str();
 
 				}
 			}
@@ -172,31 +195,46 @@ void* crawl_thread(void* arg)
 
 		if (-404 == file_length) // 重定向到了一个404的页面
 		{
-			level_pool.finish_crawl(site);
-			fail_output.append_error(url, "NOT_FOUND_REDIRECT");
+			p_level_pool->finish_crawl(site);
+			if (p_fail_output->append_error(url, "NOT_FOUND_REDIRECT"))
+			{
+				printf("fail append error");
+			}
 			continue;
 		}
 
 		if (file_length <= 0 && file_length > conf.max_page_len)
 		{
-			level_pool.finish_crawl(site);
-			err_str = "CONTENT_LEN_INVALID (" + file_length + ")";
-			fail_output.append_error(url, err_str.c_str());
+			p_level_pool->finish_crawl(site);
+			memset(err_buf, 0, sizeof(err_buf));
+			sprintf(err_buf, "CONTENT_LEN_INVALID (%d)", file_length);
+			if (-1 == p_fail_output->append_error(url, err_buf))
+			{
+				printf("fail append error\n");
+			}
 			continue;
 		}
-		level_pool.finish_crawl(site, true);
+		p_level_pool->finish_crawl(site, true);
 
-        if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue)  // category写入cate.list
+        if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue == QUEUE_TYPE_COQ)  // category写入cate.list
 		{
-			cate_output.append(qi.url);
+			if (-1 == p_cate_output->append(qi.url))
+			{
+				printf("category write error\n");
+				continue;
+			}
 		}
 		else                           // item写入item.list
 		{
-			item_output.append(qi.url);
+			if (-1 == p_item_output->append(qi.url))
+			{
+				printf("item write error\n");
+				continue;
+			}
 		}
 
 
-        utf8_converter.set(downloaded_file, strlen(downloaded_file));
+        utf8_converter.set_input(downloaded_file, strlen(downloaded_file));
 		if (-1 == utf8_converter.to_utf8())
 		{
 			printf("converted to utf8 error\n");
@@ -205,9 +243,10 @@ void* crawl_thread(void* arg)
 		converted_content = utf8_converter.get_converted_content();
 
         // extractor links and enter queue
+		// set flag
 
         // write to page list
-		if (-1 == write_page_list(p_page_output, url, domain, site, flag, converted_content))
+		if (-1 == psp->write_page_list(p_page_output, url, domain, site, flag, converted_content, page_list_buf, sizeof(page_list_buf)))
 		{
             printf("write page error\n");
 			continue;
@@ -217,8 +256,10 @@ void* crawl_thread(void* arg)
 	return NULL;
 }
 
-int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content)
+int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content, char* page_list_buf, int page_list_buf_len)
 {
+	string base64_content;
+
 	unsigned int url_sign1;
 	char url_sign1_buf[64];
 	unsigned int url_sign2;
@@ -233,9 +274,11 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 
     memset(time_buf, 0, sizeof(time_buf));
     memset(flag_buf, 0, sizeof(flag_buf));
-    memset(url_sign_buf, 0, sizeof(url_sign_buf));
-	memset(page_sign_buf, 0, sizeof(page_sign_buf));
-    memset(m_pagelist_buf, 0, sizeof(m_pagelist_buf));
+    memset(url_sign1_buf, 0, sizeof(url_sign1_buf));
+    memset(url_sign2_buf, 0, sizeof(url_sign2_buf));
+	memset(page_sign1_buf, 0, sizeof(page_sign1_buf));
+	memset(page_sign2_buf, 0, sizeof(page_sign2_buf));
+    memset(page_list_buf, 0, sizeof(page_list_buf));
 
     sprintf(time_buf, "%lu", time(NULL));
 
@@ -245,7 +288,7 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 	sprintf(url_sign1_buf, "%u", url_sign1);
 	sprintf(url_sign2_buf, "%u", url_sign2);
 
-    base64_content = base64_encode(converted_content.c_str(), converted_content.length());
+    base64_content = base64_encode((unsigned char const*)(converted_content.c_str()), converted_content.length());
 	CSign::Generate(base64_content.c_str(), base64_content.length(), &page_sign1, &page_sign2);
     sprintf(page_sign1_buf, "%u", page_sign1);
 	sprintf(page_sign2_buf, "%u", page_sign2);
@@ -260,34 +303,34 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 				  + strlen(page_sign2_buf)
 				  + strlen(flag_buf)
 				  + base64_content.length()
-				  + 10                                 // 10 "\t"
+				  + 10;                               // 10 "\t"
 
-    if (total_len >= m_pagelist_buf)
+    if (total_len >= page_list_buf_len)
 	{
 		return -1;
 	}
 
-    strcat(m_pagelist_buf, time_buf);
-	strcat("\t");
-    sprintf(m_pagelist_buf, url.c_str());
-	sprintf(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, domain.c_str());
-	strcat(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, site.c_str());
-	strcat(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, url_sign1_buf);
-	strcat(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, url_sign2_buf);
-	strcat(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, page_sign1_buf);
-	strcat(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, page_sign2_buf);
-	strcat(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, flag_buf);
-	strcat(m_pagelist_buf, "\t");
-	strcat(m_pagelist_buf, base64_content.c_str());
+    strcat(page_list_buf, time_buf);
+	strcat(page_list_buf, "\t");
+    sprintf(page_list_buf, url.c_str());
+	sprintf(page_list_buf, "\t");
+	strcat(page_list_buf, domain.c_str());
+	strcat(page_list_buf, "\t");
+	strcat(page_list_buf, site.c_str());
+	strcat(page_list_buf, "\t");
+	strcat(page_list_buf, url_sign1_buf);
+	strcat(page_list_buf, "\t");
+	strcat(page_list_buf, url_sign2_buf);
+	strcat(page_list_buf, "\t");
+	strcat(page_list_buf, page_sign1_buf);
+	strcat(page_list_buf, "\t");
+	strcat(page_list_buf, page_sign2_buf);
+	strcat(page_list_buf, "\t");
+	strcat(page_list_buf, flag_buf);
+	strcat(page_list_buf, "\t");
+	strcat(page_list_buf, base64_content.c_str());
 
-    if (0 != pout->append(m_pagelist_buf, strlen(m_pagelist_buf)))
+    if (0 != pout->append(page_list_buf, strlen(page_list_buf)))
 	{
 		return -1;
 	}

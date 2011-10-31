@@ -1,12 +1,13 @@
 #ifndef _FANFAN_LEVEL_POOL_H__
 #define _FANFAN_LEVEL_POOL_H__
 
-#include "spider.h"
 #include <pthread.h>
 #include <string>
 #include <map>
 
 using namespace std;
+
+class CSpiderConf;
 
 struct SLevelInfo
 {
@@ -22,9 +23,8 @@ class CLevelPool
 public:
     CLevelPool(void) {}
 	~CLevelPool(void) {}
-    int init(void);
+    int init(CSpiderConf* conf);
 	int destroy(void);
-    void set_spider(CSpider* sp);
     void insert_level_info(string& site, SLevelInfo li);
 	bool is_crawl_enabled(string& site);
 	void finish_crawl(string& site, bool change_time=true);
@@ -35,7 +35,7 @@ public:
 private:
     time_t get_time_now(void);
 
-    CSpider* mp_spider;
+    CSpiderConf* mp_conf;
     pthread_mutex_t m_mutex;
 	map<string, SLevelInfo> m_pool;
 

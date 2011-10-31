@@ -2,11 +2,17 @@
 #include <time.h>
 #include <sys/time.h>
 
-int CLevelPool::init(void)
-{
-	int ret = pthread_mutex_init(&m_mutex, NULL);
+class SpiderConf;
 
-	return 0==ret ? 0 : -1;
+int CLevelPool::init(CSpiderConf* conf)
+{
+	int ret = -1;
+	mp_conf = conf;
+	if ((ret=pthread_mutex_init(&m_mutex, NULL)) != 0)
+	{
+		return -1;
+	}
+	return 0;
 }
 
 int CLevelPool::destroy(void)
@@ -16,12 +22,6 @@ int CLevelPool::destroy(void)
 	return 0==ret ? 0 : -1;
 }
 
-
-void CLevelPool::set_spider(CSpider* sp)
-{
-	mp_spider = sp;
-}
-
 void CLevelPool::insert_level_info(string& site, SLevelInfo li)
 {
 	m_pool.insert(make_pair(site, li));
@@ -29,7 +29,7 @@ void CLevelPool::insert_level_info(string& site, SLevelInfo li)
 
 bool CLevelPool::is_crawl_enabled(string& site)
 {
-	CSpiderConf& conf = mp_spider->m_spider_conf;
+	CSpiderConf& conf = mp_conf;
 
     time_t now = get_time_now();
 

@@ -17,6 +17,8 @@
 #include "ncpack.h"
 #include "ncthread.h"
 
+using namespace std;
+
 class CDnsClient {
 public:
 	int init(CSpiderConf *conf); // 0 for ok ; -1 for error
