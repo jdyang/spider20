@@ -38,6 +38,7 @@ class CSpider
 {
 public:
     int load_conf(const char* conf_path);
+	int init(void);
 
 	CSpiderConf m_spider_conf;
 

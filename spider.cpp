@@ -1,3 +1,4 @@
+#include <string>
 #include "sse_common.h"
 #include "spider.h"
 #include "selected_queue.h"
@@ -6,7 +7,7 @@
 #include "sdconf.h"
 #include "Http.h"
 #include "uc_url.h"
-#include <string>
+#include "base64.h"
 
 bool stopped = false;
 
@@ -21,11 +22,11 @@ void* select_thread(void* arg)
 void* crawl_thread(void* arg)
 {
 	CSpider* psp = (CSpider*)arg;
-	CSpiderConf& conf = psp->m_spider_conf;
-	CSelectedQueue& sq = psp->m_selected_queue;
-	CUrlOutput& fail_output = psp->m_fail_output;
-	CPageOutput& page_output = psp->m_page_output;
-	CDnsClient& dns_client = psp->m_dns_client;
+	CSpiderConf& conf = *(psp->m_spider_conf);
+	CSelectedQueue& sq = *(psp->m_selected_queue);
+	CUrlOutput& fail_output = *(psp->m_fail_output);
+	CPageOutput& page_output = *(psp->m_page_output);
+	CDnsClient& dns_client = *(psp->m_dns_client);
 
 	SSQItem qi;
 
@@ -42,7 +43,11 @@ void* crawl_thread(void* arg)
 
 	string redirect_url;
 	string site = "";
+	string domain = "";
 	string ip = "";
+
+    string converted_content = "";
+	string base64_content = "";
 
 	while (!stopped)
 	{
@@ -86,6 +91,7 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 		site = uc_url.get_site();
+		domain = uc_url.get_domain();
 
         if (downloaded_file)
 		{
@@ -189,19 +195,104 @@ void* crawl_thread(void* arg)
 			item_output.append(qi.url);
 		}
 
+
+        utf8_converter.set(downloaded_file, strlen(downloaded_file));
+		if (-1 == utf8_converter.to_utf8())
+		{
+			printf("converted to utf8 error\n");
+			continue;
+		}
+		converted_content = utf8_converter.get_converted_content();
+
         // extractor links and enter queue
 
-        // transfer content-encoding
-		// base64 encoding
-		if (0 != page_output.append(downloaded_file, strlen(downloaded_file)))
+        // write to page list
+		if (-1 == write_page_list(p_page_output, url, domain, site, flag, converted_content))
 		{
             printf("write page error\n");
+			continue;
 		}
 	}
 
 	return NULL;
 }
 
+int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content)
+{
+	unsigned int url_sign1;
+	char url_sign1_buf[64];
+	unsigned int url_sign2;
+	char url_sign2_buf[64];
+	unsigned int page_sign1;
+	char page_sign1_buf[64];
+	unsigned int page_sign2;
+	char page_sign2_buf[64];
+
+	char time_buf[64];
+	char flag_buf[4];
+
+    memset(time_buf, 0, sizeof(time_buf));
+    memset(flag_buf, 0, sizeof(flag_buf));
+    memset(url_sign_buf, 0, sizeof(url_sign_buf));
+	memset(page_sign_buf, 0, sizeof(page_sign_buf));
+    memset(m_pagelist_buf, 0, sizeof(m_pagelist_buf));
+
+    sprintf(time_buf, "%lu", time(NULL));
+
+	sprintf(flag_buf, "%d", flag);
+
+	CSign::Generate(url.c_str(), url.length(), &url_sign1, &url_sign2);
+	sprintf(url_sign1_buf, "%u", url_sign1);
+	sprintf(url_sign2_buf, "%u", url_sign2);
+
+    base64_content = base64_encode(converted_content.c_str(), converted_content.length());
+	CSign::Generate(base64_content.c_str(), base64_content.length(), &page_sign1, &page_sign2);
+    sprintf(page_sign1_buf, "%u", page_sign1);
+	sprintf(page_sign2_buf, "%u", page_sign2);
+
+    int total_len = strlen(time_buf)
+	              + url.length()
+	              + domain.length()
+				  + site.length()
+				  + strlen(url_sign1_buf)
+				  + strlen(url_sign2_buf)
+				  + strlen(page_sign1_buf)
+				  + strlen(page_sign2_buf)
+				  + strlen(flag_buf)
+				  + base64_content.length()
+				  + 10                                 // 10 "\t"
+
+    if (total_len >= m_pagelist_buf)
+	{
+		return -1;
+	}
+
+    strcat(m_pagelist_buf, time_buf);
+	strcat("\t");
+    sprintf(m_pagelist_buf, url.c_str());
+	sprintf(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, domain.c_str());
+	strcat(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, site.c_str());
+	strcat(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, url_sign1_buf);
+	strcat(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, url_sign2_buf);
+	strcat(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, page_sign1_buf);
+	strcat(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, page_sign2_buf);
+	strcat(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, flag_buf);
+	strcat(m_pagelist_buf, "\t");
+	strcat(m_pagelist_buf, base64_content.c_str());
+
+    if (0 != pout->append(m_pagelist_buf, strlen(m_pagelist_buf)))
+	{
+		return -1;
+	}
+	return 0;
+}
 
 int CSpider::load_conf(const char* conf_path)
 {
