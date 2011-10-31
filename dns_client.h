@@ -3,9 +3,9 @@
 
 #include "udpdns.h"
 #include "map"
-#include "string"
 #include "vector"
 #include <set>
+#include <string>
 #include "spider.h"
 #include <iostream>
 
@@ -20,7 +20,7 @@
 class DnsClient {
 public:
 	int init(CSpiderConf *conf); // 0 for ok ; -1 for error
-	void query_site_ip(set<string> &sites);
+	int query_site_ip(set<string> *sites);
 	
     CSpiderConf* get_conf();
 	void set_conf(CSpiderConf *conf);

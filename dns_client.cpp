@@ -1,4 +1,5 @@
 #include "dns_client.h"
+#include <string>
 using namespace std;
 
 void DnsClient::set_conf(CSpiderConf *conf){
@@ -41,22 +42,20 @@ string DnsClient::get_ip(string site)
 	return ip;
 }
 
-void DnsClient::query_site_ip(set &sites)
+int DnsClient::query_site_ip(set *sites)
 {
 	vector<string>::iterator it;
+	string ip;
 	for (it = sites.begin(); it != sites.end(); ++it){
 		ip = query_real_dns(*it);
 		put_ip(*it, ip);
 		usleep(100*1000);
 	}
+	return 0;
 }
 
 string DnsClient::query_real_dns(string site)
 {
-	//struct hostent *hp;
-	//struct	in_addr in;
-    //char    abuf[INET_ADDRSTRLEN];
-	//time_t now_time;
 	
 	string ret = "NO_IP";
 	

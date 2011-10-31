@@ -10,12 +10,33 @@ AR=ar
 vpath %.h ../..
 vpath %.cpp ../..
 
-INCLUDES= -I./ \
+INCLUDE= -I./ \
 		  -I$(SELIBPATH)/include \
 
-FLAGS=-g $(INCLUDES)
+ifeq "$(MAKECMDGOALS)" "release"
+	DEFINES=$(COMMON_DEFINES) -DNDEBUG
+	CPPFLAGS= -Wno-deprecated 
+	CFLAGS= -O2 -Wall $(DEFINES) $(INCLUDE)  
+	CXXFLAGS= -O2 -Wall $(DEFINES) $(INCLUDE) 
+else
+	ifeq "$(MAKECMDGOALS)" "withpg"
+		DEFINES=$(COMMON_DEFINES)
+		CPPFLAGS= -Wno-deprecated
+		CFLAGS= -g -pg -Wall $(DEFINES) $(INCLUDE)  
+		CXXFLAGS= -g -pg -Wall $(DEFINES) $(INCLUDE) 
+	else
+		DEFINES=$(COMMON_DEFINES)
+		CPPFLAGS= -Wno-deprecated
+		CFLAGS= -g -Wall $(DEFINES) $(INCLUDE)  
+		CXXFLAGS= -g -Wall $(DEFINES) $(INCLUDE) 
+	endif
+endif
 
-LIB= -lpthread
+
+LIB= -lpthread \
+	-L$(SELIBPATH)/lib \
+	-lnet \
+	-lutil \
 
 all : test_dns_client
 
@@ -25,6 +46,6 @@ OBJS= udpdns.o \
       
 
 clean :
-	rm -rf *.o *~ test_page_output
+	rm -rf *.o *~ test_dns_client
 test_dns_client : $(OBJS) 
-	$(CPP) $(FLAGS) -o $@ $^ $(LIB)
+	$(CPP) $(CPPFLAGS) -o $@ $^ $(LIB)
