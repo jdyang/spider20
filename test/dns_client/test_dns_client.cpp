@@ -39,14 +39,19 @@ int main(int argc, char** argv)
 	
 	g_site_set.insert("0591.doido.com");
 	g_site_set.insert("search.paipai.com");
-	g_site_set.insert("http://www.baidu.com/");
+	g_site_set.insert("map.baidu.com");
+	g_site_set.insert("list.m18.com");
 	g_site_set.insert("categoryb.dangdang.com");
 	
 	set<string>::iterator it;
 	it = g_site_set.begin();
 	
 	g_site_vector.assign(it, g_site_set.end());
-	
+/*
+	vector<string>::iterator ii;
+	for (ii = g_site_vector.begin(); ii != g_site_vector.end(); ++ ii)
+		cout << *ii << endl;
+*/	
 	if (-1 == dns_client.init(&conf))
 	{
 		printf("dns init error.\n");
@@ -77,7 +82,8 @@ void* write_thread(void* arg)
 	while (true)
 	{
 		usleep(300000);
-		cout << dns->get_ip(g_site_vector[rand()%g_site_vector.size()]) << endl;
+		int i = rand()%g_site_vector.size();
+		cout << i << " : " << g_site_vector[i] << " ip: " << dns->get_ip(g_site_vector[i]) << endl;
 		
 	}
 
