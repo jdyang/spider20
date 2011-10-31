@@ -1,6 +1,9 @@
 #ifndef __FANFAN_SPIDER_COMMON_H__
 #define __FANFAN_SPIDER_COMMON_H__
 
+#include "sdlog.h"
+
+
 #define SP_LOGNAME "spider"
 #define SP_WFNAME "spiderwf"
 
