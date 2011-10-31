@@ -7,6 +7,10 @@
 #include "selected_queue.h"
 #include "page_output.h"
 
+#define SP_LOGNAME "spider"
+#define SP_WFNAME "spiderwf"
+
+
 class CPageOutput;
 
 class CSpiderConf
@@ -25,6 +29,9 @@ public:
 	string dns_host;
 	int dns_port;
 	int dns_sleep_interval; //ms
+	
+	//select thread
+	int min_select_interval;
 };
 
 class CSpider

@@ -11,6 +11,14 @@
 
 bool stopped = false;
 
+void* select_thread(void* arg)
+{
+	CSpider* psp = (CSpider*)arg;
+	CSpiderConf& conf = psp->m_spider_conf;
+	CSelectedQueue& sq = psp->m_selected_queue;
+	CDnsClient& dns_client = psp->m_dns_client;
+}
+
 void* crawl_thread(void* arg)
 {
 	CSpider* psp = (CSpider*)arg;
