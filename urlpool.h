@@ -24,6 +24,8 @@
 #include "util.h"
 #include "uc_url.h"
 
+#include "spider.h"
+
 using namespace std;
 
 
@@ -48,6 +50,7 @@ public:
 	bool url_empty();
 	void push_url(UrlInfo ui);
 	UrlInfo pop_url();
+	int print_pool();
 	
 	
 private:

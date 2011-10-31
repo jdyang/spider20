@@ -39,9 +39,10 @@ LIB=-L./ \
 	-lpthread \
 	-L$(SELIBPATH)/lib \
 	-lnet \
-	-lutil \
 	-lurl \
 	-lurlpattern \
+	-lutil \
+
 all : test_urlpool
 
 OBJS= urlpool.o \
@@ -50,4 +51,4 @@ OBJS= urlpool.o \
 clean :
 	rm -rf $(OBJS) test_urlpool
 test_urlpool : $(OBJS) 
-		$(CPP) $(CPPFLAGS) -o $@ $^ $(LIB)
+	$(CPP) $(CPPFLAGS) -o $@ $^ $(LIB)
