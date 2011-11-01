@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	
 	struct rlimit rlim;
 	getrlimit(RLIMIT_STACK,&rlim);
-	rlim.rlim_cur=100*1024*1024;
+	rlim.rlim_cur=20*1024*1024;
 	if(setrlimit(RLIMIT_STACK,&rlim)<0){
 		SDLOG_FATAL(SP_WFNAME,"Set stack size failed.");
 		return -1;

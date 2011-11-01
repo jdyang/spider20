@@ -40,6 +40,10 @@ public:
 	
 	//select thread
 	int min_select_interval;
+	
+	//global define
+	int work_thread_num;
+	string statis_file_path;
 };
 
 #endif
