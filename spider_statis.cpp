@@ -105,6 +105,14 @@ int CSpiderStatis::set_statis_to_file(const char* file_path)
 	return 0;
 }
 
+int CSpiderStatis::write_message_to_file(string message)
+{
+	if(message.c_str() == NULL)
+		return -1;
+	fprintf(m_fp, "%s\n", message.c_str());
+	return 0;
+
+}
 
 int CSpiderStatis::get_domain_cate_done_num(string domain)
 {
