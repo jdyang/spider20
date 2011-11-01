@@ -36,6 +36,8 @@ public:
 
 	int set_statis_to_file();
 	int set_statis_to_file(const char* file_path);
+	
+	int write_message_to_file(string message);
 
 	int get_domain_cate_done_num(string domain);
 	int get_domain_item_done_num(string domain);
