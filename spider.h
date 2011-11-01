@@ -18,6 +18,7 @@
 
 #include <time.h>
 #include <string>
+#include <vector>
 #include "spider_common.h"
 #include "url_output.h"
 #include "selected_queue.h"
@@ -53,6 +54,9 @@ public:
 	CUrlPool* m_ipq;
 	CUrlPool* m_coq;
 	CUrlPool* m_ioq;
+	
+	//select tmp queue, need to be shuffled 
+	vector<UrlInfo> select_buffer;
 	
 	CSpiderStatis m_statis;
 

@@ -25,7 +25,7 @@ void* select_thread(void* arg)
 	
 	CSpider* psp = (CSpider*)arg;
 	CSpiderConf& conf = (psp->m_spider_conf);
-	CSelectedQueue& sq = *(psp->m_selected_queue);
+	CSelectedQueue& sq = *(psp->mp_selected_queue);
 	CDnsClient& dns_client = psp->m_dns_client;
 	CLevelPool* p_level_pool = psp->mp_level_pool;
 	
@@ -331,6 +331,7 @@ void* crawl_thread(void* arg)
 
 int CSpider::select_url()
 {
+	
 	return 0;
 }
 

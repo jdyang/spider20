@@ -1,6 +1,6 @@
 /*
  @file: spider_statis.h
- @brief: spider2.0统计接口
+ @brief: spider2.0脥鲁录脝陆脫驴脷
  @author: stanshen
  @version: 1.0
  @date: 2011.10.25
@@ -28,7 +28,7 @@ using namespace std;
 
 typedef struct _DomainAttr
 {
-	int isShield;
+	int isShield; //0forfalse;1fortrue;
 	int isSeed;
 }DomainAttr;
 
@@ -80,20 +80,20 @@ public:
 private:
 
 	pthread_mutex_t m_cate_mutex;
-	map<string, int> m_domain_cate_done;//domain对应已抓取cate数
+	map<string, int> m_domain_cate_done;//domain露脭脫娄脪脩脳楼脠隆cate脢媒
 	
 	pthread_mutex_t m_item_mutex;
-	map<string, int> m_domain_item_done;//domain对应已抓取item数
+	map<string, int> m_domain_item_done;//domain露脭脫娄脪脩脳楼脠隆item脢媒
 
-	map<string, int> m_domain_cate_select;//domain对应待选取cate数
+	map<string, int> m_domain_cate_select;//domain露脭脫娄麓媒脩隆脠隆cate脢媒
 	
-	map<string, int> m_domain_item_select;//domain对应待选取item数
+	map<string, int> m_domain_item_select;//domain露脭脫娄麓媒脩隆脠隆item脢媒
 
-	int m_CPQ_url_num;//CPQ中url数
-	int m_IPQ_url_num;//IPQ中url数
-	int m_COQ_url_num;//COQ中url数
-	int m_IOQ_url_num;//IOQ中url数
-	int m_SQ_url_num; //SQ中url数
+	int m_CPQ_url_num;//CPQ脰脨url脢媒
+	int m_IPQ_url_num;//IPQ脰脨url脢媒
+	int m_COQ_url_num;//COQ脰脨url脢媒
+	int m_IOQ_url_num;//IOQ脰脨url脢媒
+	int m_SQ_url_num; //SQ脰脨url脢媒
 
 	FILE* m_fp;
 };
