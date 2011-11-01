@@ -13,6 +13,15 @@
 
 using namespace std;
 
+string get_local_time()
+{
+	time_t time_date = time(NULL);
+	char tmp[32];
+	strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&time_date));
+	return string(tmp);
+}
+
+
 CSpiderStatis::CSpiderStatis()
 {
 
@@ -56,7 +65,7 @@ int CSpiderStatis::init(const char* file_path)
 int CSpiderStatis::set_statis_to_file()
 {
 
-	fprintf(m_fp, "%ld\t", time(NULL));
+	fprintf(m_fp, "%s\t", get_local_time().c_str());
 	fprintf(m_fp, "CPQ=%d\tCOQ=%d\tIPQ=%d\tIOQ=%d\tSQ=%d\n", get_cpq_url_num(), get_coq_url_num(),
 	             get_ipq_url_num(), get_ioq_url_num(), get_sq_url_num());
 	
@@ -90,7 +99,7 @@ int CSpiderStatis::set_statis_to_file(const char* file_path)
 	
 	
 
-	fprintf(fp, "%ld\t", time(NULL));
+	fprintf(fp, "%s\t", get_local_time().c_str());
 	fprintf(fp, "CPQ=%d\tCOQ=%d\tIPQ=%d\tIOQ=%d\tSQ=%d\n", get_cpq_url_num(), get_coq_url_num(),
 	             get_ipq_url_num(), get_ioq_url_num(), get_sq_url_num());
 	
@@ -109,7 +118,8 @@ int CSpiderStatis::write_message_to_file(string message)
 {
 	if(message.c_str() == NULL)
 		return -1;
-	fprintf(m_fp, "%s\n", message.c_str());
+	
+	fprintf(m_fp, "%s\t%s\n", get_local_time().c_str(), message.c_str());
 	return 0;
 
 }
