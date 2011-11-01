@@ -69,12 +69,12 @@ int CSpiderStatis::set_statis_to_file()
 	fprintf(m_fp, "CPQ=%d\tCOQ=%d\tIPQ=%d\tIOQ=%d\tSQ=%d\n", get_cpq_url_num(), get_coq_url_num(),
 	             get_ipq_url_num(), get_ioq_url_num(), get_sq_url_num());
 	
-	set<string>::iterator set_iter;
-	for(set_iter = m_domain.begin(); set_iter != m_domain.end(); set_iter++)
+	map<string, DomainAttr>::iterator map_iter;
+	for(map_iter = m_domain.begin(); map_iter != m_domain.end(); map_iter++)
 	{
-		fprintf(m_fp, "domain=%s\tcate_done=%d\tcate_sel=%d\titem_done=%d\titem_sel=%d\n",(*set_iter).c_str(),
-		            get_domain_cate_done_num(*set_iter), get_domain_cate_select_num(*set_iter),
-					get_domain_item_done_num(*set_iter), get_domain_item_select_num(*set_iter));
+		fprintf(m_fp, "domain=%s\tcate_done=%d\tcate_sel=%d\titem_done=%d\titem_sel=%d\n",(*map_iter).first.c_str(),
+		            get_domain_cate_done_num(map_iter->first), get_domain_cate_select_num(map_iter->first),
+					get_domain_item_done_num(map_iter->first), get_domain_item_select_num(map_iter->first));
 	}
 	fprintf(m_fp, "\n");
 	return 0;
@@ -103,12 +103,12 @@ int CSpiderStatis::set_statis_to_file(const char* file_path)
 	fprintf(fp, "CPQ=%d\tCOQ=%d\tIPQ=%d\tIOQ=%d\tSQ=%d\n", get_cpq_url_num(), get_coq_url_num(),
 	             get_ipq_url_num(), get_ioq_url_num(), get_sq_url_num());
 	
-	set<string>::iterator set_iter;
-	for(set_iter = m_domain.begin(); set_iter != m_domain.end(); set_iter++)
+	map<string, DomainAttr>::iterator map_iter;
+	for(map_iter = m_domain.begin(); map_iter != m_domain.end(); map_iter++)
 	{
-		fprintf(fp, "domain=%s\tcate_done=%d\tcate_sel=%d\titem_done=%d\titem_sel=%d\n\n",(*set_iter).c_str(),
-		            get_domain_cate_done_num(*set_iter), get_domain_cate_select_num(*set_iter),
-					get_domain_item_done_num(*set_iter), get_domain_item_select_num(*set_iter));
+		fprintf(fp, "domain=%s\tcate_done=%d\tcate_sel=%d\titem_done=%d\titem_sel=%d\n",(*map_iter).first.c_str(),
+		            get_domain_cate_done_num(map_iter->first), get_domain_cate_select_num(map_iter->first),
+					get_domain_item_done_num(map_iter->first), get_domain_item_select_num(map_iter->first));
 	}
 	fclose(fp);	
 	return 0;
