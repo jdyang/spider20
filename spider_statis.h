@@ -26,6 +26,13 @@ using namespace std;
 //#define FR_OK 0
 //#define FR_FALSE -1
 
+typedef struct _DomainAttr
+{
+	int isShield;
+	int isSeed;
+}DomainAttr;
+
+
 class CSpiderStatis
 {
 public:
@@ -66,7 +73,8 @@ public:
 	void set_ioq_url_num(int url_num){m_IOQ_url_num = url_num;}
 	void set_sq_url_num(int url_num){m_SQ_url_num = url_num;}
 
-	set<string> m_domain;
+	//set<string> m_domain;
+	map<string, DomainAttr> m_domain;
 	set<string> m_site;
 
 private:
