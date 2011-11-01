@@ -10,6 +10,11 @@
 #include "uc_url.h"
 #include "base64.h"
 #include "utf8_converter.h"
+#include "url_recognizer.h"
+#include "urlpool.h"
+
+#define ITEM_LINK (1)
+#define CATE_LINK (2)
 
 using namespace std;
 
@@ -30,6 +35,7 @@ void* crawl_thread(void* arg)
 
 	CHttp http;
 	UTF8Converter utf8_converter;
+	CUrlRecognizer url_recog;
 
 	SSQItem qi;
 	
@@ -67,13 +73,16 @@ void* crawl_thread(void* arg)
 
     string converted_content = "";
 	string base64_content = "";
-	int flag;
 
     char err_buf[4096];
 	char page_list_buf[2097152];
 
 	while (!stopped)
 	{
+		while (conf.spider_paused) {    // spider如果暂停
+			sleep(60);
+			continue;
+		}
         if (!sq.pop(qi))  // SelectedQueue为空
 		{
 			if (-1 == p_page_output->append(NULL, 0, false)) // 为了满足即使没有抓到网页也写一个page.list空文件
@@ -230,7 +239,7 @@ void* crawl_thread(void* arg)
 			}
 			continue;
 		}
-		p_level_pool->finish_crawl(site, true);
+		p_level_pool->finish_crawl(site);
 
         if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue == QUEUE_TYPE_COQ)  // category写入cate.list
 		{
@@ -249,8 +258,16 @@ void* crawl_thread(void* arg)
 			}
 		}
 		
+        utf8_converter.set_input(downloaded_file, strlen(downloaded_file));
+		if (-1 == utf8_converter.to_utf8())
+		{
+			printf("converted to utf8 error\n");
+			continue;
+		}
+		converted_content = utf8_converter.get_converted_content();
+
 		//extract links
-		extractor.set_html(url,downloaded_file);
+		extractor.set_html(url,converted_content);
 	    EcSwitch swi;
 		swi.sw_link = true;
 	    swi.sw_title = false;
@@ -264,16 +281,8 @@ void* crawl_thread(void* arg)
 		
 		extractor.extract(swi);
 		
-		write_to_queue(qi.which_queue, &extractor, &url_recog);
+		psp->write_to_queue(qi.which_queue, &extractor, &url_recog);
 		SDLOG_INFO(SP_LOGNAME, "finish extracting links "<<url);
-
-        utf8_converter.set_input(downloaded_file, strlen(downloaded_file));
-		if (-1 == utf8_converter.to_utf8())
-		{
-			printf("converted to utf8 error\n");
-			continue;
-		}
-		converted_content = utf8_converter.get_converted_content();
 
         // write item to page list
 		if (qi.which_queue == QUEUE_TYPE_IPQ || qi.which_queue == QUEUE_TYPE_IOQ)
@@ -291,33 +300,69 @@ void* crawl_thread(void* arg)
 
 void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
 {
-	CUrlPool* cq;
-	CUrlPool* iq;
+	CSpiderConf& conf = m_spider_conf;
+	UrlPool* cq;
+	UrlPool* iq;
 
-	if (which_queue == CPQ)
+    string normal_url;
+	int type;
+
+	if (which_queue == QUEUE_TYPE_CPQ)
 	{
-		cq = m_cpq;
-		iq = m_ipq;
+		cq = &m_cpq;
+		iq = &m_ipq;
 	}
 	else
 	{
-		cq = m_coq;
-		iq = m_ioq;
+		cq = &m_coq;
+		iq = &m_ioq;
 	}
 
-	map<string,CEcUrlLink> links = extractor.get_links();
+	map<string,CEcUrlLink> links = extractor->get_links();
 
+    UrlInfo ui;
 	for(map<string,CEcUrlLink>::iterator it = links.begin(); it != links.end(); ++it) 
     {
-		type = url_recog.get_type(it->second.link);
+		ucUrl uc_url(it->second.link);
+		if (FR_OK != uc_url.build())
+		{
+			printf("extracted link build error\n");
+			continue;
+		}
+		type = url_recog->get_type(it->second.link);
 		if (type == ITEM_LINK)
 		{
-			normal_url = url_recog.normalize(it->second.url);
-            iq->push_url(normal_url);
+			if (conf.extract_item_url)  // 需要提取item
+			{
+				if (conf.normalize_url)  // 需要归一化
+				{
+			        ui.url = url_recog->normalize(it->second.link);
+				}
+				else
+				{
+					ui.url = it->second.link;
+				}
+			    ui.last_crawl_time = 0;
+			    ui.domain = uc_url.get_domain();
+			    ui.site = uc_url.get_site();
+
+                iq->push_url(ui);
+			}
 		}
 		else if (type == CATE_LINK)
 		{
-			cq->push_url(it->second.url);
+			if (conf.extract_cate_url)
+			{
+			    ui.url = it->second.link;
+			    ui.last_crawl_time = 0;
+			    ui.domain = uc_url.get_domain();
+			    ui.site = uc_url.get_site();
+			    cq->push_url(ui);
+			}
+		}
+		else  // 垃圾URL
+		{
+			printf("invalud url\n");
 		}
 	}
 }

@@ -24,6 +24,7 @@
 #include "page_output.h"
 #include "dns_client.h"
 #include "level_pool.h"
+#include "urlpool.h"
 
 #include "extractor.h"
 #include "recognizer.h"
@@ -33,6 +34,7 @@ class CSpider
 public:
     int load_conf(const char* conf_path);
 	int init(void);
+    void write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog);
     int write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content, char* page_list_buf, int page_list_buf_len);
 
 	CSpiderConf m_spider_conf;
@@ -48,6 +50,11 @@ public:
 	CDnsClient m_dns_client;
 
 	CLevelPool* mp_level_pool;
+
+    UrlPool m_cpq;
+	UrlPool m_coq;
+	UrlPool m_ipq;
+	UrlPool m_ioq;
 
 };
 

@@ -1,5 +1,5 @@
-#ifndef _URLPOOL_H_
-#define _URLPOOL_H_
+#ifndef _FANFAN_URLPOOL_H_
+#define _FANFAN_URLPOOL_H_
 
 #include <string>
 #include <vector>
