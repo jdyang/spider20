@@ -187,6 +187,7 @@ void* crawl_thread(void* arg)
 					ehconfig.ipstr = ip.c_str();
 
 				}
+				redirect_url = red_url.get_url();
 			}
 
             if (downloaded_file)
@@ -263,14 +264,8 @@ void* crawl_thread(void* arg)
 		
 		extractor.extract(swi);
 		
-		map<string,CEcUrlLink> links = extractor.get_links();
-
-		for(map<string,CEcUrlLink>::iterator it = links.begin(); it != links.end(); ++it) 
-	    {
-			//TODO add links to urlpool
-		}
+		write_to_queue(qi.which_queue, &extractor, &url_recog);
 		SDLOG_INFO(SP_LOGNAME, "finish extracting links "<<url);
-
 
         utf8_converter.set_input(downloaded_file, strlen(downloaded_file));
 		if (-1 == utf8_converter.to_utf8())
@@ -280,18 +275,51 @@ void* crawl_thread(void* arg)
 		}
 		converted_content = utf8_converter.get_converted_content();
 
-        // extractor links and enter queue
-		// set flag
-
-        // write to page list
-		if (-1 == psp->write_page_list(p_page_output, url, domain, site, flag, converted_content, page_list_buf, sizeof(page_list_buf)))
+        // write item to page list
+		if (qi.which_queue == QUEUE_TYPE_IPQ || qi.which_queue == QUEUE_TYPE_IOQ)
 		{
-            printf("write page error\n");
-			continue;
+		    if (-1 == psp->write_page_list(p_page_output, url, domain, site, 0, converted_content, page_list_buf, sizeof(page_list_buf)))
+		    {
+                printf("write page error\n");
+			    continue;
+		    }
 		}
 	}
 
 	return NULL;
+}
+
+void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
+{
+	CUrlPool* cq;
+	CUrlPool* iq;
+
+	if (which_queue == CPQ)
+	{
+		cq = m_cpq;
+		iq = m_ipq;
+	}
+	else
+	{
+		cq = m_coq;
+		iq = m_ioq;
+	}
+
+	map<string,CEcUrlLink> links = extractor.get_links();
+
+	for(map<string,CEcUrlLink>::iterator it = links.begin(); it != links.end(); ++it) 
+    {
+		type = url_recog.get_type(it->second.link);
+		if (type == ITEM_LINK)
+		{
+			normal_url = url_recog.normalize(it->second.url);
+            iq->push_url(normal_url);
+		}
+		else if (type == CATE_LINK)
+		{
+			cq->push_url(it->second.url);
+		}
+	}
 }
 
 int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content, char* page_list_buf, int page_list_buf_len)
