@@ -1,4 +1,6 @@
 #include <string>
+#include <time.h>
+
 #include "sse_common.h"
 #include "sign.h"
 #include "spider.h"
@@ -14,6 +16,44 @@
 using namespace std;
 
 static bool stopped = false;
+
+void* select_thread(void* arg)
+{
+	time_t start_time;
+	time_t now_time;
+	int left_time;
+	
+	CSpider* psp = (CSpider*)arg;
+	CSpiderConf& conf = (psp->m_spider_conf);
+	CSelectedQueue& sq = *(psp->m_selected_queue);
+	CDnsClient& dns_client = psp->m_dns_client;
+	CLevelPool* p_level_pool = psp->mp_level_pool;
+	
+	while(1){
+		start_time=time(NULL);
+		SDLOG_INFO(SP_LOGNAME,"start updating conf.");
+		if (!psp->update_conf()) {
+			cerr << "load cmd conf error!" << endl;
+			exit(-1);
+		}
+		
+		SDLOG_INFO(SP_LOGNAME,"start selecting.");
+		if (!psp->select_url()) {
+			//TODO
+		}		//select from 4 queue
+		SDLOG_INFO(SP_LOGNAME,"finish selecting.");
+		SDLOG_INFO(SP_LOGNAME,"start insert urls into select queue.");
+		psp->insert_url();
+		SDLOG_INFO(SP_LOGNAME,"finish inserting.");
+		now_time=time(NULL);
+		left_time=(int)(conf.min_select_interval-difftime(now_time,start_time));
+		if(left_time>0){
+			usleep(left_time * 1000);
+		}
+	}
+	
+	return NULL;
+}
 
 void* crawl_thread(void* arg)
 {
@@ -289,6 +329,21 @@ void* crawl_thread(void* arg)
 	return NULL;
 }
 
+int CSpider::select_url()
+{
+	return 0;
+}
+
+int CSpider::insert_url()
+{
+	return 0;
+} 
+
+int CSpider::update_conf()
+{
+	return 0;
+}
+
 void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
 {
 	CUrlPool* cq;
@@ -455,5 +510,38 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.selected_queue_empty_sleep_time = int_result;
 
+	return 0;
+}
+
+int CSpider::start()
+{
+	//init
+	if (!m_statis.init(m_spider_conf.statis_file_path) || !m_statis.write_message_to_file("start spider!")){
+		cerr << "init statis file error , exit!" << endl;
+		return -1;
+	}
+	
+	pthread_t works[m_spider_conf.work_thread_num];
+	pthread_t select;
+	if (0 != pthread_create(&select, NULL, select_thread, this)) {
+		cerr << "start select thread failed." << endl;
+		return -1;
+	}
+
+	void* work_ret = NULL;
+	for (int i = 0; i < m_spider_conf.work_thread_num; i++) {
+		if (0 != pthread_create(works+i, NULL, work_thread, this)) {
+			cerr << "start work thread " << i << " failed." << endl;
+			pthread_join(select, &work_ret);
+			for (int x=0;x<i;x++) {pthread_join(works[x],&work_ret);}
+			return NULL;
+		}
+	}
+	SDLOG_INFO(SP_LOGNAME, "spider start successfully");
+	
+	pthread_join(select, &work_ret);
+	for (int x=0;x<m_spider_conf.work_thread_num;x++) {pthread_join(works[x],&work_ret);}
+	SDLOG_INFO(SP_LOGNAME, "spider end working");
+	
 	return 0;
 }
