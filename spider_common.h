@@ -44,6 +44,7 @@ public:
 	//global define
 	int work_thread_num;
 	string statis_file_path;
+	string cmd_path;
 };
 
 #endif
