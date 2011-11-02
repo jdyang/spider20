@@ -54,10 +54,10 @@ public:
 	CUrlOutput* mp_item_output;
 	CUrlOutput* mp_fail_output;
 	
-	CUrlPool* m_cpq;
-	CUrlPool* m_ipq;
-	CUrlPool* m_coq;
-	CUrlPool* m_ioq;
+	CUrlPool* mp_cpq;
+	CUrlPool* mp_ipq;
+	CUrlPool* mp_coq;
+	CUrlPool* mp_ioq;
 	
 	//select tmp queue, need to be shuffled 
 	vector<UrlInfo> select_buffer;

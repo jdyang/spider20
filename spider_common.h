@@ -11,6 +11,7 @@ class CSpiderConf
 {
 public:
     string spider_name;                       // 该spider的名字，格式为 spiderxx
+	string log_conf_path;                    // log4cxx的配置文件路径
 	int spider_paused;                       // 是否暂停spider
 	int next_round_continue;                 // 是否继续下一轮
 	int extract_cate_url;                    // 是否提取cate
@@ -53,7 +54,6 @@ public:
 	//global define
 	int work_thread_num;
 	string statis_file_path;
-	string cmd_path;
 };
 
 #endif

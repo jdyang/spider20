@@ -367,21 +367,21 @@ int CSpider::update_conf()
 void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
 {
 	CSpiderConf& conf = m_spider_conf;
-	UrlPool* cq;
-	UrlPool* iq;
+	CUrlPool* cq;
+	CUrlPool* iq;
 
     string normal_url;
 	int type;
 
 	if (which_queue == QUEUE_TYPE_CPQ)
 	{
-		cq = &m_cpq;
-		iq = &m_ipq;
+		cq = mp_cpq;
+		iq = mp_ipq;
 	}
 	else
 	{
-		cq = &m_coq;
-		iq = &m_ioq;
+		cq = mp_coq;
+		iq = mp_ioq;
 	}
 
 	map<string,CEcUrlLink> links = extractor->get_links();
@@ -527,12 +527,19 @@ int CSpider::load_conf(const char* conf_path)
 	}
 
     // 该spider服务的名字
-	if ((str_result=conf.get_string_item("SPIDER_NAME")).empty)
+	if ((str_result=conf.get_string_item("SPIDER_NAME")).empty())
 	{
 		printf("get item SPIDER_NAME error\n");
 		return -1;
 	}
-	m_spider_conf.spider_name = str_result
+	m_spider_conf.spider_name = str_result;
+    // Log4cxx配置文件路径
+	if ((str_result=conf.get_string_item("LOG_CONF_PATH")).empty())
+	{
+		printf("get item LOG_CONF_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.log_conf_path = str_result;
 	// 是否暂停spider
 	if ((int_result=conf.get_int_item("SPIDER_PAUSED")) == 0)
 	{
@@ -612,6 +619,7 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.stop_domain_conf_path = str_result;
 
+
     // 站点最大线程并发度
 	if ((int_result=conf.get_int_item("DEFAULT_MAX_CONCURRENT_THREAD_COUNT")) <=0)
 	{
@@ -619,6 +627,13 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.default_max_concurrent_thread_count= int_result;
+	//
+	if ((int_result=conf.get_int_item("URLPOOL_EMPTY_SLEEP_TIME"))<0)
+	{
+		printf("get item URLPOOL_EMPTY_SLEEP_TIME error\n");
+		return -1;
+	}
+	m_spider_conf.urlpool_empty_sleep_time = int_result;
 
     // 站点抓取间隔
 	if ((int_result=conf.get_int_item("DEFAULT_SITE_CRAWL_INTERVAL")) <= 0)
@@ -636,6 +651,14 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.max_url_fail_count = int_result;
 
+    // URL最大长度
+	if ((int_result=conf.get_int_item("MAX_URL_LEN")) <= 0)
+	{
+        printf("get item MAX_URL_LEN error\n");
+		return -1;
+	}
+	m_spider_conf.max_url_len = int_result;
+	
     // 最大网页长度
     if ((int_result=conf.get_int_item("MAX_PAGE_LEN")) <=0)
 	{
@@ -644,6 +667,34 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.max_page_len = int_result;
 
+    // 最小网页长度
+    if ((int_result=conf.get_int_item("MIN_PAGE_LEN")) <=0)
+	{
+		printf("get item MIN_PAGE_LEN error\n");
+		return -1;
+	}
+	m_spider_conf.min_page_len = int_result;
+    // URL最大失败重抓次数
+    if ((int_result=conf.get_int_item("MAX_URL_FAIL_COUNT")) <=0)
+	{
+		printf("get item MAX_URL_FAIL_COUNT error\n");
+		return -1;
+	}
+	m_spider_conf.max_url_fail_count = int_result;
+    // URL最大重定向次数
+    if ((int_result=conf.get_int_item("MAX_URL_REDIRECT_COUNT")) <=0)
+	{
+		printf("get item MAX_URL_REDIRECT_COUNT error\n");
+		return -1;
+	}
+	m_spider_conf.max_url_redirect_count = int_result;
+	// 所允许的最大DNS查询次数
+    if ((int_result=conf.get_int_item("MAX_DNS_QUERY_COUNT")) <=0)
+	{
+		printf("get item MAX_DNS_QUERY_COUNT error\n");
+		return -1;
+	}
+	m_spider_conf.max_dns_query_count = int_result;
     // crawl线程发现选取队列为空时要休眠一段时间，单位是毫秒
 	if ((int_result=conf.get_int_item("SELECTED_QUEUE_EMPTY_SLEEP_TIME")) <= 0)
 	{
@@ -651,6 +702,71 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.selected_queue_empty_sleep_time = int_result;
+
+    // DNS的服务器地址
+	if ((str_result=conf.get_string_item("DNS_HOST")).empty())
+	{
+		printf("get item DNS_HOST error\n");
+		return -1;
+	}
+	m_spider_conf.dns_host = str_result;
+	// DNS服务的端口
+	if ((int_result=conf.get_int_item("DNS_PORT")) <= 0)
+	{
+		printf("get item DNS_PORT error\n");
+		return -1;
+	}
+	m_spider_conf.dns_port = int_result;
+	// DNS查询间隔时间
+	if ((int_result=conf.get_int_item("DNS_SLEEP_INTERVAL")) <= 0)
+	{
+		printf("get item DNS_SLEEP_INTERVAL error\n");
+		return -1;
+	}
+	m_spider_conf.dns_sleep_interval = int_result;
+
+    // 抽取器的配置文件路径
+	if ((str_result=conf.get_string_item("EXTRACTOR_CONF_PATH")).empty())
+	{
+		printf("get item EXTRACTOR_CONF_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.extractor_conf_path = str_result;
+    // 识别器的配置文件路径
+	if ((str_result=conf.get_string_item("RECOGNIAER_CONF_PATH")).empty())
+	{
+		printf("get item RECOGNIZER_CONF_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.recognizer_conf_path = str_result;
+
+	if ((int_result=conf.get_int_item("MIN_SELECT_INTERVAL")) <= 0)
+	{
+		printf("get item MIN_SELECT_INTERVAL error\n");
+		return -1;
+	}
+	m_spider_conf.min_select_interval = int_result;
+
+	if ((int_result=conf.get_int_item("SELECTED_QUEUE_SIZE")) <= 0)
+	{
+		printf("get item SELECTED_QUEUE_SIZE error\n");
+		return -1;
+	}
+	m_spider_conf.selected_queue_size= int_result;
+    // 抓取线程个数
+	if ((int_result=conf.get_int_item("WORK_THREAD_NUM")) <= 0)
+	{
+		printf("get item WORK_THREAD_NUM error\n");
+		return -1;
+	}
+	m_spider_conf.work_thread_num= int_result;
+    // 统计输出文件路径
+	if ((str_result=conf.get_string_item("STATIS_FILE_PATH")).empty())
+	{
+		printf("get item STATIS_FILE_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.statis_file_path = str_result;
 
 	return 0;
 }
@@ -724,10 +840,30 @@ int CSpider::start()
 		return -1;
 	}
 
-	m_cpq.set_conf(&m_spider_conf);
-	m_coq.set_conf(&m_spider_conf);
-	m_ipq.set_conf(&m_spider_conf);
-	m_ioq.set_conf(&m_spider_conf);
+    if (!(mp_cpq=new CUrlPool()))
+	{
+		cerr << "malloc cpq error, exit!" << endl;
+		return -1;
+	}
+	mp_cpq->set_conf(&m_spider_conf);
+    if (!(mp_coq=new CUrlPool()))
+	{
+		cerr << "malloc coq error, exit!" << endl;
+		return -1;
+	}
+	mp_coq->set_conf(&m_spider_conf);
+    if (!(mp_ipq=new CUrlPool()))
+	{
+		cerr << "malloc ipq error, exit!" << endl;
+		return -1;
+	}
+	mp_ipq->set_conf(&m_spider_conf);
+    if (!(mp_ioq=new CUrlPool()))
+	{
+		cerr << "malloc ioq error, exit!" << endl;
+		return -1;
+	}
+	mp_ioq->set_conf(&m_spider_conf);
 
 	if (!(mp_level_pool = new CLevelPool()))
 	{

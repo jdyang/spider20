@@ -71,7 +71,8 @@ int main(int argc, char **argv)
 	
 	if (getrlimit(RLIMIT_CORE, &rlim)==0) {
 		rlim.rlim_cur = rlim.rlim_max = RLIM_INFINITY;
-	if (setrlimit(RLIMIT_CORE, &rlim_new)!=0) {
+	}
+	if (setrlimit(RLIMIT_CORE, &rlim)!=0) {
 		SDLOG_FATAL(SP_WFNAME,"Set coredump size failed.");
 		return -1;
 	}

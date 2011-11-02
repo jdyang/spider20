@@ -87,7 +87,7 @@ LIB_OBJS= dns_client.o \
 		spider.o \
 		spider_main.o \
 		spider_statis.o \
-		udpnds.o \
+		udpdns.o \
 		url_output.o \
 		url_recognizer.o \
 		utf8_converter.o \
