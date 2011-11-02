@@ -35,6 +35,7 @@ public:
     unsigned long last_crawl_time;
 	string domain;
 	string site;
+	int type; // 0 for item, 1for cate
 };
 
 class CUrlPool {

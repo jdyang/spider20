@@ -47,6 +47,10 @@ public:
 	
 	//select thread
 	int min_select_interval;
+	int select_nums_per_time;
+	int priority_quota;
+	int cate_percent;
+	int item_percent;
 	
 	//global define
 	int work_thread_num;
