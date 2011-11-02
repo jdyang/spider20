@@ -11,11 +11,11 @@ class CSpiderConf
 {
 public:
     string spider_name;                       // 该spider的名字，格式为 spiderxx
-	bool spider_paused;                       // 是否暂停spider
-	bool next_round_continue;                 // 是否继续下一轮
-	bool extract_cate_url;                    // 是否提取cate
-	bool extract_item_url;                    // 是否提取item
-	bool normalize_url;
+	int spider_paused;                       // 是否暂停spider
+	int next_round_continue;                 // 是否继续下一轮
+	int extract_cate_url;                    // 是否提取cate
+	int extract_item_url;                    // 是否提取item
+	int normalize_url;
 
 	string page_dir;                          // 网页存储的目录
 	int page_name_change_interval;            // 网页文件切分的间隔
@@ -30,6 +30,7 @@ public:
 	int urlpool_empty_sleep_time;
 	int max_url_len;
 	int max_page_len;                         // 页面最大长度
+	int min_page_len;
 	
 	int default_site_crawl_interval;       // 站点默认抓取间隔
 	int max_url_fail_count;                   // URL抓取最大失败次数
@@ -47,6 +48,7 @@ public:
 	
 	//select thread
 	int min_select_interval;
+	int selected_queue_size;
 	
 	//global define
 	int work_thread_num;

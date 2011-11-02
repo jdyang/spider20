@@ -73,6 +73,7 @@ OBJS= url_output.o \
 	  utf8_converter.o \
 	  dns_client.o \
 	  urlpool.o \
+	  spider_statis.o \
       spider.o \
       test_crawl_thread.o
 
