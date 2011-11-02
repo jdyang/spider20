@@ -27,6 +27,7 @@
 #include "dns_client.h"
 #include "level_pool.h"
 #include "urlpool.h"
+#include "spider_statis.h"
 
 #include "extractor.h"
 #include "recognizer.h"
@@ -37,7 +38,6 @@ public:
     int load_conf(const char* conf_path);
 	int init(void);
     void write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog);
-    int write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content, char* page_list_buf, int page_list_buf_len);
 
 	int start();
     
@@ -55,10 +55,10 @@ public:
 	CUrlOutput* mp_item_output;
 	CUrlOutput* mp_fail_output;
 	
-	CUrlPool* m_cpq;
-	CUrlPool* m_ipq;
-	CUrlPool* m_coq;
-	CUrlPool* m_ioq;
+	CUrlPool* mp_cpq;
+	CUrlPool* mp_ipq;
+	CUrlPool* mp_coq;
+	CUrlPool* mp_ioq;
 	
 	//select tmp queue, need to be shuffled 
 	vector<UrlInfo> m_select_buffer;
