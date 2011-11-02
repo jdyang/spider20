@@ -18,7 +18,9 @@
 
 #include <time.h>
 #include <string>
+#include <vector>
 #include "spider_common.h"
+#include "spider_statis.h"
 #include "url_output.h"
 #include "selected_queue.h"
 #include "page_output.h"
@@ -52,6 +54,14 @@ public:
 	CUrlOutput* mp_item_output;
 	CUrlOutput* mp_fail_output;
 	
+	CUrlPool* m_cpq;
+	CUrlPool* m_ipq;
+	CUrlPool* m_coq;
+	CUrlPool* m_ioq;
+	
+	//select tmp queue, need to be shuffled 
+	vector<UrlInfo> select_buffer;
+	
 	CSpiderStatis m_statis;
 
 	CPageOutput* mp_page_output;
@@ -59,11 +69,6 @@ public:
 	CDnsClient m_dns_client;
 
 	CLevelPool* mp_level_pool;
-
-    UrlPool m_cpq;
-	UrlPool m_coq;
-	UrlPool m_ipq;
-	UrlPool m_ioq;
 
 };
 

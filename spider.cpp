@@ -350,6 +350,7 @@ void* work_thread(void* arg)
 
 int CSpider::select_url()
 {
+	
 	return 0;
 }
 

@@ -37,7 +37,7 @@ public:
 	string site;
 };
 
-class UrlPool {
+class CUrlPool {
 public:
     CSpiderConf& get_conf();
 	FuncRet load_urls(const char *path);
