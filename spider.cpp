@@ -361,7 +361,92 @@ int CSpider::insert_url()
 
 int CSpider::update_conf()
 {
+	CSpiderConf& conf = m_spider_conf;
+	struct stat conf_stat;
+	struct stat file_stat;
+	struct stat stop_domain_stat;
+
+	if (-1 == fstat(m_conf_path.c_str(), &conf_stat))
+	{
+		printf("fstat stop domain error\n");
+		return -1;
+	}
+	if (conf_stat.st_ctime != m_conf_change_time)
+	{
+		if (-1 == load_conf(m_conf_path.c_str()))
+		{
+			printf("reload conf error\n");
+			return -1;
+		}
+	}
+
+
+	if (-1 == fstat(conf.stop_domain_conf_path, &stop_domain_stat))
+	{
+		printf("fstat stop domain error\n");
+		return -1;
+	}
+	if (stop_domain_stat.st_ctime != m_stop_domain_change_time)
+	{
+		if (-1 == do_stop_domain(conf.stop_domain_conf_path))
+		{
+			printf("load stop domain error\n");
+			return -1;
+		}
+		m_stop_domain_change_time = stop_domain_stat.st_ctime;
+	}
+
+	if (-1 == fstat(conf.seed_path.c_str(), file_stat))
+	{
+		printf("fstat error\n");
+		return -1;
+	}
+
+	if (file_stat.st_ctime != m_seed_change_time)  // 种子文件发生变化
+	{
+		if (-1 == load_seed(conf.seed_path.c_str()))
+		{
+			printf("load seed error\n");
+			return -1;
+		}
+		m_seed_change_time = file_stat.st_ctime;
+	}
 	return 0;
+}
+
+int CSpider::load_seed(const char* seed_path)
+{
+}
+
+void CSpider::get_one_line(FILE* fp, char* line, int len, int& lineno)
+{
+    lineno++;
+    memset(line,0,len);
+    if(feof(fp)) return;
+
+    fgets(line,len,fp);
+    char* pch = strchr(line,'\r');
+    if(pch != NULL) *pch = 0;
+    pch = strchr(line,'\n');
+    if(pch != NULL) *pch = 0;
+}
+
+char* CUrlRecognizer::filter_headtail_blank(char* buf, int len)
+{
+    char *p = buf;
+    char *q = buf + len -1;
+    while (true)
+    {
+        if (*p != ' ' && *p != '\t' && *p != '\n') break;
+        *p++ = '\0';
+    }
+
+    while (true)
+    {
+        if (*q != ' ' && *q != '\t' && *q != '\n' && *q != '\0') break;
+        *q-- = '\0';
+    }
+    return p;
 }
 
 void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
