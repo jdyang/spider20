@@ -1,5 +1,7 @@
 SELIB=../../../public/selib
+SPLIB=../../../spider/spider_lib
 NLP=../../../nlp
+DBLIB=../../../public/dblib
 
 CPP=g++
 AR=ar
@@ -10,7 +12,10 @@ vpath %.cpp ../..
 INCLUDE= -I./ \
           -I../../ \
           -I$(SELIB)/include \
-		  -I$(NLP)/include
+		  -I$(NLP)/include \
+		  -I$(SPLIB)/include  \
+		  -I$(SPLIB)/include/htmlcxx \
+		  -I$(DBLIB)/include 
 
 COMMON_DEFINES=-DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_DLFCN_H=1 -DSTDC_HEADERS=1 -DSIZEOF_UNSIGNED_SHORT=2 -DSIZEOF_UNSIGNED_INT=4 -DSIZEOF_UNSIGNED_LONG=8 -DHAVE_THREADS=1 -DHAVE_GETHOSTBYNAME=1 -DHAVE_SOCKET=1 -DHAVE_INET_ATON=1 -DHAVE_INET_ADDR=1 -DHAVE_INET_PTON=1 -DHAVE_POLL=1 -DHAVE_SELECT=1 -DHAVE_STRERROR=1
 
@@ -36,15 +41,28 @@ endif
 
 
 
-LIB= -L $(SELIB)/lib \
-     -L $(NLP)/lib \
+LIB= -L$(SELIB)/lib \
+     -L$(NLP)/lib \
+	 -L$(SPLIB)/lib \
+	 -L$(DBLIB)/lib \
+	 -lextractor \
+	 -lfdb \
+	 -lhtml \
+	 -lhtmlcxx \
+	 -lcmysql \
 	 -ltse \
-	 -lcode \
+	 -lutil \
+	 -lurlpattern \
 	 -lurl \
 	 -lnet \
-	 -lutil \
+	 -lcode \
+	 -lmysqlclient \
+	 -llog4cxx \
+	 -lapr-1 \
+	 -laprutil-1 \
+	 -lboost_regex-gcc41-mt \
 	 -lpthread \
-	 -lcrypto
+	 -lcrypto \
 
 all : test_crawl_thread
 
@@ -54,8 +72,10 @@ OBJS= url_output.o \
 	  selected_queue.o \
 	  utf8_converter.o \
 	  dns_client.o \
+	  urlpool.o \
       spider.o \
       test_crawl_thread.o
+
 
 clean :
 	rm -rf *.o *~ test_crawl_thread

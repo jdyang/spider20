@@ -35,6 +35,9 @@ class CSpider
 public:
     int load_conf(const char* conf_path);
 	int init(void);
+    void write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog);
+    int write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content, char* page_list_buf, int page_list_buf_len);
+
 	int start();
     
 	int write_page_list(CPageOutput* pout, string& url, string& domain, string& site, int flag, string& converted_content, char* page_list_buf, int page_list_buf_len);
@@ -44,7 +47,7 @@ public:
 	
 	CSpiderConf m_spider_conf;
 
-    CSelectedQueue* m_selected_queue;
+    CSelectedQueue* mp_selected_queue;
 
 	CUrlOutput* mp_cate_output;
 	CUrlOutput* mp_item_output;
@@ -65,6 +68,11 @@ public:
 	CDnsClient m_dns_client;
 
 	CLevelPool* mp_level_pool;
+
+    UrlPool m_cpq;
+	UrlPool m_coq;
+	UrlPool m_ipq;
+	UrlPool m_ioq;
 
 };
 

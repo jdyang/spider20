@@ -11,6 +11,11 @@ class CSpiderConf
 {
 public:
     string spider_name;                       // 该spider的名字，格式为 spiderxx
+	bool spider_paused;                       // 是否暂停spider
+	bool next_round_continue;                 // 是否继续下一轮
+	bool extract_cate_url;                    // 是否提取cate
+	bool extract_item_url;                    // 是否提取item
+	bool normalize_url;
 
 	string page_dir;                          // 网页存储的目录
 	int page_name_change_interval;            // 网页文件切分的间隔
@@ -18,6 +23,8 @@ public:
     string item_output_path;
 	string cate_output_path;
 	string fail_output_path;
+
+	string stop_domain_conf_path;
 
 	int default_max_concurrent_thread_count;  // 每个站点默认最大线程并发度
 	int urlpool_empty_sleep_time;
