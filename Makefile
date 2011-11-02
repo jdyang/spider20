@@ -7,6 +7,7 @@ NLPLIBPATH=$(WORKROOT)/../nlp
 
 INCLUDE = -I./	\
 	      -I$(SELIBPATH)/include \
+		  -I$(DBLIBPATH)/include  \
 		  -I$(SPIDERLIBPATH)/include/htmlcxx \
 			-I$(SPIDERLIBPATH)/include \
 		  -I$(NLPLIBPATH)/include
@@ -22,6 +23,8 @@ LIB     = -L./	\
 	      -lnet \
 	      -lutil \
 		  -ltse \
+		    -lfdb\
+					  -lcmysql \
 	      -L/usr/local/lib -llog4cxx \
 	      -L/usr/local/lib -lapr-1\
 	      -L/usr/local/lib -laprutil-1\
@@ -37,6 +40,7 @@ LIB     = -L./	\
 		  -lcrypto	\
 		  -lcode	\
 		  -lboost_regex-gcc41-mt \
+		  -L/usr/local/lib -lmysqlclient \
 		  -lurlpattern \
 		  -lextractor
 

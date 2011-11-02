@@ -7,31 +7,31 @@ using namespace std;
 
 struct CSpiderConf;
 
-//=============== UrlPool ================================
+//=============== CUrlPool ================================
 
-CSpiderConf& UrlPool::get_conf() {
+CSpiderConf& CUrlPool::get_conf() {
 	return *m_conf;
 }
 
 
-void UrlPool::set_conf(CSpiderConf *conf) {
+void CUrlPool::set_conf(CSpiderConf *conf) {
 	m_conf = conf;
 }
 
-deque<UrlInfo>& UrlPool::get_url_queue() {
+deque<UrlInfo>& CUrlPool::get_url_queue() {
 	return m_url_queue;
 }
 
-set<string>& UrlPool::get_url_set() {
+set<string>& CUrlPool::get_url_set() {
 	return m_url_set;
 }
 
-bool UrlPool::url_empty() {
+bool CUrlPool::url_empty() {
 	return m_url_queue.empty();
 }
 
 
-void UrlPool::push_url(UrlInfo ui) {
+void CUrlPool::push_url(UrlInfo ui) {
 	
 	if(ui.url.length() < 4)
 		return;
@@ -47,7 +47,7 @@ void UrlPool::push_url(UrlInfo ui) {
 	}
 }
 
-UrlInfo UrlPool::pop_url(void) {
+UrlInfo CUrlPool::pop_url(void) {
 	UrlInfo ui;
     CSpiderConf& conf = get_conf();
 
@@ -70,12 +70,12 @@ UrlInfo UrlPool::pop_url(void) {
 	}
 }
 
-int UrlPool::print_pool()
+int CUrlPool::print_pool()
 {
 	cout << "queue size: " << m_url_queue.size() << " set size: " << m_url_set.size() << endl;
 }
 
-FuncRet UrlPool::load_urls(const char *path) {
+FuncRet CUrlPool::load_urls(const char *path) {
 	deque<UrlInfo>& url_queue = get_url_queue();
 	set<string>& url_set = get_url_set();
     CSpiderConf& conf = *m_conf;

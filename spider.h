@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include "spider_common.h"
+#include "spider_statis.h"
 #include "url_output.h"
 #include "selected_queue.h"
 #include "page_output.h"
@@ -68,11 +69,6 @@ public:
 	CDnsClient m_dns_client;
 
 	CLevelPool* mp_level_pool;
-
-    UrlPool m_cpq;
-	UrlPool m_coq;
-	UrlPool m_ipq;
-	UrlPool m_ioq;
 
 };
 
