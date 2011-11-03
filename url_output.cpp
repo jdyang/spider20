@@ -9,12 +9,12 @@
 
 using namespace std;
 
-int CUrlOutput::init(CSpiderConf* p_conf)
+int CUrlOutput::init(const char* file_path)
 {
 
 	m_fd = -1;
 
-	if (-1 == (m_fd=open(p_conf->item_output_path.c_str(), O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR | S_IROTH | S_IRGRP)))
+	if (-1 == (m_fd=open(file_path, O_CREAT | O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR | S_IROTH | S_IRGRP)))
 	{
 		printf("open file error.\n");
 		return -1;

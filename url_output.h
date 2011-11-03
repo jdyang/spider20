@@ -13,7 +13,7 @@ class CUrlOutput
 public:
     CUrlOutput(void){}
 	~CUrlOutput(void){}
-	int init(CSpiderConf* p_conf);
+	int init(const char* file_path);
 	int destroy(void);
 	int append(string& url);
 	int append_error(string& url, const char* err_str);
