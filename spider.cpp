@@ -381,9 +381,9 @@ int CSpider::select_url()
 	
 	for (domain_it = m_statis.m_domain.begin(); domain_it != m_statis.m_domain.end(); ++domain_it) {
 		if ((*domain_it).second.isSeed == 1 && (*domain_it).second.isShield == 0){
-			domain_p.insert((*domain_it).first);
+			domain_p.push_back((*domain_it).first);
 		} else if ((*domain_it).second.isSeed == 0 && (*domain_it).second.isShield == 0) {
-			domain_o.insert((*domain_it).first);
+			domain_o.push_back((*domain_it).first);
 		}
 		vector<UrlInfo> tmp;
 		url_array.push_back(tmp);
@@ -392,11 +392,11 @@ int CSpider::select_url()
 	int o_domain_num = domain_o.size();
 	int p_domain_num = domain_p.size();
 	int o_link_num = m_statis.get_coq_url_num() + m_statis.get_ioq_url_num();
-	int p_link_num = m_statis.get_cpq_url_num() +get_ipq_url_num();
+	int p_link_num = m_statis.get_cpq_url_num() + m_statis.get_ipq_url_num();
 	
-	deque<UrlInfo> tmp_que = m_cpq->get_url_queue();
+	deque<UrlInfo> tmp_que = mp_cpq->get_url_queue();
 	deque<UrlInfo>::iterator it;
-	m_cpq->get_url_mutex().lock();
+	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 1;
 		select_map[(*it).domain].push_back(*it);
@@ -404,7 +404,7 @@ int CSpider::select_url()
 	m_cpq->get_url_queue().clear();
 	m_cpq->get_url_mutex().unlock();
 	
-	tmp_que = m_ipq->get_url_queue();
+	tmp_que = mp_ioq->get_url_queue();
 	m_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 0;
@@ -413,7 +413,7 @@ int CSpider::select_url()
 	m_ipq->get_url_queue().clear();
 	m_ipq->get_url_mutex().unlock();
 	
-	tmp_que = m_ioq->get_url_queue();
+	tmp_que = mp_icq->get_url_queue();
 	m_ioq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 0;
@@ -1021,7 +1021,6 @@ int CSpider::load_conf(const char* conf_path)
 	m_spider_conf.stop_domain_conf_path = str_result;
 
 
->>>>>>> d9fe30dea57682f1288819ef9e272bd4d3152f0e
     // 站点最大线程并发度
 	if ((int_result=conf.get_int_item("DEFAULT_MAX_CONCURRENT_THREAD_COUNT")) <=0)
 	{
@@ -1176,7 +1175,6 @@ int CSpider::start()
 		cerr << "init level pool error, exit!" << endl;
 		return -1;
 	}
->>>>>>> d9fe30dea57682f1288819ef9e272bd4d3152f0e
 
     m_conf_change_time = -1;
     m_stop_domain_conf_change_time = -1;
@@ -1195,7 +1193,7 @@ int CSpider::start()
 			cerr << "start work thread " << i << " failed." << endl;
 			pthread_join(select, &work_ret);
 			for (int x=0;x<i;x++) {pthread_join(works[x],&work_ret);}
-			return NULL;
+			return -1;
 		}
 	}
 	SDLOG_INFO(SP_LOGNAME, "spider start successfully");
