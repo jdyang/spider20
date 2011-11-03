@@ -379,60 +379,62 @@ int CSpider::select_url()
 	
 	vector<string> domain_p;
 	vector<string> domain_o;
-	map<string, vector<UrlInfo>> select_map;
-	vector<UrlInfo>[m_statis.m_domain.size()] url_array;
+	map<string, vector<UrlInfo> > select_map;
+	vector<vector<UrlInfo> > url_array;
 	map<string, DomainAttr>::iterator domain_it;
 	int i = -1;
 	
 	for (domain_it = m_statis.m_domain.begin(); domain_it != m_statis.m_domain.end(); ++domain_it) {
 		if ((*domain_it).second.isSeed == 1 && (*domain_it).second.isShield == 0){
-			domain_p.insert((*domain_it).first);
+			domain_p.push_back((*domain_it).first);
 		} else if ((*domain_it).second.isSeed == 0 && (*domain_it).second.isShield == 0) {
-			domain_o.insert((*domain_it).first);
+			domain_o.push_back((*domain_it).first);
 		}
+		vector<UrlInfo> tmp;
+		url_array.push_back(tmp);
 		select_map.insert(make_pair((*domain_it).first, url_array[++i]));
 	}
 	int o_domain_num = domain_o.size();
 	int p_domain_num = domain_p.size();
 	int o_link_num = m_statis.get_coq_url_num() + m_statis.get_ioq_url_num();
-	int p_link_num = m_statis.get_cpq_url_num() +get_ipq_url_num();
+	int p_link_num = m_statis.get_cpq_url_num() + m_statis.get_ipq_url_num();
 	
-	deque<UrlInfo> tmp_que = m_cpq->get_url_queue();
+	deque<UrlInfo> tmp_que = mp_cpq->get_url_queue();
 	deque<UrlInfo>::iterator it;
-	m_cpq->get_url_mutex().lock();
+	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 1;
 		select_map[(*it).domain].push_back(*it);
 	}
-	m_cpq->get_url_queue().clear();
-	m_cpq->get_url_mutex().unlock();
+	mp_cpq->get_url_queue().clear();
+	mp_cpq->get_url_mutex().unlock();
 	
-	tmp_que = m_ipq->get_url_queue();
-	m_ipq->get_url_mutex().lock();
+	tmp_que = mp_ioq->get_url_queue();
+	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 0;
 		select_map[(*it).domain].push_back(*it);
 	}
-	m_ipq->get_url_queue().clear();
-	m_ipq->get_url_mutex().unlock();
+	mp_ipq->get_url_queue().clear();
+	mp_ipq->get_url_mutex().unlock();
 	
-	tmp_que = m_ioq->get_url_queue();
-	m_ioq->get_url_mutex().lock();
+	tmp_que = mp_coq->get_url_queue();
+	mp_ioq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 0;
 		select_map[(*it).domain].push_back(*it);
 	}
-	m_ioq->get_url_queue().clear();
-	m_ioq->get_url_mutex().unlock();
+	mp_ioq->get_url_queue().clear();
+	mp_ioq->get_url_mutex().unlock();
 	
-	tmp_que = m_icq->get_url_queue();
-	m_icq->get_url_mutex().lock();
+	tmp_que = mp_coq->get_url_queue();
+	mp_coq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 1;
 		select_map[(*it).domain].push_back(*it);
 	}	
-	m_icq->get_url_queue().clear();
-	m_icq->get_url_mutex().unlock();
+	mp_coq->get_url_queue().clear();
+	mp_coq->get_url_mutex().unlock();
 	
 	int prio_num = select_nums*priority_quota/10;
 	int ord_num = select_nums - prio_num;
@@ -446,7 +448,7 @@ int CSpider::select_url()
 		
 		int i_num = 0;
 		int c_num = 0;	
-		int i = 0;
+		unsigned int i = 0;
 		for (i = 0 ; i < tmp_vector.size() && c_num < prio_num_c && i_num < prio_num_i; ++i){
 			if (tmp_vector[i].type == 1){
 				++c_num;
@@ -463,15 +465,16 @@ int CSpider::select_url()
 			tmp_num = c_num;
 			max_tmp_num = prio_num_c;
 		}
-		for (int k = i; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
-			if (tmp_vector[k] == flag) {
+		unsigned int k = i;
+		for (;k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
+			if (tmp_vector[k].type == flag) {
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
 			} else{
 				m_select_back.push_back(tmp_vector[k]);
 			}
 		}
-		for (int l = k; l < tmp_vector.size(); ++l){
+		for (unsigned int l = k; l < tmp_vector.size(); ++l){
 			m_select_back.push_back(tmp_vector[l]);
 		}
 	}
@@ -480,11 +483,11 @@ int CSpider::select_url()
 	for (tmp_it = domain_o.begin(); tmp_it != domain_o.end(); ++tmp_it){
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
 		int ord_num_c = ord_num * tmp_vector.size()/o_link_num*cate_percent;
-		int ord_num_i = ord_num * tmp_vector.size()/o_link_num - prio_num_c + 1;
+		int ord_num_i = ord_num * tmp_vector.size()/o_link_num - ord_num_c + 1;
 		
 		int i_num = 0;
 		int c_num = 0;	
-		int i = 0;
+		unsigned int i = 0;
 		for (i = 0 ; i < tmp_vector.size() && c_num < ord_num_c && i_num < ord_num_i; ++i){
 			if (tmp_vector[i].type == 1){
 				++c_num;
@@ -496,20 +499,21 @@ int CSpider::select_url()
 		int flag = 0;
 		int tmp_num = i_num;
 		int max_tmp_num = ord_num_i;
-		if (c_num < prio_num_c) {
+		if (c_num < ord_num_c) {
 			flag = 1;
 			tmp_num = c_num;
 			max_tmp_num = ord_num_c;
 		}
-		for (int k = i; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
-			if (tmp_vector[k] == flag) {
+		unsigned int k = i;
+		for (; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
+			if (tmp_vector[k].type == flag) {
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
 			} else{
 				m_select_back.push_back(tmp_vector[k]);
 			}
 		}
-		for (int l = k; l < tmp_vector.size(); ++l){
+		for (unsigned int l = k; l < tmp_vector.size(); ++l){
 			m_select_back.push_back(tmp_vector[l]);
 		}
 	}
@@ -753,21 +757,21 @@ char* CSpider::filter_headtail_blank(char* buf, int len)
 void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
 {
 	CSpiderConf& conf = m_spider_conf;
-	UrlPool* cq;
-	UrlPool* iq;
+	CUrlPool* cq;
+	CUrlPool* iq;
 
     string normal_url;
 	int type;
 
 	if (which_queue == QUEUE_TYPE_CPQ)
 	{
-		cq = &m_cpq;
-		iq = &m_ipq;
+		cq = &mp_cpq;
+		iq = &mp_ipq;
 	}
 	else
 	{
 		cq = &m_coq;
-		iq = &m_ioq;
+		iq = &mp_ioq;
 	}
 
 	map<string,CEcUrlLink> links = extractor->get_links();
@@ -1024,7 +1028,6 @@ int CSpider::load_conf(const char* conf_path)
 	m_spider_conf.stop_domain_conf_path = str_result;
 
 
->>>>>>> d9fe30dea57682f1288819ef9e272bd4d3152f0e
     // 站点最大线程并发度
 	if ((int_result=conf.get_int_item("DEFAULT_MAX_CONCURRENT_THREAD_COUNT")) <=0)
 	{
@@ -1179,7 +1182,6 @@ int CSpider::start()
 		cerr << "init level pool error, exit!" << endl;
 		return -1;
 	}
->>>>>>> d9fe30dea57682f1288819ef9e272bd4d3152f0e
 
     m_conf_change_time = -1;
     m_stop_domain_conf_change_time = -1;
@@ -1194,11 +1196,11 @@ int CSpider::start()
 
 	void* work_ret = NULL;
 	for (int i = 0; i < m_spider_conf.work_thread_num; i++) {
-		if (0 != pthread_create(works+i, NULL, work_thread, this)) {
+		if (0 != pthread_create(works+i, NULL, crawl_thread, this)) {
 			cerr << "start work thread " << i << " failed." << endl;
 			pthread_join(select, &work_ret);
 			for (int x=0;x<i;x++) {pthread_join(works[x],&work_ret);}
-			return NULL;
+			return -1;
 		}
 	}
 	SDLOG_INFO(SP_LOGNAME, "spider start successfully");
