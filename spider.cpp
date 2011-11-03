@@ -38,17 +38,17 @@ void* select_thread(void* arg)
 	
 	CSpider* psp = (CSpider*)arg;
 	CSpiderConf& conf = (psp->m_spider_conf);
-	CSelectedQueue& sq = *(psp->mp_selected_queue);
-	CDnsClient& dns_client = psp->m_dns_client;
-	CLevelPool* p_level_pool = psp->mp_level_pool;
+//	CSelectedQueue& sq = *(psp->mp_selected_queue);
+//	CDnsClient& dns_client = psp->m_dns_client;
+//	CLevelPool* p_level_pool = psp->mp_level_pool;
 	
-	if (psp->load_input_urls() < 0){
+	if (psp->load_input_urls(conf.url_output_dir.c_str()) < 0){
 		SDLOG_WARN(SP_WFNAME, "load input urls error!");
 		exit(-1);
 	}
 	
 	while(1){
-		++m_select_rounds;
+		++psp->m_select_rounds;
 		start_time=time(NULL);
 		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << m_select_rounds);
 		if (!psp->update_conf()) {
@@ -63,7 +63,7 @@ void* select_thread(void* arg)
 				SDLOG_WARN(SP_WFNAME, "next samsara transfer error!");
 				exit(-1);
 			}
-			if (psp->load_input_urls(conf.url_output_dir) < 0){
+			if (psp->load_input_urls(conf.url_output_dir.c_str()) < 0){
 				SDLOG_WARN(SP_WFNAME, "load input urls error!");
 				exit(-1);
 			}
@@ -394,7 +394,7 @@ int CSpider::select_url()
 	int min_select_threshold = m_spider_conf.min_select_threshold;
 	int priority_quota = m_spider_conf.priority_quota;
 	int cate_percent = m_spider_conf.cate_percent/(m_spider_conf.cate_percent + m_spider_conf.item_percent);
-	int select_remains = 0;
+//	int select_remains = 0;
 	
 	vector<string> domain_p;
 	vector<string> domain_o;
@@ -413,8 +413,8 @@ int CSpider::select_url()
 		url_array.push_back(tmp);
 		select_map.insert(make_pair((*domain_it).first, url_array[++i]));
 	}
-	int o_domain_num = domain_o.size();
-	int p_domain_num = domain_p.size();
+//	int o_domain_num = domain_o.size();
+//	int p_domain_num = domain_p.size();
 	int o_link_num = m_statis.get_coq_url_num() + m_statis.get_ioq_url_num();
 	int p_link_num = m_statis.get_cpq_url_num() + m_statis.get_ipq_url_num();
 	
@@ -457,7 +457,7 @@ int CSpider::select_url()
 	
 	int prio_num = select_nums*priority_quota/10;
 	int ord_num = select_nums - prio_num;
-	int prio_real_num = 0;
+//	int prio_real_num = 0;
 	
 	vector<string>::iterator tmp_it;
 	for (tmp_it = domain_p.begin(); tmp_it != domain_p.end(); ++tmp_it){
@@ -493,7 +493,7 @@ int CSpider::select_url()
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
 			} else{
-				m_select_back.push_back(tmp_vector[k]);
+				m_select_back_p.push_back(tmp_vector[k]);
 			}
 		}
 		for (unsigned int l = k; l < tmp_vector.size(); ++l){
@@ -534,7 +534,7 @@ int CSpider::select_url()
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
 			} else{
-				m_select_back.push_back(tmp_vector[k]);
+				m_select_back_o.push_back(tmp_vector[k]);
 			}
 		}
 		for (unsigned int l = k; l < tmp_vector.size(); ++l){
@@ -553,7 +553,7 @@ int CSpider::select_url()
 
 int CSpider::next_round()
 {
-	string url_path = m_spider_conf.url_output_path;
+	string url_path = m_spider_conf.url_output_dir;
 	m_statis.write_message_to_file("next samsara");
 	
 	mp_cate_output->destroy();
@@ -563,18 +563,19 @@ int CSpider::next_round()
 		SDLOG_WARN(SP_WFNAME,"transfer: errror");
 		return -1;
 	}
-	mp_cate_output->init(m_spider_conf.item_output_path);
-	mp_item_output->init(m_spider_conf.cate_output_path);
-	mp_fail_output->init(m_spider_conf.fail_output_path);
+	string path = m_spider_conf.url_output_dir + "/" + INPUT_PATH;
+	mp_cate_output->init((path+"/"+ITEM_LIST).c_str());
+	mp_item_output->init((path+"/"+CATE_LIST).c_str());
+	mp_fail_output->init((path+"/"+FAIL_LIST).c_str());
 	
 	return 0;
 }
 
 int CSpider::transfer()
 {
-	string str_saver_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_saver_path;
-	string str_reader_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_reader_path;
-	string str_backup_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_backup_path;
+	string str_saver_path =  m_spider_conf.url_output_dir + "/" + OUTPUT_PATH;
+	string str_reader_path =  m_spider_conf.url_output_dir + "/" + INPUT_PATH;
+	string str_backup_path =  m_spider_conf.url_output_dir + "/" + BACKUP_PATH;
 	/*
 	step1: mv reader backup
 	step2: mv saver reader
@@ -589,30 +590,30 @@ int CSpider::transfer()
 	SDLOG_INFO(SP_LOGNAME,"start transfer rm b.");
 	string str_cmd = "rm -rf " +  str_backup_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command " << str_cmd);
+		SDLOG_WARN(SP_WFNAME,"transfer: errror " << strerror(errno));
 	}
 
 	SDLOG_INFO(SP_LOGNAME,"start transfer r2b.");
 	str_cmd = "mv -f " + str_reader_path + " " + str_backup_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command " << str_cmd.c_str());
+		SDLOG_WARN(SP_WFNAME,"transfer: errror " << strerror(errno));
 		return -1;
 	}
 	SDLOG_INFO(SP_LOGNAME,"start transfer s2r.");
 
 	str_cmd = "mv -f " + str_saver_path + " " + str_reader_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command " << str_cmd.c_str());
+		SDLOG_WARN(SP_WFNAME,"transfer: errror " << strerror(errno));
 		return -1;
 	}
 	SDLOG_INFO(SP_LOGNAME,"start make s.");	
 	str_cmd = "mkdir -p " + str_saver_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command << " << str_cmd.c_str());
+		SDLOG_WARN(SP_WFNAME,"transfer: errror " << strerror(errno));
 		return -1;
 	}
 	signal(SIGCHLD,SIG_IGN); 
@@ -628,16 +629,16 @@ int CSpider::insert_url()
 	vector<UrlInfo>::iterator it;
 	for (it = m_select_back_o.begin(); it != m_select_back_o.end(); ++it){
 		if ((*it).type == 1){
-			mp_coq.add_to_que(*it);
+			mp_coq->add_to_que(*it);
 		}else if ((*it).type == 0){
-			mp_ioq.add_to_que(*it);
+			mp_ioq->add_to_que(*it);
 		}
 	}
 	for (it = m_select_back_p.begin(); it != m_select_back_p.end(); ++it){
 		if ((*it).type == 3){
-			mp_cpq.add_to_que(*it);
+			mp_cpq->add_to_que(*it);
 		}else if ((*it).type == 2){
-			mp_ipq.add_to_que(*it);
+			mp_ipq->add_to_que(*it);
 		}
 	}
 	//get the ips ready
@@ -656,7 +657,7 @@ int CSpider::insert_url()
 		item.dns_count = 0;
 		item.last_crawl_time = (*it).last_crawl_time;
 		switch((*it).type) {
-			case 0:item.which_queue = 4;break;
+			case 0:item.which_queue = queue_type_t.QUEUE_TYPE_IOQ;break;
 			case 1:item.which_queue = 2;break;
 			case 2:item.which_queue = 3;break;
 			case 3:item.which_queue = 1;break;

@@ -11,6 +11,10 @@
 #define CATE_LIST "cate.list"
 #define FAIL_LIST "fail.list"
 
+#define INPUT_PATH "input"
+#define OUTPUT_PATH "next"
+#define BACKUP_PATH "backup"
+
 class CSpiderConf
 {
 public:
