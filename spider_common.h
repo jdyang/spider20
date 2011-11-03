@@ -21,9 +21,12 @@ public:
 	string page_dir;                          // 网页存储的目录
 	int page_name_change_interval;            // 网页文件切分的间隔
 
+    string cate_input_path;
+	string seed_path;
     string item_output_path;
 	string cate_output_path;
 	string fail_output_path;
+	
 
 	string stop_domain_conf_path;
 

@@ -73,6 +73,20 @@ public:
 
 	CLevelPool* mp_level_pool;
 
+    long m_conf_change_time;
+	long m_stop_domain_conf_change_time;
+	long m_seed_change_time;
+
+	string m_conf_path;
+
+private:
+    void get_one_line(FILE* fp, char* line, int len, int& lineno);
+    char* filter_headtail_blank(char* buf, int len=5120);
+
+    long get_change_time(const char* path);
+
+    int load_stop_domain(const char* stop_file);
+    int load_seed(const char* seed_path);
 };
 
 #endif
