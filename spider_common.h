@@ -67,6 +67,7 @@ public:
 
 	//code transfer
 	string converter_code_path;
+	string strong_rule_conf_path;
 };
 
 #endif
