@@ -359,63 +359,173 @@ int CSpider::insert_url()
 	return 0;
 } 
 
+long CSpider::get_change_time(const char* path)
+{
+	struct stat file_stat;
+	if (-1 == stat(path, &file_stat))
+	{
+		return -1;
+	}
+	return file_stat.st_ctime;
+}
+
 int CSpider::update_conf()
 {
 	CSpiderConf& conf = m_spider_conf;
-	struct stat conf_stat;
-	struct stat file_stat;
-	struct stat stop_domain_stat;
+	long change_time;
 
-	if (-1 == fstat(m_conf_path.c_str(), &conf_stat))
+	if (-1 == (change_time=get_change_time(m_conf_path.c_str())))
 	{
-		printf("fstat stop domain error\n");
+		SDLOG_WARN(SP_WFNAME, "detect conf change error");
 		return -1;
 	}
-	if (conf_stat.st_ctime != m_conf_change_time)
+	if (change_time != m_conf_change_time)
 	{
 		if (-1 == load_conf(m_conf_path.c_str()))
 		{
-			printf("reload conf error\n");
+			SDLOG_WARN(SP_WFNAME, "reload conf error");
 			return -1;
 		}
+		m_conf_change_time = change_time;
 	}
 
 
-	if (-1 == fstat(conf.stop_domain_conf_path, &stop_domain_stat))
+	if (-1 == (change_time=get_change_time(conf.stop_domain_conf_path.c_str())))
 	{
-		printf("fstat stop domain error\n");
+		SDLOG_WARN(SP_WFNAME, "detect stop domain conf change error");
 		return -1;
 	}
-	if (stop_domain_stat.st_ctime != m_stop_domain_change_time)
+	if (change_time != m_stop_domain_conf_change_time)
 	{
-		if (-1 == do_stop_domain(conf.stop_domain_conf_path))
+		if (-1 == load_stop_domain(conf.stop_domain_conf_path.c_str()))
 		{
-			printf("load stop domain error\n");
+			SDLOG_WARN(SP_WFNAME, "load stop domain error");
 			return -1;
 		}
-		m_stop_domain_change_time = stop_domain_stat.st_ctime;
+		m_stop_domain_conf_change_time = change_time;
 	}
 
-	if (-1 == fstat(conf.seed_path.c_str(), file_stat))
+	if (-1 == (change_time=get_change_time(conf.seed_path.c_str())))
 	{
-		printf("fstat error\n");
+		SDLOG_WARN(SP_WFNAME, "detect seed conf change error");
 		return -1;
 	}
-
-	if (file_stat.st_ctime != m_seed_change_time)  // 种子文件发生变化
+	if (change_time != m_seed_change_time)
 	{
 		if (-1 == load_seed(conf.seed_path.c_str()))
 		{
-			printf("load seed error\n");
+			SDLOG_WARN(SP_WFNAME, "load seed error");
 			return -1;
 		}
-		m_seed_change_time = file_stat.st_ctime;
+		m_seed_change_time = change_time;
+	}
+
+	return 0;
+}
+
+int CSpider::load_stop_domain(const char* stop_file)
+{
+	CSpiderConf& conf = m_spider_conf;
+
+	FILE* fp = NULL;
+	char line[conf.max_url_len+1];
+	string domain = "";
+	int lineno = 0;
+	char* p = NULL;
+	DomainAttr da;
+
+	fp = fopen(stop_file, "r");
+	if (!fp)
+	{
+		SDLOG_WARN(SP_WFNAME, "open stop domain file error "<<stop_file);
+		return -1;
+	}
+
+    // 清空原有的配置
+	map<string, DomainAttr>::iterator it = m_statis.m_domain.begin();
+	for (; it != m_statis.m_domain.end(); it++)
+	{
+		it->second.isShield = false;
+	}
+
+    while (!feof(fp))
+	{
+		memset(line, 0, sizeof(line));
+		get_one_line(fp, line, sizeof(line), lineno);
+		p = filter_headtail_blank(line);
+		if (p[0] == '\0')
+		{
+			SDLOG_INFO(SP_LOGNAME, "find an empty domain");
+			continue;
+		}
+		domain = p;
+		map<string, DomainAttr>::iterator dit = m_statis.m_domain.find(domain);
+		if (dit == m_statis.m_domain.end())
+		{
+			da.isShield = true;
+			da.isSeed = false;
+			m_statis.m_domain.insert(make_pair(domain, da));
+		}
+		dit->second.isShield = true;
 	}
 	return 0;
 }
 
 int CSpider::load_seed(const char* seed_path)
 {
+	CSpiderConf& conf = m_spider_conf;
+
+	FILE* fp = NULL;
+	char line[conf.max_url_len+1];
+	UrlInfo ui;
+	int lineno = 0;
+	char* p = NULL;
+
+	fp = fopen(seed_path, "r");
+	if (!fp)
+	{
+		SDLOG_WARN(SP_WFNAME, "open seed file error");
+		return -1;
+	}
+
+	while (!feof(fp))
+	{
+		memset(line, 0, sizeof(line));
+		get_one_line(fp, line, sizeof(line), lineno);
+		p = filter_headtail_blank(line);
+		if (p[0] == '\0')
+		{
+			SDLOG_INFO(SP_LOGNAME, "find an empty seed");
+			continue;
+		}
+		ucUrl uc_url(p);
+		if (uc_url.build() != FR_OK)
+		{
+			SDLOG_INFO(SP_LOGNAME, "seed build error for\t" << p);
+			continue;
+		}
+
+		ui.url = uc_url.get_url();
+		ui.site = uc_url.get_site();
+		ui.domain = uc_url.get_domain();
+		ui.last_crawl_time = 0;
+		mp_cpq->push_url(ui);
+
+        map<string, DomainAttr>::iterator it = m_statis.m_domain.find(ui.domain);
+		if (it == m_statis.m_domain.end())
+		{
+            DomainAttr da;
+			da.isShield = false;
+			da.isSeed = true;
+			m_statis.m_domain.insert(make_pair(ui.domain, da));
+		}
+		else if (!(it->second.isSeed))
+		{
+			it->second.isSeed = true;
+		}
+	}
+
+	return 0;
 }
 
 void CSpider::get_one_line(FILE* fp, char* line, int len, int& lineno)
@@ -431,7 +541,7 @@ void CSpider::get_one_line(FILE* fp, char* line, int len, int& lineno)
     if(pch != NULL) *pch = 0;
 }
 
-char* CUrlRecognizer::filter_headtail_blank(char* buf, int len)
+char* CSpider::filter_headtail_blank(char* buf, int len)
 {
     char *p = buf;
     char *q = buf + len -1;
@@ -605,6 +715,8 @@ int CSpider::load_conf(const char* conf_path)
 	string str_result;
 	int int_result;
 
+    m_conf_path = conf_path;
+
 	if (0 != conf.load_conf(conf_path))
 	{
 		printf("load conf error: %s\n", conf_path);
@@ -674,6 +786,20 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.page_name_change_interval = int_result;
+	//category输入路径
+	if ((str_result=conf.get_string_item("CATE_INPUT_PATH")).empty())
+	{
+		printf("get item CATE_INPUT_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.cate_input_path = str_result;
+	//种子路径
+	if ((str_result=conf.get_string_item("SEED_PATH")).empty())
+	{
+		printf("get item SEED_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.seed_path = str_result;
 	// item连接的输出路径
 	if ((str_result=conf.get_string_item("ITEM_OUTPUT_PATH")).empty())
 	{
@@ -859,7 +985,9 @@ int CSpider::load_conf(const char* conf_path)
 int CSpider::start()
 {
 	//init
-	if (!m_statis.init(m_spider_conf.statis_file_path.c_str()) || !m_statis.write_message_to_file("start spider!")){
+	CSpiderConf& conf = m_spider_conf;
+
+	if (!m_statis.init(conf.statis_file_path.c_str()) || !m_statis.write_message_to_file("start spider!")){
 		cerr << "init statis file error , exit!" << endl;
 		return -1;
 	}
@@ -869,7 +997,7 @@ int CSpider::start()
 		cerr << "malloc cate output error, exit!" << endl;
 		return -1;
 	}
-	if (0 != mp_cate_output->init(&m_spider_conf))
+	if (0 != mp_cate_output->init(&conf))
 	{
 		cerr << "init cate output error, exit!" << endl;
 		return -1;
@@ -880,7 +1008,7 @@ int CSpider::start()
 		cerr << "malloc item output error, exit!" << endl;
 		return -1;
 	}
-	if (0 != mp_item_output->init(&m_spider_conf))
+	if (0 != mp_item_output->init(&conf))
 	{
 		cerr << "init item output error, exit!" << endl;
 		return -1;
@@ -891,7 +1019,7 @@ int CSpider::start()
 		cerr << "malloc fail output error, exit!" << endl;
 		return -1;
 	}
-	if (0 != mp_fail_output->init(&m_spider_conf))
+	if (0 != mp_fail_output->init(&conf))
 	{
 		cerr << "init fail output error, exit!" << endl;
 		return -1;
@@ -902,7 +1030,7 @@ int CSpider::start()
 		cerr << "malloc page output error, exit" << endl;
 		return -1;
 	}
-	if (0 != mp_page_output->init(&m_spider_conf))
+	if (0 != mp_page_output->init(&conf))
 	{
 		cerr << "init page_output error, exit" << endl;
 		return -1;
@@ -913,13 +1041,13 @@ int CSpider::start()
 		cerr << "malloc selected queue error, exit!" << endl;
 		return -1;
 	}
-	if (0 != mp_selected_queue->init(m_spider_conf.selected_queue_size))
+	if (0 != mp_selected_queue->init(conf.selected_queue_size))
 	{
 		cerr << "init selected queue error, exit" << endl;
 		return -1;
 	}
 
-    if (0 != m_dns_client.init(&m_spider_conf))
+    if (0 != m_dns_client.init(&conf))
 	{
 		cerr << "init dns client error, exit!" << endl;
 		return -1;
@@ -930,37 +1058,41 @@ int CSpider::start()
 		cerr << "malloc cpq error, exit!" << endl;
 		return -1;
 	}
-	mp_cpq->set_conf(&m_spider_conf);
+	mp_cpq->set_conf(&conf);
     if (!(mp_coq=new CUrlPool()))
 	{
 		cerr << "malloc coq error, exit!" << endl;
 		return -1;
 	}
-	mp_coq->set_conf(&m_spider_conf);
+	mp_coq->set_conf(&conf);
     if (!(mp_ipq=new CUrlPool()))
 	{
 		cerr << "malloc ipq error, exit!" << endl;
 		return -1;
 	}
-	mp_ipq->set_conf(&m_spider_conf);
+	mp_ipq->set_conf(&conf);
     if (!(mp_ioq=new CUrlPool()))
 	{
 		cerr << "malloc ioq error, exit!" << endl;
 		return -1;
 	}
-	mp_ioq->set_conf(&m_spider_conf);
+	mp_ioq->set_conf(&conf);
 
 	if (!(mp_level_pool = new CLevelPool()))
 	{
 		cerr << "malloc level pool error, exit!" << endl;
 		return -1;
 	}
-	if (0 != mp_level_pool->init(&m_spider_conf))
+	if (0 != mp_level_pool->init(&conf))
 	{
 		cerr << "init level pool error, exit!" << endl;
 		return -1;
 	}
 
+    m_conf_change_time = -1;
+    m_stop_domain_conf_change_time = -1;
+    m_seed_change_time = -1;
+	
 	pthread_t works[m_spider_conf.work_thread_num];
 	pthread_t select;
 	if (0 != pthread_create(&select, NULL, select_thread, this)) {
