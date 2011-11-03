@@ -46,6 +46,7 @@ public:
 	int insert_url();
 	int update_conf();
 	int next_round();
+	int transfer();
 	
 	CSpiderConf m_spider_conf;
 

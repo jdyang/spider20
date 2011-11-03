@@ -539,15 +539,12 @@ int CSpider::next_round()
 	m_statis.write_message_to_file("next samsara");
 	
 	
+	
 	return 0;
 }
 
-int CLinkDBWriter::transfer()
+int CSpider::transfer()
 {
-	//lock the flag file while processing
-//	if (!m_pLinkDB->setUnAccessible())
-//		return false;
-//	
 	string str_saver_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_saver_path;
 	string str_reader_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_reader_path;
 	string str_backup_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_backup_path;
@@ -562,46 +559,39 @@ int CLinkDBWriter::transfer()
 	*/
 	signal(SIGCHLD,SIG_DFL);
 
-	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::transfer rm b.");
+	SDLOG_INFO(SP_LOGNAME,"start transfer rm b.");
 	string str_cmd = "rm -rf " +  str_backup_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
-		//m_pLinkDB->setAccessible();
-	//	return false;
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
 	}
 
-	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::transfer r2b.");
+	SDLOG_INFO(SP_LOGNAME,"start transfer r2b.");
 	str_cmd = "mv -f " + str_reader_path + " " + str_backup_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
-		//m_pLinkDB->setAccessible();
-	//	return false;
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
+		return -1;
 	}
-	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::transfer s2r.");
+	SDLOG_INFO(SP_LOGNAME,"start transfer s2r.");
 
 	str_cmd = "mv -f " + str_saver_path + " " + str_reader_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
-	//	m_pLinkDB->setAccessible();
-	//	return false;
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
+		return -1;
 	}
-	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::make s.");	
+	SDLOG_INFO(SP_LOGNAME,"start make s.");	
 	str_cmd = "mkdir -p " + str_saver_path;
 	if (system(str_cmd.c_str()) ==-1){
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
-		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
-		//m_pLinkDB->setAccessible();
-		//return false;
+		SDLOG_WARN(SP_WFNAME,"transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOG_WARN(SP_WFNAME,"transfer: errror [%s]",strerror(errno));
+		return -1;
 	}
 	signal(SIGCHLD,SIG_IGN); 
 
-	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::unlock.");	
+	SDLOG_INFO(SP_LOGNAME,"finish transfer");	
 	
-	//unlock the flag
-	//m_pLinkDB->setAccessible();
 	return true;
 }
 
