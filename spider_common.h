@@ -23,10 +23,10 @@ public:
 
     string cate_input_path;
 	string seed_path;
+	string url_output_dir;
     string item_output_path;
 	string cate_output_path;
 	string fail_output_path;
-	
 
 	string stop_domain_conf_path;
 
@@ -64,6 +64,9 @@ public:
 	//global define
 	int work_thread_num;
 	string statis_file_path;
+
+	//code transfer
+	string converter_code_path;
 };
 
 #endif
