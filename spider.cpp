@@ -54,7 +54,7 @@ void* select_thread(void* arg)
 	while(1){
 		++(psp->m_select_rounds);
 		start_time=time(NULL);
-		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << m_select_rounds);
+		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << psp->m_select_rounds);
 		if (!psp->update_conf()) {
 			cerr << "load cmd conf error!" << endl;
 			exit(-1);
@@ -546,7 +546,7 @@ int CSpider::select_url()
 		}
 	}
 	// judge if it need to go the next round
-	if (m_select_rounds > 0 && m_select_buffer.size() < min_select_threshold) {
+	if (m_select_rounds > 0 && m_select_buffer.size() < (unsigned int)min_select_threshold) {
 		SDLOG_INFO(SP_LOGNAME, "go to next round, count: " << m_select_rounds);
 		return -1;
 	}
