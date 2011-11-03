@@ -1336,7 +1336,8 @@ int CSpider::start()
 		return -1;
 	}
 
-	if (0 != mp_cate_output->init(&conf))
+    string cate_file = conf.url_output_dir + conf.cate_output_path;
+	if (0 != mp_cate_output->init(cate_file.c_str()))
 	{
 		cerr << "init cate output error, exit!" << endl;
 		return -1;
@@ -1348,7 +1349,8 @@ int CSpider::start()
 		return -1;
 	}
 
-	if (0 != mp_item_output->init(&conf))
+    string item_file = conf.url_output_dir + conf.item_output_path;
+	if (0 != mp_item_output->init(item_file.c_str()))
 	{
 		cerr << "init item output error, exit!" << endl;
 		return -1;
@@ -1360,7 +1362,8 @@ int CSpider::start()
 		return -1;
 	}
 
-	if (0 != mp_fail_output->init(&conf))
+    string fail_file = conf.url_output_dir + conf.fail_output_path;
+	if (0 != mp_fail_output->init(fail_file.c_str()))
 	{
 		cerr << "init fail output error, exit!" << endl;
 		return -1;
