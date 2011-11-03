@@ -136,11 +136,12 @@ void* work_thread(void* arg)
 			sleep(60);
 			continue;
 		}
+
         if (!p_selected_queue->pop(qi))  // SelectedQueue为空
 		{
 			if (-1 == p_page_output->append(NULL, 0, false)) // 为了满足即使没有抓到网页也写一个page.list空文件
 			{
-				printf("page append null error\n");
+				SDLOG_WARN(SP_WFNAME, "write null page error");
 			}
 			usleep(conf.selected_queue_empty_sleep_time*1000);
 			continue;
@@ -148,17 +149,19 @@ void* work_thread(void* arg)
 
         if (qi.fail_count > conf.max_url_fail_count)  // 此URL多次抓取失败，丢弃
 		{
+			SDLOG_INFO(SP_LOGNAME, "CRAWL_FAIL\t"<<qi.url)
             if (-1 == p_fail_output->append_error(qi.url, "CRAWL_FAIL"))
 			{
-				printf("fail append error\n");
+				SDLOG_WARN(SP_WFNAME, "fail append error\t"<<qi.url);
 			}
 			continue;
 		}
 		if (qi.dns_count > conf.max_dns_query_count)  // 此URL无IP，丢弃
 		{
+			SDLOG_INFO(SP_LOGNAME, "DNS_FAIL\t"<<qi.url)
 			if (-1 == p_fail_output->append_error(qi.url, "DNS_FAIL"))
 			{
-				printf("fail append error\n");
+				SDLOG_WARN(SP_WFNAME, "fail append error\t"<<qi.url);
 			}
 			continue;
 		}
@@ -166,12 +169,14 @@ void* work_thread(void* arg)
 		ip = dns_client.get_ip(site);
 		if (ip == "NO_IP")
 		{
+			SDLOG_WARN(SP_WFNAME, "get ip fail\t"<<qi.url);
 			qi.dns_count++;
 			p_selected_queue->push(qi);
 		}
 
 		if (!p_level_pool->is_crawl_enabled(qi.url))  // 不符合压力控制规则
 		{
+			SDLOG_INFO(SP_LOGNAME, "DELAY\t"<<qi.url);
 			p_selected_queue->push(qi);
 			continue;
 		}
@@ -183,7 +188,7 @@ void* work_thread(void* arg)
 			p_level_pool->finish_crawl(site, false);
 			if (-1 == p_fail_output->append_error(qi.url, "FORMAT_ERROR"))
 			{
-				printf("fail append error\n");
+				SDLOG_INFO(SP_LOGNAME, "fail append error\t"<<url);
 			}
 			continue;
 		}
@@ -211,10 +216,10 @@ void* work_thread(void* arg)
 
 		if (-404 == file_length)
 		{
-			printf("download 404\n");
+			SDLOG_INFO(SP_LOGNAME, "NOT_FOUND\t"<<url);
 			if (-1 == p_fail_output->append_error(url, "NOT_FOUND"))
 			{
-				printf("fail append error\n");
+				SDLOG_WARN(SP_WFNAME, "fail append error\t"<<url);
 			}
 			p_level_pool->finish_crawl(site);
 			continue;
@@ -274,15 +279,17 @@ void* work_thread(void* arg)
 		if (-404 == file_length) // 重定向到了一个404的页面
 		{
 			p_level_pool->finish_crawl(site);
-			if (p_fail_output->append_error(url, "NOT_FOUND_REDIRECT"))
+			SDLOG_INFO(SP_LOGNAME, "REDIRECT_NOT_FOUND\t"<<url);
+			if (p_fail_output->append_error(url, "REDIRECT_NOT_FOUND"))
 			{
-				printf("fail append error");
+				SDLOG_WARN(SP_WFNAME, "fail append error\t"<<url);
 			}
 			continue;
 		}
 
         if (file_length < 0) {
 			p_level_pool->finish_crawl(site);
+			SDLOG_INFO(SP_LOGNAME, "NET_FAIL\t"<<url);
 			qi.fail_count++;
 			p_selected_queue->push(qi);
 			continue;
@@ -291,10 +298,11 @@ void* work_thread(void* arg)
 		{
 			p_level_pool->finish_crawl(site);
 			memset(err_buf, 0, sizeof(err_buf));
+			SDLOG_INFO(SP_LOGNAME, "SIZE_FAIL\t"<<url);
 			sprintf(err_buf, "CONTENT_LEN_INVALID (%d)", file_length);
 			if (-1 == p_fail_output->append_error(url, err_buf))
 			{
-				printf("fail append error\n");
+				SDLOG_WARN(SP_WFNAME, "fail append error\t"<<url);
 			}
 			continue;
 		}
@@ -305,7 +313,7 @@ void* work_thread(void* arg)
 			spider_statis.update_domain_cate_done(domain);
 			if (-1 == p_cate_output->append(qi.url))
 			{
-				printf("category write error\n");
+				SDLOG_WARN(SP_WFNAME, "category append error\t"<<url);
 				continue;
 			}
 		}
@@ -314,7 +322,7 @@ void* work_thread(void* arg)
 			spider_statis.update_domain_item_done(domain);
 			if (-1 == p_item_output->append(qi.url))
 			{
-				printf("item write error\n");
+				SDLOG_WARN(SP_WFNAME, "item append error\t"<<url);
 				continue;
 			}
 		}
@@ -322,7 +330,7 @@ void* work_thread(void* arg)
         utf8_converter.set_input(downloaded_file, strlen(downloaded_file));
 		if (-1 == utf8_converter.to_utf8())
 		{
-			printf("converted to utf8 error\n");
+			SDLOG_WARN(SP_WFNAME, "converted to utf8 error\t"<<url);
 			continue;
 		}
 		converted_content = utf8_converter.get_converted_content();
@@ -350,7 +358,7 @@ void* work_thread(void* arg)
 		{
 		    if (-1 == psp->write_page_list(p_page_output, url, domain, site, 0, converted_content, page_list_buf, sizeof(page_list_buf)))
 		    {
-                printf("write page error\n");
+				SDLOG_WARN(SP_WFNAME, "page append error\t"<<url);
 			    continue;
 		    }
 		}
@@ -535,6 +543,7 @@ int CSpider::update_conf()
 	CSpiderConf& conf = m_spider_conf;
 	long change_time;
 
+    // 更新主配置文件
 	if (-1 == (change_time=get_change_time(m_conf_path.c_str())))
 	{
 		SDLOG_WARN(SP_WFNAME, "detect conf change error");
@@ -550,7 +559,7 @@ int CSpider::update_conf()
 		m_conf_change_time = change_time;
 	}
 
-
+    // 更新要屏蔽的domain
 	if (-1 == (change_time=get_change_time(conf.stop_domain_conf_path.c_str())))
 	{
 		SDLOG_WARN(SP_WFNAME, "detect stop domain conf change error");
@@ -566,9 +575,10 @@ int CSpider::update_conf()
 		m_stop_domain_conf_change_time = change_time;
 	}
 
+    // 新加种子
 	if (-1 == (change_time=get_change_time(conf.seed_path.c_str())))
 	{
-		SDLOG_WARN(SP_WFNAME, "detect seed conf change error");
+		SDLOG_WARN(SP_WFNAME, "detect seed change error");
 		return -1;
 	}
 	if (change_time != m_seed_change_time)
@@ -609,6 +619,7 @@ int CSpider::load_stop_domain(const char* stop_file)
 		it->second.isShield = false;
 	}
 
+    int count = 0;
     while (!feof(fp))
 	{
 		memset(line, 0, sizeof(line));
@@ -616,9 +627,11 @@ int CSpider::load_stop_domain(const char* stop_file)
 		p = filter_headtail_blank(line);
 		if (p[0] == '\0')
 		{
-			SDLOG_INFO(SP_LOGNAME, "find an empty domain");
+			SDLOG_INFO(SP_LOGNAME, "load stop domain: find an empty domain");
 			continue;
 		}
+		count++;
+
 		domain = p;
 		map<string, DomainAttr>::iterator dit = m_statis.m_domain.find(domain);
 		if (dit == m_statis.m_domain.end())
@@ -626,9 +639,16 @@ int CSpider::load_stop_domain(const char* stop_file)
 			da.isShield = true;
 			da.isSeed = false;
 			m_statis.m_domain.insert(make_pair(domain, da));
+			SDLOG_INFO(SP_LOGNAME, "stop select "<< domain);
 		}
-		dit->second.isShield = true;
+		else
+		{
+		    dit->second.isShield = true;
+			SDLOG_INFO(SP_LOGNAME, "stop select "<< domain);
+		}
 	}
+	SDLOG_INFO(SP_LOGNAME, "stop " << count << " domains");
+
 	return 0;
 }
 
@@ -642,10 +662,12 @@ int CSpider::load_seed(const char* seed_path)
 	int lineno = 0;
 	char* p = NULL;
 
+	int count = 0;
+
 	fp = fopen(seed_path, "r");
 	if (!fp)
 	{
-		SDLOG_WARN(SP_WFNAME, "open seed file error");
+		SDLOG_WARN(SP_WFNAME, "open seed file error: "<<seed_path);
 		return -1;
 	}
 
@@ -666,6 +688,8 @@ int CSpider::load_seed(const char* seed_path)
 			continue;
 		}
 
+        count++;
+
 		ui.url = uc_url.get_url();
 		ui.site = uc_url.get_site();
 		ui.domain = uc_url.get_domain();
@@ -685,6 +709,7 @@ int CSpider::load_seed(const char* seed_path)
 			it->second.isSeed = true;
 		}
 	}
+	SDLOG_INFO(SP_LOGNAME, "load " << count << " seeds success");
 
 	return 0;
 }
@@ -784,7 +809,7 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
 		}
 		else  // 垃圾URL
 		{
-			printf("invalud url\n");
+			SDLOG_INFO(SP_LOGNAME, "invalud url\t"<<it->second.link);
 		}
 	}
 }
@@ -840,6 +865,7 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 
     if (total_len >= page_list_buf_len)
 	{
+		SDLOG_INFO(SP_LOGNAME, "page too len:\t" << url);
 		return -1;
 	}
 
@@ -865,6 +891,7 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 
     if (0 != pout->append(page_list_buf, strlen(page_list_buf)))
 	{
+		SDLOG_INFO(SP_LOGNAME, "write page error:\t"<<url);
 		return -1;
 	}
 	return 0;
