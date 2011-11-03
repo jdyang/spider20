@@ -658,10 +658,11 @@ int CSpider::insert_url()
 		item.last_crawl_time = (*it).last_crawl_time;
 		switch((*it).type) {
 			case 0:item.which_queue = QUEUE_TYPE_IOQ;break;
-			case 1:item.which_queue = 2;break;
-			case 2:item.which_queue = 3;break;
-			case 3:item.which_queue = 1;break;
-			default:item.which_queue = 2;break;
+			case 1:item.which_queue = QUEUE_TYPE_COQ;break;
+			case 2:item.which_queue = QUEUE_TYPE_IPQ;break;
+			case 3:item.which_queue = QUEUE_TYPE_CPQ;break;
+			default:item.which_queue = QUEUE_TYPE_COQ;break;
+
 		}
 		mp_selected_queue->push(item);
 	}
@@ -810,7 +811,7 @@ int CSpider::load_input_urls(const char* input_path)
 
 	int count = 0;
 
-	fp = fopen(cate_path, "r");
+	fp = fopen(cate_path.c_str(), "r");
 	if (!fp)
 	{
 		SDLOG_WARN(SP_WFNAME, "open cate file error: "<<cate_path);
@@ -827,7 +828,7 @@ int CSpider::load_input_urls(const char* input_path)
 			SDLOG_INFO(SP_LOGNAME, "find an empty seed");
 			continue;
 		}
-		for (int i = 0; i< sizeof(line); ++i){
+		for (unsigned int i = 0; i< sizeof(line); ++i){
 			if (p[i] == '\t'){
 				p[i] = '\0';
 				break;
@@ -861,7 +862,7 @@ int CSpider::load_input_urls(const char* input_path)
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " cate success");
 	
 	count = 0;
-	fp = fopen(item_path, "r");
+	fp = fopen(item_path.c_str(), "r");
 	if (!fp)
 	{
 		SDLOG_WARN(SP_WFNAME, "open item file error: "<<cate_path);
@@ -878,7 +879,7 @@ int CSpider::load_input_urls(const char* input_path)
 			SDLOG_INFO(SP_LOGNAME, "find an empty seed");
 			continue;
 		}
-		for (int i = 0; i< sizeof(line); ++i){
+		for (unsigned int i = 0; i< sizeof(line); ++i){
 			if (p[i] == '\t'){
 				p[i] = '\0';
 				break;
