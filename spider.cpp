@@ -645,7 +645,7 @@ int CSpider::insert_url()
 	m_dns_client.clear();
 	map<string, string>::iterator site_it;
 	for (site_it = m_sites.begin(); site_it != m_sites.end(); ++site_it){
-		string ip = m_dns_client.get((*site_it).first));
+		string ip = m_dns_client.get((*site_it).first);
 		(*site_it).second = ip;
 	}
 	
@@ -657,7 +657,7 @@ int CSpider::insert_url()
 		item.dns_count = 0;
 		item.last_crawl_time = (*it).last_crawl_time;
 		switch((*it).type) {
-			case 0:item.which_queue = queue_type_t.QUEUE_TYPE_IOQ;break;
+			case 0:item.which_queue = QUEUE_TYPE_IOQ;break;
 			case 1:item.which_queue = 2;break;
 			case 2:item.which_queue = 3;break;
 			case 3:item.which_queue = 1;break;
