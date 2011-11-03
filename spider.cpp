@@ -745,7 +745,6 @@ char* CSpider::filter_headtail_blank(char* buf, int len)
     return p;
 }
 
->>>>>>> d9fe30dea57682f1288819ef9e272bd4d3152f0e
 void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
 {
 	CSpiderConf& conf = m_spider_conf;
