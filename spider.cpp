@@ -43,6 +43,7 @@ void* select_thread(void* arg)
 	CLevelPool* p_level_pool = psp->mp_level_pool;
 	
 	while(1){
+		++m_select_rounds;
 		start_time=time(NULL);
 		SDLOG_INFO(SP_LOGNAME,"start updating conf.");
 		if (!psp->update_conf()) {
@@ -403,16 +404,16 @@ int CSpider::select_url()
 	deque<UrlInfo>::iterator it;
 	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
-		(*it).type = 1;
+		(*it).type = 3;
 		select_map[(*it).domain].push_back(*it);
 	}
 	mp_cpq->get_url_queue().clear();
 	mp_cpq->get_url_mutex().unlock();
 	
-	tmp_que = mp_ioq->get_url_queue();
+	tmp_que = mp_ipq->get_url_queue();
 	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
-		(*it).type = 0;
+		(*it).type = 2;
 		select_map[(*it).domain].push_back(*it);
 	}
 	mp_ipq->get_url_queue().clear();
@@ -421,7 +422,7 @@ int CSpider::select_url()
 	tmp_que = mp_coq->get_url_queue();
 	mp_ioq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
-		(*it).type = 0;
+		(*it).type = 1;
 		select_map[(*it).domain].push_back(*it);
 	}
 	mp_ioq->get_url_queue().clear();
@@ -450,24 +451,27 @@ int CSpider::select_url()
 		int c_num = 0;	
 		unsigned int i = 0;
 		for (i = 0 ; i < tmp_vector.size() && c_num < prio_num_c && i_num < prio_num_i; ++i){
-			if (tmp_vector[i].type == 1){
+			if (tmp_vector[i].type == 3){
 				++c_num;
 			} else {
 				++i_num;
 			}
+			m_sites.insert(make_pair(tmp_vector[i].site, "NO_IP"));
 			m_select_buffer.push_back(tmp_vector[i]);
 		}
-		int flag = 0;
+		int flag = 2;
 		int tmp_num = i_num;
 		int max_tmp_num = prio_num_i;
 		if (c_num < prio_num_c) {
-			flag = 1;
+			flag = 3;
 			tmp_num = c_num;
 			max_tmp_num = prio_num_c;
 		}
+		//the rest of c or i
 		unsigned int k = i;
 		for (;k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
 			if (tmp_vector[k].type == flag) {
+				m_sites.insert(make_pair(tmp_vector[k].site, "NO_IP"));
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
 			} else{
@@ -475,7 +479,7 @@ int CSpider::select_url()
 			}
 		}
 		for (unsigned int l = k; l < tmp_vector.size(); ++l){
-			m_select_back.push_back(tmp_vector[l]);
+			m_select_back_p.push_back(tmp_vector[l]);
 		}
 	}
 	
@@ -494,6 +498,7 @@ int CSpider::select_url()
 			} else {
 				++i_num;
 			}
+			m_sites.insert(make_pair(tmp_vector[i].site, "NO_IP"));
 			m_select_buffer.push_back(tmp_vector[i]);
 		}
 		int flag = 0;
@@ -507,6 +512,7 @@ int CSpider::select_url()
 		unsigned int k = i;
 		for (; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
 			if (tmp_vector[k].type == flag) {
+				m_sites.insert(make_pair(tmp_vector[k].site, "NO_IP"));
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
 			} else{
@@ -514,7 +520,7 @@ int CSpider::select_url()
 			}
 		}
 		for (unsigned int l = k; l < tmp_vector.size(); ++l){
-			m_select_back.push_back(tmp_vector[l]);
+			m_select_back_o.push_back(tmp_vector[l]);
 		}
 	}
 	// judge if it need to go the next round
@@ -529,11 +535,54 @@ int CSpider::select_url()
 
 int CSpider::next_round()
 {
+	string url_path = m_conf_path
+	m_statis.write_message_to_file("next samsara");
 	return 0;
 }
 
 int CSpider::insert_url()
 {
+	//push back to urlpool
+	vector<UrlInfo>::iterator it;
+	for (it = m_select_back_o.begin(); it != m_select_back_o.end(); ++it){
+		if ((*it).type == 1){
+			mp_coq.add_to_que(*it);
+		}else if ((*it).type == 0){
+			mp_ioq.add_to_que(*it);
+		}
+	}
+	for (it = m_select_back_p.begin(); it != m_select_back_p.end(); ++it){
+		if ((*it).type == 3){
+			mp_cpq.add_to_que(*it);
+		}else if ((*it).type == 2){
+			mp_ipq.add_to_que(*it);
+		}
+	}
+	//get the ips ready
+	m_dns_client.clear();
+	map<string, string>::iterator site_it;
+	for (site_it = m_sites.begin(); site_it != m_sites.end(); ++site_it){
+		string ip = m_dns_client.get((*site_it).first));
+		(*site_it).second = ip;
+	}
+	
+	//push into sq
+	for (it = m_select_buffer.begin(); it != m_select_buffer.end(); ++it) {
+		SSQItem item;
+		item.url = (*it).url;
+		item.fail_count = 0;
+		item.dns_count = 0;
+		item.last_crawl_time = (*it).last_crawl_time;
+		switch((*it).type) {
+			case 0:item.which_queue = 4;break;
+			case 1:item.which_queue = 2;break;
+			case 2:item.which_queue = 3;break;
+			case 3:item.which_queue = 1;break;
+			default:item.which_queue = 2;break;
+		}
+		mp_selected_queue->push(item);
+	}
+	
 	return 0;
 } 
 

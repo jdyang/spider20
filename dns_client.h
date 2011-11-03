@@ -28,8 +28,8 @@ public:
 	void set_conf(CSpiderConf *conf);
     
  	map<string, string>& get_ip_map();
-
-	bool url_empty();
+	
+	int clear_map();
 	void put_ip(string site, string ip);
 	string get_ip(string site); //if the site haven't been queried yet, it will update the ip map(adding a new record)
 

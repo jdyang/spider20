@@ -47,6 +47,15 @@ void CUrlPool::push_url(UrlInfo ui) {
 	}
 }
 
+void CUrlPool::add_to_que(UrlInfo ui) {
+	
+	if(ui.url.length() < 4)
+		return;
+	m_url_mutex.lock();
+	m_url_queue.push_back(ui);
+	m_url_mutex.unlock();
+}
+
 UrlInfo CUrlPool::pop_url(void) {
 	UrlInfo ui;
     CSpiderConf& conf = get_conf();

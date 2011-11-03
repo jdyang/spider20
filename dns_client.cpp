@@ -21,6 +21,13 @@ int CDnsClient::init(CSpiderConf *conf)
 	return 0;
 }
 
+int CDnsClient::clear_map()
+{	m_ip_mutex.lock();
+	m_ip_list.clear();
+	m_ip_mutex.unlock();
+	return 0;
+}
+
 void CDnsClient::put_ip(string site, string ip)
 {
 	m_ip_mutex.lock();

@@ -35,7 +35,7 @@ public:
     unsigned long last_crawl_time;
 	string domain;
 	string site;
-	int type; // 0 for item, 1for cate
+	int type; // 0 for oitem, 1for ocate, 2for pitem, 3for pcate
 };
 
 class CUrlPool {
@@ -52,6 +52,8 @@ public:
 	void push_url(UrlInfo ui);
 	UrlInfo pop_url();
 	int print_pool();
+	
+	void add_to_que(UrlInfo ui);
 	
 	
 private:
