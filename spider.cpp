@@ -401,35 +401,35 @@ int CSpider::select_url()
 		(*it).type = 1;
 		select_map[(*it).domain].push_back(*it);
 	}
-	m_cpq->get_url_queue().clear();
-	m_cpq->get_url_mutex().unlock();
+	mp_cpq->get_url_queue().clear();
+	mp_cpq->get_url_mutex().unlock();
 	
 	tmp_que = mp_ioq->get_url_queue();
-	m_ipq->get_url_mutex().lock();
+	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 0;
 		select_map[(*it).domain].push_back(*it);
 	}
-	m_ipq->get_url_queue().clear();
-	m_ipq->get_url_mutex().unlock();
+	mp_ipq->get_url_queue().clear();
+	mp_ipq->get_url_mutex().unlock();
+	
+	tmp_que = mp_coq->get_url_queue();
+	mp_ioq->get_url_mutex().lock();
+	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
+		(*it).type = 0;
+		select_map[(*it).domain].push_back(*it);
+	}
+	mp_ioq->get_url_queue().clear();
+	mp_ioq->get_url_mutex().unlock();
 	
 	tmp_que = mp_icq->get_url_queue();
-	m_ioq->get_url_mutex().lock();
-	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
-		(*it).type = 0;
-		select_map[(*it).domain].push_back(*it);
-	}
-	m_ioq->get_url_queue().clear();
-	m_ioq->get_url_mutex().unlock();
-	
-	tmp_que = m_icq->get_url_queue();
-	m_icq->get_url_mutex().lock();
+	mp_icq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 1;
 		select_map[(*it).domain].push_back(*it);
 	}	
-	m_icq->get_url_queue().clear();
-	m_icq->get_url_mutex().unlock();
+	mp_icq->get_url_queue().clear();
+	mp_icq->get_url_mutex().unlock();
 	
 	int prio_num = select_nums*priority_quota/10;
 	int ord_num = select_nums - prio_num;
@@ -443,7 +443,7 @@ int CSpider::select_url()
 		
 		int i_num = 0;
 		int c_num = 0;	
-		int i = 0;
+		unsigned int i = 0;
 		for (i = 0 ; i < tmp_vector.size() && c_num < prio_num_c && i_num < prio_num_i; ++i){
 			if (tmp_vector[i].type == 1){
 				++c_num;
@@ -460,8 +460,9 @@ int CSpider::select_url()
 			tmp_num = c_num;
 			max_tmp_num = prio_num_c;
 		}
-		for (int k = i; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
-			if (tmp_vector[k] == flag) {
+		unsigned int k = i;
+		for (;k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
+			if (tmp_vector[k].type == flag) {
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
 			} else{
@@ -477,11 +478,11 @@ int CSpider::select_url()
 	for (tmp_it = domain_o.begin(); tmp_it != domain_o.end(); ++tmp_it){
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
 		int ord_num_c = ord_num * tmp_vector.size()/o_link_num*cate_percent;
-		int ord_num_i = ord_num * tmp_vector.size()/o_link_num - prio_num_c + 1;
+		int ord_num_i = ord_num * tmp_vector.size()/o_link_num - ord_num_c + 1;
 		
 		int i_num = 0;
 		int c_num = 0;	
-		int i = 0;
+		unsigned int i = 0;
 		for (i = 0 ; i < tmp_vector.size() && c_num < ord_num_c && i_num < ord_num_i; ++i){
 			if (tmp_vector[i].type == 1){
 				++c_num;
@@ -498,7 +499,8 @@ int CSpider::select_url()
 			tmp_num = c_num;
 			max_tmp_num = ord_num_c;
 		}
-		for (int k = i; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
+		unsigned int k = i;
+		for (; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
 			if (tmp_vector[k] == flag) {
 				m_select_buffer.push_back(tmp_vector[k]);
 				++tmp_num;
@@ -506,7 +508,7 @@ int CSpider::select_url()
 				m_select_back.push_back(tmp_vector[k]);
 			}
 		}
-		for (int l = k; l < tmp_vector.size(); ++l){
+		for (unsigned int l = k; l < tmp_vector.size(); ++l){
 			m_select_back.push_back(tmp_vector[l]);
 		}
 	}
@@ -750,21 +752,21 @@ char* CSpider::filter_headtail_blank(char* buf, int len)
 void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecognizer* url_recog)
 {
 	CSpiderConf& conf = m_spider_conf;
-	UrlPool* cq;
-	UrlPool* iq;
+	CUrlPool* cq;
+	CUrlPool* iq;
 
     string normal_url;
 	int type;
 
 	if (which_queue == QUEUE_TYPE_CPQ)
 	{
-		cq = &m_cpq;
-		iq = &m_ipq;
+		cq = &mp_cpq;
+		iq = &mp_ipq;
 	}
 	else
 	{
 		cq = &m_coq;
-		iq = &m_ioq;
+		iq = &mp_ioq;
 	}
 
 	map<string,CEcUrlLink> links = extractor->get_links();
