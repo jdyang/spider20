@@ -94,6 +94,11 @@ void* crawl_thread(void* arg)
 	CExtractor extractor;
 	CRecognizer recognizer;
 	
+	if (0 != utf8_converter.init(conf.converter_code_path.c_str()))
+	{
+		cerr << "utf8 init error" << endl;
+		exit(1);
+	}
 	if (extractor.load_conf(conf.extractor_conf_path)!=FR_OK){
 		cerr << "LOAD extractor configuration failed." << endl;
 		exit(1);
@@ -240,7 +245,7 @@ void* crawl_thread(void* arg)
 				ucUrl red_url(location);
 				if (red_url.build() != FR_OK)
 				{
-					printf("redirect url build error\n");
+					SDLOG_INFO(SP_LOGNAME, "REDIRECT_BUILD_FAIL\t"<< url << " -> " <<redirect_url);
 					break;
 				}
 				if (red_url.get_site() != site)
