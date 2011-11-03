@@ -59,7 +59,7 @@ int UTF8Converter::init(const char* code_path)
 		abort();
 	}
 
-	if (!mp_code_recognizer->Initialize(code_path))
+	if (!mp_code_recognizer->Initialize(const_cast<char*>(code_path)))
 	{
 		printf("code recognizer initial error");
 		return -1;
