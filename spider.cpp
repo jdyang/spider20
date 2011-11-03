@@ -1191,7 +1191,7 @@ int CSpider::start()
 
 	void* work_ret = NULL;
 	for (int i = 0; i < m_spider_conf.work_thread_num; i++) {
-		if (0 != pthread_create(works+i, NULL, work_thread, this)) {
+		if (0 != pthread_create(works+i, NULL, crawl_thread, this)) {
 			cerr << "start work thread " << i << " failed." << endl;
 			pthread_join(select, &work_ret);
 			for (int x=0;x<i;x++) {pthread_join(works[x],&work_ret);}
