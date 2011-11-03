@@ -765,13 +765,13 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
 
 	if (which_queue == QUEUE_TYPE_CPQ)
 	{
-		cq = &mp_cpq;
-		iq = &mp_ipq;
+		cq = mp_cpq;
+		iq = mp_ipq;
 	}
 	else
 	{
-		cq = &m_coq;
-		iq = &mp_ioq;
+		cq = mp_coq;
+		iq = mp_ioq;
 	}
 
 	map<string,CEcUrlLink> links = extractor->get_links();
@@ -997,6 +997,13 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.seed_path = str_result;
+	// URL输出路径
+	if ((str_result=conf.get_string_item("URL_OUTPUT_DIR")).empty())
+	{
+		printf("get item URL_OUTPUT_DIR error\n");
+		return -1;
+	}
+	m_spider_conf.url_output_dir = str_result;
 	// item连接的输出路径
 	if ((str_result=conf.get_string_item("ITEM_OUTPUT_PATH")).empty())
 	{
@@ -1036,22 +1043,20 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.default_max_concurrent_thread_count= int_result;
 
-    // 站点抓取间隔
-	if ((int_result=conf.get_int_item("DEFAULT_SITE_CRAWL_INTERVAL")) <= 0)
+    // urlpool为空
+	if ((int_result=conf.get_int_item("URLPOOL_EMPTY_SLEEP_TIME")) <= 0)
 	{
-        printf("get item DEFAULT_SITE_CRAWL_INTERVAL error\n");
+		printf("get item URLPOOL_EMPTY_SLEEP_TIME\n");
 		return -1;
 	}
-	m_spider_conf.default_site_crawl_interval = int_result;
-
-    // URL抓取所允许的最多失败次数
-	if ((int_result=conf.get_int_item("MAX_URL_FAIL_COUNT")) <= 0)
+	m_spider_conf.urlpool_empty_sleep_time = int_result;
+    // 最大URL长度
+    if ((int_result=conf.get_int_item("MAX_URL_LEN")) <= 0)
 	{
-        printf("get item MAX_URL_FAIL_COUNT error\n");
+		printf("get item MAX_URL_LEN error\n");
 		return -1;
 	}
-	m_spider_conf.max_url_fail_count = int_result;
-
+	m_spider_conf.max_url_len = int_result;
     // 最大网页长度
     if ((int_result=conf.get_int_item("MAX_PAGE_LEN")) <=0)
 	{
@@ -1059,14 +1064,153 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.max_page_len = int_result;
-
+    // 最小网页长度
+    if ((int_result=conf.get_int_item("MIN_PAGE_LEN")) <=0)
+	{
+		printf("get item MIN_PAGE_LEN error\n");
+		return -1;
+	}
+	m_spider_conf.min_page_len = int_result;
+    // 站点抓取间隔
+	if ((int_result=conf.get_int_item("DEFAULT_SITE_CRAWL_INTERVAL")) <= 0)
+	{
+        printf("get item DEFAULT_SITE_CRAWL_INTERVAL error\n");
+		return -1;
+	}
+	m_spider_conf.default_site_crawl_interval = int_result;
+    // URL抓取所允许的最多失败次数
+	if ((int_result=conf.get_int_item("MAX_URL_FAIL_COUNT")) <= 0)
+	{
+        printf("get item MAX_URL_FAIL_COUNT error\n");
+		return -1;
+	}
+	m_spider_conf.max_url_fail_count = int_result;
+    // URL最多重复抓取次数
+	if ((int_result=conf.get_int_item("MAX_URL_REDIRECT_COUNT")) <= 0)
+	{
+        printf("get item MAX_URL_REDIRECT_COUNT error\n");
+		return -1;
+	}
+	m_spider_conf.max_url_redirect_count = int_result;
+    // 最多重复查询DNS的次数
+	if ((int_result=conf.get_int_item("MAX_DNS_QUERY_COUNT")) <= 0)
+	{
+        printf("get item MAX_DNS_QUERY_COUNT error\n");
+		return -1;
+	}
+	m_spider_conf.max_dns_query_count = int_result;
     // crawl线程发现选取队列为空时要休眠一段时间，单位是毫秒
 	if ((int_result=conf.get_int_item("SELECTED_QUEUE_EMPTY_SLEEP_TIME")) <= 0)
 	{
-		printf("get item SELECTED_QUEUE_EMPTY_SLEEP_TIME\n");
+		printf("get item SELECTED_QUEUE_EMPTY_SLEEP_TIME error\n");
 		return -1;
 	}
 	m_spider_conf.selected_queue_empty_sleep_time = int_result;
+    // DNS服务器地址
+	if ((str_result=conf.get_int_item("DNS_HOST")).empty())
+	{
+		printf("get item DNS error\n");
+		return -1;
+	}
+	m_spider_conf.dns_host = str_result;
+    // DNS服务端口
+	if ((int_result=conf.get_int_item("DNS_PORT")) <= 0)
+	{
+		printf("get item DNS_PORT error\n");
+		return -1;
+	}
+	m_spider_conf.dns_port = int_result;
+    // DNS查询间隔
+	if ((int_result=conf.get_int_item("DNS_SLEEP_INTERVAL")) <= 0)
+	{
+		printf("get item DNS_SLEEP_INTERVAL error\n");
+		return -1;
+	}
+	m_spider_conf.dns_sleep_interval = int_result;
+    // 抽取器的配置文件
+	if ((str_result=conf.get_string_item("EXTRACTOR_CONF_PATH")).empty())
+	{
+		printf("get item EXTRACTOR_CONF_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.extractor_conf_path = str_result;
+    // 老识别器的配置文件
+	if ((str_result=conf.get_string_item("RECOGNIZER_CONF_PATH")).empty())
+	{
+		printf("get item RECOGNIZER_CONF_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.recognizer_conf_path = str_result;
+    // 选取线程的最小选取间隔
+	if ((int_result=conf.get_int_item("MIN_SELECT_INTERVAL")) <= 0)
+	{
+		printf("get item MIN_SELECT_INTERVAL error\n");
+		return -1;
+	}
+	m_spider_conf.min_select_interval = int_result;
+    // 每次选多少条URL
+	if ((int_result=conf.get_int_item("SELECT_NUMS_PER_TIME")) <= 0)
+	{
+		printf("get item SELECT_NUMS_PER_TIME error\n");
+		return -1;
+	}
+	m_spider_conf.select_nums_per_time = int_result;
+    // 每轮最少选取数
+	if ((int_result=conf.get_int_item("MIN_SELECT_THRESHOLD")) <= 0)
+	{
+		printf("get item MIN_SELECT_THRESHOLD error\n");
+		return -1;
+	}
+	m_spider_conf.min_select_threshold = int_result;
+    // 优先队列的阈值
+	if ((int_result=conf.get_int_item("PRIORITY_QUOTA")) <= 0)
+	{
+		printf("get item PRIORITY_QUOTA error\n");
+		return -1;
+	}
+	m_spider_conf.priority_quota = int_result;
+    // 选取时 category所占百分比
+	if ((int_result=conf.get_int_item("CATE_PERSENT")) <= 0)
+	{
+		printf("get item CATE_PERSENT error\n");
+		return -1;
+	}
+	m_spider_conf.cate_percent = int_result;
+    // 选取时 item所占百分比
+	if ((int_result=conf.get_int_item("ITEM_PERCENT")) <= 0)
+	{
+		printf("get item ITEM_PERCENT error\n");
+		return -1;
+	}
+	m_spider_conf.item_percent = int_result;
+    // 选取队列大小
+	if ((int_result=conf.get_int_item("SELECTED_QUEUE_SIZE")) <= 0)
+	{
+		printf("get item SELECTED_QUEUE_SIZE error\n");
+		return -1;
+	}
+	m_spider_conf.selected_queue_size = int_result;
+    // 抓取线程数量
+	if ((int_result=conf.get_int_item("WORK_THREAD_NUM")) <= 0)
+	{
+		printf("get item WORK_THREAD_NUM error\n");
+		return -1;
+	}
+	m_spider_conf.work_thread_num = int_result;
+	// 统计输出文件
+	if ((str_result=conf.get_string_item("STATIS_FILE_PATH")).empty())
+	{
+		printf("get item STATIS_FILE_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.statis_file_path = str_result;
+	// 转码字表文件
+	if ((str_result=conf.get_string_item("CONVERTER_CODE_PATH")).empty())
+	{
+		printf("get item CONVERTER_CODE_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.converter_code_path = str_result;
 
 	return 0;
 }
