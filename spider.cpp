@@ -8,6 +8,10 @@
 #include <vector>
 #include <ctime>
 #include <cstdlib>
+#include <assert.h>
+#include <stdlib.h>
+#include <signal.h>
+#include "errno.h"
 
 #include "sse_common.h"
 #include "sign.h"
@@ -48,7 +52,7 @@ void* select_thread(void* arg)
 	}
 	
 	while(1){
-		++psp->m_select_rounds;
+		++(psp->m_select_rounds);
 		start_time=time(NULL);
 		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << m_select_rounds);
 		if (!psp->update_conf()) {
@@ -642,10 +646,10 @@ int CSpider::insert_url()
 		}
 	}
 	//get the ips ready
-	m_dns_client.clear();
+	m_dns_client.clear_map();
 	map<string, string>::iterator site_it;
 	for (site_it = m_sites.begin(); site_it != m_sites.end(); ++site_it){
-		string ip = m_dns_client.get((*site_it).first);
+		string ip = m_dns_client.get_ip((*site_it).first);
 		(*site_it).second = ip;
 	}
 	
