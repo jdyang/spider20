@@ -63,6 +63,7 @@ public:
 	//select tmp queue, need to be shuffled 
 	vector<UrlInfo> m_select_buffer;
 	vector<UrlInfo> m_select_back;
+	int m_select_rounds;
 	
 	CSpiderStatis m_statis;
 

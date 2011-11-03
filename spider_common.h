@@ -50,6 +50,7 @@ public:
 	//select thread
 	int min_select_interval;
 	int select_nums_per_time;
+	int min_select_threshold;
 	int priority_quota;
 	int cate_percent;
 	int item_percent;
