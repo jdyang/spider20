@@ -530,9 +530,74 @@ int CSpider::select_url()
 
 int CSpider::next_round()
 {
-	string url_path = m_conf_path
+	string url_path = m_conf_path.url_output_path;
 	m_statis.write_message_to_file("next samsara");
+	
+	
 	return 0;
+}
+
+int CLinkDBWriter::transfer()
+{
+	//lock the flag file while processing
+//	if (!m_pLinkDB->setUnAccessible())
+//		return false;
+//	
+	string str_saver_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_saver_path;
+	string str_reader_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_reader_path;
+	string str_backup_path =  m_pConfig->m_link_db_path + "/" + CLinkDB::str_backup_path;
+	/*
+	step1: mv reader backup
+	step2: mv saver reader
+	step2: mkdir saver
+	*/
+	
+	/*
+	 * while sytem is executed, parent process shoud wait for chile process
+	*/
+	signal(SIGCHLD,SIG_DFL);
+
+	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::transfer rm b.");
+	string str_cmd = "rm -rf " +  str_backup_path;
+	if (system(str_cmd.c_str()) ==-1){
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
+		//m_pLinkDB->setAccessible();
+	//	return false;
+	}
+
+	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::transfer r2b.");
+	str_cmd = "mv -f " + str_reader_path + " " + str_backup_path;
+	if (system(str_cmd.c_str()) ==-1){
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
+		//m_pLinkDB->setAccessible();
+	//	return false;
+	}
+	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::transfer s2r.");
+
+	str_cmd = "mv -f " + str_saver_path + " " + str_reader_path;
+	if (system(str_cmd.c_str()) ==-1){
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
+	//	m_pLinkDB->setAccessible();
+	//	return false;
+	}
+	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::make s.");	
+	str_cmd = "mkdir -p " + str_saver_path;
+	if (system(str_cmd.c_str()) ==-1){
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: failed to execute command [%s]",str_cmd.c_str());
+		SDLOGFMT_WARN(CLinkDB::str_log_name,"CLinkDBWriter::transfer: errror [%s]",strerror(errno));
+		//m_pLinkDB->setAccessible();
+		//return false;
+	}
+	signal(SIGCHLD,SIG_IGN); 
+
+	SDLOG_INFO(CLinkDB::str_log_name,"CLinkDBWriter::unlock.");	
+	
+	//unlock the flag
+	//m_pLinkDB->setAccessible();
+	return true;
 }
 
 int CSpider::insert_url()
