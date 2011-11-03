@@ -7,6 +7,10 @@
 #define SP_LOGNAME "spider"
 #define SP_WFNAME "spiderwf"
 
+#define ITEM_LIST "item.list"
+#define CATE_LIST "cate.list"
+#define FAIL_LIST "fail.list"
+
 class CSpiderConf
 {
 public:

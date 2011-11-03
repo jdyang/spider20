@@ -42,10 +42,15 @@ void* select_thread(void* arg)
 	CDnsClient& dns_client = psp->m_dns_client;
 	CLevelPool* p_level_pool = psp->mp_level_pool;
 	
+	if (psp->load_input_urls() < 0){
+		SDLOG_WARN(SP_WFNAME, "load input urls error!");
+		exit(-1);
+	}
+	
 	while(1){
 		++m_select_rounds;
 		start_time=time(NULL);
-		SDLOG_INFO(SP_LOGNAME,"start updating conf.");
+		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << m_select_rounds);
 		if (!psp->update_conf()) {
 			cerr << "load cmd conf error!" << endl;
 			exit(-1);
@@ -53,8 +58,13 @@ void* select_thread(void* arg)
 		
 		SDLOG_INFO(SP_LOGNAME,"start selecting.");
 		if (!psp->select_url()) {
+			SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
 			if (!psp->next_round()){
-				SDLOG_WARN(SP_WFNAME, "next round transfer error!");
+				SDLOG_WARN(SP_WFNAME, "next samsara transfer error!");
+				exit(-1);
+			}
+			if (psp->load_input_urls(conf.url_output_dir) < 0){
+				SDLOG_WARN(SP_WFNAME, "load input urls error!");
 				exit(-1);
 			}
 			continue;
@@ -370,6 +380,7 @@ void* crawl_thread(void* arg)
 	return NULL;
 }
 
+
 int CSpider::select_url()
 {
 	int select_nums = m_spider_conf.select_nums_per_time;
@@ -535,10 +546,19 @@ int CSpider::select_url()
 
 int CSpider::next_round()
 {
-	string url_path = m_conf_path.url_output_path;
+	string url_path = m_spider_conf.url_output_path;
 	m_statis.write_message_to_file("next samsara");
 	
-	
+	mp_cate_output->destroy();
+	mp_item_output->destroy();
+	mp_fail_output->destroy();
+	if (transfer() < 0){
+		SDLOG_WARN(SP_WFNAME,"transfer: errror");
+		return -1;
+	}
+	mp_cate_output->init(m_spider_conf.item_output_path);
+	mp_item_output->init(m_spider_conf.cate_output_path);
+	mp_fail_output->init(m_spider_conf.fail_output_path);
 	
 	return 0;
 }
@@ -765,6 +785,127 @@ int CSpider::load_stop_domain(const char* stop_file)
 	return 0;
 }
 
+int CSpider::load_input_urls(const char* input_path)
+{
+	CSpiderConf& conf = m_spider_conf;
+	
+	string cate_path = string(input_path) + "/" + ITEM_LIST;
+	string item_path = string(input_path) + "/" + CATE_LIST;
+	
+	m_statis.m_domain.clear();
+
+	FILE* fp = NULL;
+	char line[conf.max_url_len+1];
+	UrlInfo ui;
+	int lineno = 0;
+	char* p = NULL;
+
+	int count = 0;
+
+	fp = fopen(cate_path, "r");
+	if (!fp)
+	{
+		SDLOG_WARN(SP_WFNAME, "open cate file error: "<<cate_path);
+		return -1;
+	}
+
+	while (!feof(fp))
+	{
+		memset(line, 0, sizeof(line));
+		get_one_line(fp, line, sizeof(line), lineno);
+		p = filter_headtail_blank(line);
+		if (p[0] == '\0')
+		{
+			SDLOG_INFO(SP_LOGNAME, "find an empty seed");
+			continue;
+		}
+		for (int i = 0; i< sizeof(line); ++i){
+			if (p[i] == '\t'){
+				p[i] = '\0';
+				break;
+			}
+		}
+		ucUrl uc_url(p);
+		if (uc_url.build() != FR_OK)
+		{
+			SDLOG_INFO(SP_LOGNAME, "seed build error for\t" << p);
+			continue;
+		}
+
+        count++;
+
+		ui.url = uc_url.get_url();
+		ui.site = uc_url.get_site();
+		ui.domain = uc_url.get_domain();
+		ui.last_crawl_time = 0;
+		mp_coq->push_url(ui);
+
+        map<string, DomainAttr>::iterator it = m_statis.m_domain.find(ui.domain);
+		if (it == m_statis.m_domain.end())
+		{
+            DomainAttr da;
+			da.isShield = false;
+			da.isSeed = false;
+			m_statis.m_domain.insert(make_pair(ui.domain, da));
+		}
+	}
+	fclose(fp);
+	SDLOG_INFO(SP_LOGNAME, "load " << count << " cate success");
+	
+	count = 0;
+	fp = fopen(item_path, "r");
+	if (!fp)
+	{
+		SDLOG_WARN(SP_WFNAME, "open item file error: "<<cate_path);
+		return -1;
+	}
+
+	while (!feof(fp))
+	{
+		memset(line, 0, sizeof(line));
+		get_one_line(fp, line, sizeof(line), lineno);
+		p = filter_headtail_blank(line);
+		if (p[0] == '\0')
+		{
+			SDLOG_INFO(SP_LOGNAME, "find an empty seed");
+			continue;
+		}
+		for (int i = 0; i< sizeof(line); ++i){
+			if (p[i] == '\t'){
+				p[i] = '\0';
+				break;
+			}
+		}		
+		ucUrl uc_url(p);
+		if (uc_url.build() != FR_OK)
+		{
+			SDLOG_INFO(SP_LOGNAME, "seed build error for\t" << p);
+			continue;
+		}
+
+        count++;
+
+		ui.url = uc_url.get_url();
+		ui.site = uc_url.get_site();
+		ui.domain = uc_url.get_domain();
+		ui.last_crawl_time = 0;
+		mp_ioq->push_url(ui);
+
+        map<string, DomainAttr>::iterator it = m_statis.m_domain.find(ui.domain);
+		if (it == m_statis.m_domain.end())
+		{
+            DomainAttr da;
+			da.isShield = false;
+			da.isSeed = false;
+			m_statis.m_domain.insert(make_pair(ui.domain, da));
+		}
+	}
+	fclose(fp);
+	SDLOG_INFO(SP_LOGNAME, "load " << count << " item success");
+
+	return 0;
+}
+
 int CSpider::load_seed(const char* seed_path)
 {
 	CSpiderConf& conf = m_spider_conf;
@@ -823,6 +964,7 @@ int CSpider::load_seed(const char* seed_path)
 		}
 	}
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " seeds success");
+	fclose(fp);
 
 	return 0;
 }

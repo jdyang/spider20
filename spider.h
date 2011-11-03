@@ -68,6 +68,8 @@ public:
 	map<string, string> m_sites;
 	int m_select_rounds;
 	
+	int load_input_urls(const char* input_path);
+	
 	CSpiderStatis m_statis;
 
 	CPageOutput* mp_page_output;
@@ -90,6 +92,7 @@ private:
 
     int load_stop_domain(const char* stop_file);
     int load_seed(const char* seed_path);
+	
 };
 
 #endif
