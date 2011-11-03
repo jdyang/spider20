@@ -110,6 +110,13 @@ void* crawl_thread(void* arg)
 		cerr << "utf8 init error" << endl;
 		exit(1);
 	}
+
+	if (0 != url_recog.load_conf(conf.strong_rule_conf_path.c_str()))
+	{
+		cerr << "strong rules load conf error" << endl;
+		exit(1);
+	}
+
 	if (extractor.load_conf(conf.extractor_conf_path)!=FR_OK){
 		cerr << "LOAD extractor configuration failed." << endl;
 		exit(1);
@@ -1458,6 +1465,13 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.converter_code_path = str_result;
 
+	// 强规则配置文件路径
+	if ((str_result=conf.get_string_item("STRONG_RULE_CONF_PATH")).empty())
+	{
+		printf("get item STRONG_RULE_CONF_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.strong_rule_conf_path = str_result;
 	return 0;
 }
 
@@ -1478,7 +1492,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string cate_file = conf.url_output_dir + conf.cate_output_path;
+    string cate_file = conf.url_output_dir + CATE_LIST;
 	if (0 != mp_cate_output->init(cate_file.c_str()))
 	{
 		cerr << "init cate output error, exit!" << endl;
@@ -1491,7 +1505,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string item_file = conf.url_output_dir + conf.item_output_path;
+    string item_file = conf.url_output_dir + ITEM_LIST;
 	if (0 != mp_item_output->init(item_file.c_str()))
 	{
 		cerr << "init item output error, exit!" << endl;
@@ -1504,7 +1518,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string fail_file = conf.url_output_dir + conf.fail_output_path;
+    string fail_file = conf.url_output_dir + FAIL_LIST;
 	if (0 != mp_fail_output->init(fail_file.c_str()))
 	{
 		cerr << "init fail output error, exit!" << endl;
