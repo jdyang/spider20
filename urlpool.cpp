@@ -73,6 +73,7 @@ UrlInfo CUrlPool::pop_url(void) {
 int CUrlPool::print_pool()
 {
 	cout << "queue size: " << m_url_queue.size() << " set size: " << m_url_set.size() << endl;
+	return 0;
 }
 
 FuncRet CUrlPool::load_urls(const char *path) {

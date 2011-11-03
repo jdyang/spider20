@@ -1,6 +1,7 @@
 #include <string>
 #include <time.h>
 #include <deque>
+#include <map>
 #include <iostream>
 #include <algorithm>
 #include <functional>
@@ -75,7 +76,7 @@ void* crawl_thread(void* arg)
 {
 	CSpider* psp = (CSpider*)arg;
 	CSpiderConf& conf = (psp->m_spider_conf);
-	CSelectedQueue& sq = *(psp->m_selected_queue);
+	CSelectedQueue& sq = *(psp->mp_selected_queue);
 	CDnsClient& dns_client = psp->m_dns_client;
 	CLevelPool* p_level_pool = psp->mp_level_pool;
 
@@ -135,7 +136,7 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 
-        if (!p_selected_queue->pop(qi))  // SelectedQueue为空
+        if (!psp->mp_selected_queue->pop(qi))  // SelectedQueue为空
 		{
 			if (-1 == p_page_output->append(NULL, 0, false)) // 为了满足即使没有抓到网页也写一个page.list空文件
 			{
@@ -175,7 +176,7 @@ void* crawl_thread(void* arg)
 		if (!p_level_pool->is_crawl_enabled(qi.url))  // 不符合压力控制规则
 		{
 			SDLOG_INFO(SP_LOGNAME, "DELAY\t"<<qi.url);
-			p_selected_queue->push(qi);
+			psp->mp_selected_queue->push(qi);
 			continue;
 		}
 
@@ -289,7 +290,7 @@ void* crawl_thread(void* arg)
 			p_level_pool->finish_crawl(site);
 			SDLOG_INFO(SP_LOGNAME, "NET_FAIL\t"<<url);
 			qi.fail_count++;
-			p_selected_queue->push(qi);
+			psp->mp_selected_queue->push(qi);
 			continue;
 		}
 		if (file_length <= conf.min_page_len && file_length > conf.max_page_len)
@@ -443,7 +444,7 @@ int CSpider::select_url()
 		int i = 0;
 		for (i = 0 ; i < tmp_vector.size() && c_num < prio_num_c && i_num < prio_num_i; ++i){
 			if (tmp_vector[i].type == 1){
-				++c_num;``
+				++c_num;
 			} else {
 				++i_num;
 			}
