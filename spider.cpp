@@ -374,8 +374,8 @@ int CSpider::select_url()
 	
 	vector<string> domain_p;
 	vector<string> domain_o;
-	map<string, vector<UrlInfo>> select_map;
-	vector<UrlInfo>[m_statis.m_domain.size()] url_array;
+	map<string, vector<UrlInfo> > select_map;
+	vector<vector<UrlInfo> > url_array;
 	map<string, DomainAttr>::iterator domain_it;
 	int i = -1;
 	
@@ -385,6 +385,8 @@ int CSpider::select_url()
 		} else if ((*domain_it).second.isSeed == 0 && (*domain_it).second.isShield == 0) {
 			domain_o.insert((*domain_it).first);
 		}
+		vector<UrlInfo> tmp;
+		url_array.push_back(tmp);
 		select_map.insert(make_pair((*domain_it).first, url_array[++i]));
 	}
 	int o_domain_num = domain_o.size();
