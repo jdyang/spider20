@@ -1,5 +1,12 @@
 #include <string>
 #include <time.h>
+#include <deque>
+#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <ctime>
+#include <cstdlib>
 
 #include "sse_common.h"
 #include "sign.h"
@@ -44,7 +51,11 @@ void* select_thread(void* arg)
 		
 		SDLOG_INFO(SP_LOGNAME,"start selecting.");
 		if (!psp->select_url()) {
-			//TODO
+			if (!psp->next_round()){
+				SDLOG_WARN(SP_WFNAME, "next round transfer error!");
+				exit(-1);
+			}
+			continue;
 		}		//select from 4 queue
 		SDLOG_INFO(SP_LOGNAME,"finish selecting.");
 		SDLOG_INFO(SP_LOGNAME,"start insert urls into select queue.");
@@ -350,7 +361,157 @@ void* work_thread(void* arg)
 
 int CSpider::select_url()
 {
+	int select_nums = m_spider_conf.select_nums_per_time;
+	int priority_quota = m_spider_conf.priority_quota;
+	int cate_percent = m_spider_conf.cate_percent/(m_spider_conf.cate_percent + m_spider_conf.item_percent);
+	int select_remains = 0;
 	
+	vector<string> domain_p;
+	vector<string> domain_o;
+	map<string, vector<UrlInfo>> select_map;
+	vector<UrlInfo>[m_statis.m_domain.size()] url_array;
+	map<string, DomainAttr>::iterator domain_it;
+	int i = -1;
+	
+	for (domain_it = m_statis.m_domain.begin(); domain_it != m_statis.m_domain.end(); ++domain_it) {
+		if ((*domain_it).second.isSeed == 1 && (*domain_it).second.isShield == 0){
+			domain_p.insert((*domain_it).first);
+		} else if ((*domain_it).second.isSeed == 0 && (*domain_it).second.isShield == 0) {
+			domain_o.insert((*domain_it).first);
+		}
+		select_map.insert(make_pair((*domain_it).first, url_array[++i]));
+	}
+	int o_domain_num = domain_o.size();
+	int p_domain_num = domain_p.size();
+	int o_link_num;//TODO
+	int p_link_num
+	
+	deque<UrlInfo> tmp_que = m_cpq->get_url_queue();
+	deque<UrlInfo>::iterator it;
+	m_cpq->get_url_mutex().lock();
+	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
+		(*it).type = 1;
+		select_map[(*it).domain].push_back(*it);
+	}
+	m_cpq->get_url_queue().clear();
+	m_cpq->get_url_mutex().unlock();
+	
+	tmp_que = m_ipq->get_url_queue();
+	m_ipq->get_url_mutex().lock();
+	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
+		(*it).type = 0;
+		select_map[(*it).domain].push_back(*it);
+	}
+	m_ipq->get_url_queue().clear();
+	m_ipq->get_url_mutex().unlock();
+	
+	tmp_que = m_ioq->get_url_queue();
+	m_ioq->get_url_mutex().lock();
+	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
+		(*it).type = 0;
+		select_map[(*it).domain].push_back(*it);
+	}
+	m_ioq->get_url_queue().clear();
+	m_ioq->get_url_mutex().unlock();
+	
+	tmp_que = m_icq->get_url_queue();
+	m_icq->get_url_mutex().lock();
+	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
+		(*it).type = 1;
+		select_map[(*it).domain].push_back(*it);
+	}	
+	m_icq->get_url_queue().clear();
+	m_icq->get_url_mutex().unlock();
+	
+	int prio_num = select_nums*priority_quota/10;
+	int ord_num = select_nums - prio_num;
+	int prio_real_num = 0;
+	
+	vector<string>::iterator tmp_it;
+	for (tmp_it = domain_p.begin(); tmp_it != domain_p.end(); ++tmp_it){
+		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
+		int prio_num_c = prio_num * tmp_vector.size()/p_link_num*cate_percent;
+		int prio_num_i = prio_num * tmp_vector.size()/p_link_num - prio_num_c + 1;
+		
+		int i_num = 0;
+		int c_num = 0;	
+		int i = 0;
+		for (i = 0 ; i < tmp_vector.size() && c_num < prio_num_c && i_num < prio_num_i; ++i){
+			if (tmp_vector[i].type == 1){
+				++c_num;
+			} else {
+				++i_num;
+			}
+			m_select_buffer.push_back(tmp_vector[i]);
+		}
+		int flag = 0;
+		int tmp_num = i_num;
+		int max_tmp_num = prio_num_i;
+		if (c_num < prio_num_c) {
+			flag = 1;
+			tmp_num = c_num;
+			max_tmp_num = prio_num_c;
+		}
+		for (int k = i; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
+			if (tmp_vector[k] == flag) {
+				m_select_buffer.push_back(tmp_vector[k]);
+				++tmp_num;
+			} else{
+				m_select_back.push_back(tmp_vector[k]);
+			}
+		}
+		for (int l = k; l < tmp_vector.size(); ++l){
+			m_select_back.push_back(tmp_vector[l]);
+		}
+	}
+	
+	//ordinay queue
+	for (tmp_it = domain_o.begin(); tmp_it != domain_o.end(); ++tmp_it){
+		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
+		int prio_num_c = prio_num * tmp_vector.size()/o_link_num*cate_percent;
+		int prio_num_i = prio_num * tmp_vector.size()/o_link_num - prio_num_c + 1;
+		
+		int i_num = 0;
+		int c_num = 0;	
+		int i = 0;
+		for (i = 0 ; i < tmp_vector.size() && c_num < prio_num_c && i_num < prio_num_i; ++i){
+			if (tmp_vector[i].type == 1){
+				++c_num;
+			} else {
+				++i_num;
+			}
+			m_select_buffer.push_back(tmp_vector[i]);
+		}
+		int flag = 0;
+		int tmp_num = i_num;
+		int max_tmp_num = prio_num_i;
+		if (c_num < prio_num_c) {
+			flag = 1;
+			tmp_num = c_num;
+			max_tmp_num = prio_num_c;
+		}
+		for (int k = i; k < tmp_vector.size() && tmp_num < max_tmp_num; ++k){
+			if (tmp_vector[k] == flag) {
+				m_select_buffer.push_back(tmp_vector[k]);
+				++tmp_num;
+			} else{
+				m_select_back.push_back(tmp_vector[k]);
+			}
+		}
+		for (int l = k; l < tmp_vector.size(); ++l){
+			m_select_back.push_back(tmp_vector[l]);
+		}
+	}
+	
+	random_shuffle(m_select_buffer.begin(), m_select_buffer.end());
+	
+	// judge if it need to go the next round
+
+	return 0;
+}
+
+int CSpider::next_round()
+{
 	return 0;
 }
 

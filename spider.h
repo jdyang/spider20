@@ -45,6 +45,7 @@ public:
 	int select_url();//0 for ok, 1 for next round
 	int insert_url();
 	int update_conf();
+	int next_round();
 	
 	CSpiderConf m_spider_conf;
 
@@ -60,7 +61,8 @@ public:
 	CUrlPool* mp_ioq;
 	
 	//select tmp queue, need to be shuffled 
-	vector<UrlInfo> select_buffer;
+	vector<UrlInfo> m_select_buffer;
+	vector<UrlInfo> m_select_back;
 	
 	CSpiderStatis m_statis;
 
