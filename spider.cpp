@@ -413,6 +413,7 @@ int CSpider::select_url()
 		} else if ((*domain_it).second.isSeed == 0 && (*domain_it).second.isShield == 0) {
 			domain_o.push_back((*domain_it).first);
 		}
+		SDLOG_INFO(SP_LOGNAME, "add domain " << (*domain_it).first);
 		vector<UrlInfo> tmp;
 		url_array.push_back(tmp);
 		select_map.insert(make_pair((*domain_it).first, url_array[++i]));
@@ -802,8 +803,8 @@ int CSpider::load_input_urls(const char* input_path)
 {
 	CSpiderConf& conf = m_spider_conf;
 	
-	string cate_path = string(input_path) + "/" + ITEM_LIST;
-	string item_path = string(input_path) + "/" + CATE_LIST;
+	string cate_path = string(input_path) + "/" + CATE_LIST;
+	string item_path = string(input_path) + "/" + ITEM_LIST;
 	
 	m_statis.m_domain.clear();
 
