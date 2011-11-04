@@ -24,7 +24,7 @@ string get_local_time()
 
 CSpiderStatis::CSpiderStatis()
 {
-
+    m_fp = NULL;
 }
 
 CSpiderStatis::~CSpiderStatis()

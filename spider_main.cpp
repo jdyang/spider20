@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	
-	if (!sp.load_conf(argv[1])) {
+	if (-1 == sp.load_conf(argv[1])) {
 		cerr << "spider_main load conf error" << endl;
 		return -1;
 	}
@@ -73,6 +73,7 @@ int main(int argc, char **argv)
 		rlim.rlim_cur = rlim.rlim_max = RLIM_INFINITY;
 	}
 	if (setrlimit(RLIMIT_CORE, &rlim)!=0) {
+		cerr << strerror(errno) << endl;
 		SDLOG_FATAL(SP_WFNAME,"Set coredump size failed.");
 		return -1;
 	}

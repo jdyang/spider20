@@ -1194,7 +1194,7 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.log_conf_path = str_result;
 	// 是否暂停spider
-	if ((int_result=conf.get_int_item("SPIDER_PAUSED")) == 0)
+	if ((int_result=conf.get_int_item("SPIDER_PAUSED")) < 0)
 	{
 		printf("get item SPIDER_PAUSED error\n");
 		return -1;
@@ -1429,9 +1429,9 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.priority_quota = int_result;
     // 选取时 category所占百分比
-	if ((int_result=conf.get_int_item("CATE_PERSENT")) <= 0)
+	if ((int_result=conf.get_int_item("CATE_PERCENT")) <= 0)
 	{
-		printf("get item CATE_PERSENT error\n");
+		printf("get item CATE_PERCENT error\n");
 		return -1;
 	}
 	m_spider_conf.cate_percent = int_result;
@@ -1478,6 +1478,7 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.strong_rule_conf_path = str_result;
+
 	return 0;
 }
 
