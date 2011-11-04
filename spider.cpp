@@ -397,7 +397,7 @@ int CSpider::select_url()
 	int select_nums = m_spider_conf.select_nums_per_time;
 	int min_select_threshold = m_spider_conf.min_select_threshold;
 	int priority_quota = m_spider_conf.priority_quota;
-	float cate_percent = m_spider_conf.cate_percent/(m_spider_conf.cate_percent + m_spider_conf.item_percent);
+	float cate_percent = 1.0*m_spider_conf.cate_percent/(m_spider_conf.cate_percent + m_spider_conf.item_percent);
 	
 //	int select_remains = 0;
 	
@@ -468,7 +468,7 @@ int CSpider::select_url()
 	vector<string>::iterator tmp_it;
 	for (tmp_it = domain_p.begin(); tmp_it != domain_p.end(); ++tmp_it){
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
-		int prio_num_c = (int)(cate_percent * prio_num) * tmp_vector.size()/p_link_num;
+		int prio_num_c = (cate_percent * prio_num) * tmp_vector.size()/p_link_num;
 		int prio_num_i = prio_num * tmp_vector.size()/p_link_num - prio_num_c + 1;
 		
 		SDLOG_INFO(SP_LOGNAME, "priority domain " << *tmp_it << " selected cate: " << prio_num_c << " and item : " << prio_num_i);
@@ -512,7 +512,7 @@ int CSpider::select_url()
 	//ordinay queue
 	for (tmp_it = domain_o.begin(); tmp_it != domain_o.end(); ++tmp_it){
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
-		int ord_num_c = (int)(cate_percent * ord_num) * tmp_vector.size()/o_link_num;
+		int ord_num_c = (cate_percent * ord_num) * tmp_vector.size()/o_link_num;
 		int ord_num_i = ord_num * tmp_vector.size()/o_link_num - ord_num_c + 1;
 		
 		SDLOG_INFO(SP_LOGNAME, "ordinary domain " << *tmp_it << " selected cate: " << ord_num_c << " and item : " << ord_num_i);
