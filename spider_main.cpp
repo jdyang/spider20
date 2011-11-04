@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	
-	if (!sp.load_conf(argv[1])) {
+	if (-1 == sp.load_conf(argv[1])) {
 		cerr << "spider_main load conf error" << endl;
 		return -1;
 	}
