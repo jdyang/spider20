@@ -55,15 +55,15 @@ void* select_thread(void* arg)
 		++(psp->m_select_rounds);
 		start_time=time(NULL);
 		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << psp->m_select_rounds);
-		if (!psp->update_conf()) {
+		if (psp->update_conf() < 0) {
 			cerr << "load cmd conf error!" << endl;
 			exit(-1);
 		}
 		
 		SDLOG_INFO(SP_LOGNAME,"start selecting.");
-		if (!psp->select_url()) {
+		if (psp->select_url() < 0) {
 			SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
-			if (!psp->next_round()){
+			if (psp->next_round() < 0){
 				SDLOG_WARN(SP_WFNAME, "next samsara transfer error!");
 				exit(-1);
 			}
