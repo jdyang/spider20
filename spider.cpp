@@ -1489,7 +1489,7 @@ int CSpider::start()
 	CSpiderConf& conf = m_spider_conf;
 
 	if (!m_statis.init(conf.statis_file_path.c_str()) || !m_statis.write_message_to_file("start spider!")){
-		cerr << "init statis file error , exit!" << endl;
+		cerr << "init statis file error , exit!" << conf.statis_file_path << endl;
 		return -1;
 	}
 	
