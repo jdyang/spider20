@@ -874,6 +874,8 @@ int CSpider::load_input_urls(const char* input_path)
 		}
 	}
 	fclose(fp);
+	int real_num = m_statis.get_coq_url_num() + count;
+	m_statis.set_coq_url_num(real_num);
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " cate success");
 	
 	count = 0;
@@ -925,6 +927,8 @@ int CSpider::load_input_urls(const char* input_path)
 		}
 	}
 	fclose(fp);
+	real_num = m_statis.get_ioq_url_num() + count;
+	m_statis.set_ioq_url_num(real_num);
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " item success");
 
 	return 0;
