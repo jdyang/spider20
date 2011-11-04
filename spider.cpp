@@ -46,7 +46,7 @@ void* select_thread(void* arg)
 //	CDnsClient& dns_client = psp->m_dns_client;
 //	CLevelPool* p_level_pool = psp->mp_level_pool;
 	
-	if (psp->load_input_urls(conf.url_output_dir.c_str()) < 0){
+	if (psp->load_input_urls(conf.url_input_dir.c_str()) < 0){
 		SDLOG_WARN(SP_WFNAME, "load input urls error!");
 		exit(-1);
 	}
@@ -55,15 +55,15 @@ void* select_thread(void* arg)
 		++(psp->m_select_rounds);
 		start_time=time(NULL);
 		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << psp->m_select_rounds);
-		if (!psp->update_conf()) {
+		if (psp->update_conf() < 0) {
 			cerr << "load cmd conf error!" << endl;
 			exit(-1);
 		}
 		
 		SDLOG_INFO(SP_LOGNAME,"start selecting.");
-		if (!psp->select_url()) {
+		if (psp->select_url() < 0) {
 			SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
-			if (!psp->next_round()){
+			if (psp->next_round() < 0){
 				SDLOG_WARN(SP_WFNAME, "next samsara transfer error!");
 				exit(-1);
 			}
@@ -1049,7 +1049,7 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
 			printf("extracted link build error\n");
 			continue;
 		}
-		type = url_recog->get_type(it->second.link);
+		
 		if (type == ITEM_LINK)
 		{
 			if (conf.extract_item_url)  // 需要提取item
@@ -1268,6 +1268,12 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.url_output_dir = str_result;
+	if ((str_result=conf.get_string_item("URL_INPUT_DIR")).empty())
+	{
+		printf("get item URL_INPUT_DIR error\n");
+		return -1;
+	}
+	m_spider_conf.url_input_dir = str_result;
 	// item连接的输出路径
 	if ((str_result=conf.get_string_item("ITEM_OUTPUT_PATH")).empty())
 	{
@@ -1605,6 +1611,7 @@ int CSpider::start()
     m_conf_change_time = -1;
     m_stop_domain_conf_change_time = -1;
     m_seed_change_time = -1;
+	m_select_rounds = 0;
 	
 	pthread_t works[m_spider_conf.work_thread_num];
 	pthread_t select;

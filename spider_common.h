@@ -32,6 +32,7 @@ public:
     string cate_input_path;
 	string seed_path;
 	string url_output_dir;
+	string url_input_dir;
     string item_output_path;
 	string cate_output_path;
 	string fail_output_path;
