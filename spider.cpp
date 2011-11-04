@@ -1173,7 +1173,7 @@ int CSpider::load_conf(const char* conf_path)
 
     m_conf_path = conf_path;
 
-	if (0 != conf.load_conf(conf_path))
+	if (FR_OK != conf.load_conf(conf_path))
 	{
 		printf("load conf error: %s\n", conf_path);
 		return -1;
@@ -1488,8 +1488,8 @@ int CSpider::start()
 
 	CSpiderConf& conf = m_spider_conf;
 
-	if (!m_statis.init(conf.statis_file_path.c_str()) || !m_statis.write_message_to_file("start spider!")){
-		cerr << "init statis file error , exit!" << endl;
+	if (-1 == m_statis.init(conf.statis_file_path.c_str()) || -1 == m_statis.write_message_to_file("start spider!")){
+		cerr << "init statis file error , exit!" << conf.statis_file_path << endl;
 		return -1;
 	}
 	
@@ -1499,7 +1499,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string cate_file = conf.url_output_dir + CATE_LIST;
+    string cate_file = conf.url_output_dir + "/" + CATE_LIST;
 	if (0 != mp_cate_output->init(cate_file.c_str()))
 	{
 		cerr << "init cate output error, exit!" << endl;
@@ -1512,7 +1512,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string item_file = conf.url_output_dir + ITEM_LIST;
+    string item_file = conf.url_output_dir + "/" + ITEM_LIST;
 	if (0 != mp_item_output->init(item_file.c_str()))
 	{
 		cerr << "init item output error, exit!" << endl;
@@ -1525,7 +1525,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string fail_file = conf.url_output_dir + FAIL_LIST;
+    string fail_file = conf.url_output_dir + "/ " +  FAIL_LIST;
 	if (0 != mp_fail_output->init(fail_file.c_str()))
 	{
 		cerr << "init fail output error, exit!" << endl;
