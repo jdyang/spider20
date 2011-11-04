@@ -30,7 +30,10 @@ CSpiderStatis::CSpiderStatis()
 CSpiderStatis::~CSpiderStatis()
 {
 	if(m_fp != NULL)
+	{
 		fclose(m_fp);
+		m_fp = NULL;
+	}
 }
 
 int CSpiderStatis::init(const char* file_path)
