@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 		SDLOG_FATAL(SP_WFNAME,"Set stack size failed.");
 		return -1;
 	}
-	
+/*	
 	if (getrlimit(RLIMIT_CORE, &rlim)==0) {
 		rlim.rlim_cur = rlim.rlim_max = RLIM_INFINITY;
 	}
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 		SDLOG_FATAL(SP_WFNAME,"Set coredump size failed.");
 		return -1;
 	}
-	
+*/	
 	if (!sp.start()) {
 		cerr << "spider start error!" << endl;
 		return -1;
