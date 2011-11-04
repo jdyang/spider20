@@ -334,6 +334,7 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 		p_level_pool->finish_crawl(site);
+		SDLOG_INFO(SP_LOGNAME, "SUCCESS\t"<<url);
 
         if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue == QUEUE_TYPE_COQ)  // category写入cate.list
 		{
