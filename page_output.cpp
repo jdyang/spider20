@@ -66,7 +66,6 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 		memset(buf, 0, sizeof(buf));
         sprintf(buf, "%s/%d%02d%02d", conf.page_dir.c_str(), year, month, day);
 		m_cur_day = day;
-		cout << buf << endl;
 		if (0 != mkdir(buf, 0777))
 		{
 			printf("mkdir error\n");

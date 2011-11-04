@@ -111,7 +111,7 @@ void* crawl_thread(void* arg)
 	
 	if (0 != utf8_converter.init(conf.converter_code_path.c_str()))
 	{
-		cerr << "utf8 init error" << endl;
+		cerr << "utf8 init error: " << conf.converter_code_path << endl;
 		exit(1);
 	}
 
@@ -722,6 +722,11 @@ int CSpider::update_conf()
 	}
 
     // 新加种子
+	if (-1 == access(conf.seed_path.c_str(), 0))
+	{
+		SDLOG_INFO(SP_LOGNAME, "seed file [" << conf.seed_path << "] not exist");
+		return 0;
+	}
 	if (-1 == (change_time=get_change_time(conf.seed_path.c_str())))
 	{
 		SDLOG_WARN(SP_WFNAME, "detect seed change error");
