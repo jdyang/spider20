@@ -79,6 +79,7 @@ void* select_thread(void* arg)
 		SDLOG_INFO(SP_LOGNAME,"finish inserting.");
 		now_time=time(NULL);
 		left_time=(int)(conf.min_select_interval-difftime(now_time,start_time));
+		SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
 		if(left_time>0){
 			usleep(left_time * 1000);
 		}
@@ -421,8 +422,11 @@ int CSpider::select_url()
 	}
 //	int o_domain_num = domain_o.size();
 //	int p_domain_num = domain_p.size();
-	int o_link_num = m_statis.get_coq_url_num() + m_statis.get_ioq_url_num();
-	int p_link_num = m_statis.get_cpq_url_num() + m_statis.get_ipq_url_num();
+//	int o_link_num = m_statis.get_coq_url_num() + m_statis.get_ioq_url_num();
+//	int p_link_num = m_statis.get_cpq_url_num() + m_statis.get_ipq_url_num();
+	
+	int o_link_num = mp_coq->get_url_queue().size() + mp_ioq->get_url_queue().size();
+	int p_link_num = mp_cpq->get_url_queue().size() + mp_ipq->get_url_queue().size();
 	
 	deque<UrlInfo> tmp_que = mp_cpq->get_url_queue();
 	deque<UrlInfo>::iterator it;
@@ -463,6 +467,7 @@ int CSpider::select_url()
 	
 	int prio_num = select_nums*priority_quota/10;
 	int ord_num = select_nums - prio_num;
+	int prio_count = 0;
 //	int prio_real_num = 0;
 	
 	vector<string>::iterator tmp_it;
@@ -470,6 +475,8 @@ int CSpider::select_url()
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
 		int prio_num_c = (cate_percent * prio_num) * tmp_vector.size()/p_link_num;
 		int prio_num_i = prio_num * tmp_vector.size()/p_link_num - prio_num_c + 1;
+		if (prio_num_c < 10)prio_num_c = 10;
+		if (prio_num_i < 10)prio_num_i = 10;
 		
 		SDLOG_INFO(SP_LOGNAME, "priority domain " << *tmp_it << " selected cate: " << prio_num_c << " and item : " << prio_num_i);
 		
@@ -484,6 +491,7 @@ int CSpider::select_url()
 			}
 			m_sites.insert(make_pair(tmp_vector[i].site, "NO_IP"));
 			m_select_buffer.push_back(tmp_vector[i]);
+			++prio_count;
 		}
 		int flag = 2;
 		int tmp_num = i_num;
@@ -499,14 +507,21 @@ int CSpider::select_url()
 			if (tmp_vector[k].type == flag) {
 				m_sites.insert(make_pair(tmp_vector[k].site, "NO_IP"));
 				m_select_buffer.push_back(tmp_vector[k]);
+				++prio_count;
 				++tmp_num;
 			} else{
 				m_select_back_p.push_back(tmp_vector[k]);
+				++prio_count;
 			}
 		}
 		for (unsigned int l = k; l < tmp_vector.size(); ++l){
 			m_select_back_p.push_back(tmp_vector[l]);
+			++prio_count;
 		}
+	}
+	
+	if (prio_count < prio_num){
+		ord_num = ord_num + prio_num -prio_count;
 	}
 	
 	//ordinay queue
@@ -514,6 +529,8 @@ int CSpider::select_url()
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
 		int ord_num_c = (cate_percent * ord_num) * tmp_vector.size()/o_link_num;
 		int ord_num_i = ord_num * tmp_vector.size()/o_link_num - ord_num_c + 1;
+		if (ord_num_c < 10)ord_num_c = 10;
+		if (ord_num_i < 10)ord_num_i = 10;
 		
 		SDLOG_INFO(SP_LOGNAME, "ordinary domain " << *tmp_it << " selected cate: " << ord_num_c << " and item : " << ord_num_i);
 		
@@ -874,6 +891,8 @@ int CSpider::load_input_urls(const char* input_path)
 		}
 	}
 	fclose(fp);
+	int real_num = m_statis.get_coq_url_num() + count;
+	m_statis.set_coq_url_num(real_num);
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " cate success");
 	
 	count = 0;
@@ -925,6 +944,8 @@ int CSpider::load_input_urls(const char* input_path)
 		}
 	}
 	fclose(fp);
+	real_num = m_statis.get_ioq_url_num() + count;
+	m_statis.set_ioq_url_num(real_num);
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " item success");
 
 	return 0;
