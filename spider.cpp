@@ -421,8 +421,11 @@ int CSpider::select_url()
 	}
 //	int o_domain_num = domain_o.size();
 //	int p_domain_num = domain_p.size();
-	int o_link_num = m_statis.get_coq_url_num() + m_statis.get_ioq_url_num();
-	int p_link_num = m_statis.get_cpq_url_num() + m_statis.get_ipq_url_num();
+//	int o_link_num = m_statis.get_coq_url_num() + m_statis.get_ioq_url_num();
+//	int p_link_num = m_statis.get_cpq_url_num() + m_statis.get_ipq_url_num();
+	
+	int o_link_num = mp_coq->get_url_queue().size() + mp_ioq->get_url_queue().size();
+	int p_link_num = mp_cpq->get_url_queue().size() + mp_ipq->get_url_queue().size();
 	
 	deque<UrlInfo> tmp_que = mp_cpq->get_url_queue();
 	deque<UrlInfo>::iterator it;
