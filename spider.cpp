@@ -1044,7 +1044,7 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
 			printf("extracted link build error\n");
 			continue;
 		}
-		type = url_recog->get_type(it->second.link);
+		
 		if (type == ITEM_LINK)
 		{
 			if (conf.extract_item_url)  // 需要提取item
