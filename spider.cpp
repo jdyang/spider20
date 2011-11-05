@@ -1574,7 +1574,6 @@ int CSpider::start()
 		cerr << "malloc cate output error, exit!" << endl;
 		return -1;
 	}
-
     string cate_file = conf.url_output_dir + "/" + CATE_LIST;
 	if (0 != mp_cate_output->init(cate_file.c_str()))
 	{
@@ -1587,7 +1586,6 @@ int CSpider::start()
 		cerr << "malloc item output error, exit!" << endl;
 		return -1;
 	}
-
     string item_file = conf.url_output_dir + "/" + ITEM_LIST;
 	if (0 != mp_item_output->init(item_file.c_str()))
 	{
