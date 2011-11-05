@@ -60,6 +60,11 @@ void* select_thread(void* arg)
 			exit(-1);
 		}
 		
+		if (psp->set_statis_to_file() < 0 ) {
+			cerr << "save statis to files error!" << endl;
+			exit(-1);
+		}
+		
 		SDLOG_INFO(SP_LOGNAME,"start selecting.");
 		if (psp->select_url() < 0) {
 			SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
