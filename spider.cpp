@@ -54,9 +54,15 @@ void* select_thread(void* arg)
 	while(1){
 		++(psp->m_select_rounds);
 		start_time=time(NULL);
+		SDLOG_INFO(SP_LOGNAME,"start in " << start_time);
 		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << psp->m_select_rounds);
 		if (psp->update_conf() < 0) {
 			cerr << "load cmd conf error!" << endl;
+			exit(-1);
+		}
+		
+		if (psp->set_statis_to_file() < 0 ) {
+			cerr << "save statis to files error!" << endl;
 			exit(-1);
 		}
 		
@@ -79,10 +85,13 @@ void* select_thread(void* arg)
 		SDLOG_INFO(SP_LOGNAME,"finish inserting.");
 		now_time=time(NULL);
 		left_time=(int)(conf.min_select_interval-difftime(now_time,start_time));
-		SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
+		SDLOG_INFO(SP_LOGNAME,"start in " << start_time << " now is " << now_time << " left " << left_time);
+		
 		if(left_time>0){
-			usleep(left_time * 1000);
+			SDLOG_INFO(SP_LOGNAME,"sleep " << left_time);
+			sleep(left_time);
 		}
+		SDLOG_INFO(SP_LOGNAME,"start going to next round.");
 	}
 	
 	return NULL;
@@ -448,7 +457,7 @@ int CSpider::select_url()
 	mp_ipq->get_url_queue().clear();
 	mp_ipq->get_url_mutex().unlock();
 	
-	tmp_que = mp_coq->get_url_queue();
+	tmp_que = mp_ioq->get_url_queue();
 	mp_ioq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 1;
@@ -473,6 +482,7 @@ int CSpider::select_url()
 	
 	vector<string>::iterator tmp_it;
 	for (tmp_it = domain_p.begin(); tmp_it != domain_p.end(); ++tmp_it){
+		SDLOG_INFO(SP_LOGNAME, "in the round " << m_select_rounds << "doamin: " *tmp_it << " has links: " << tmp_vector.size());
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
 		int prio_num_c = (cate_percent * prio_num) * tmp_vector.size()/p_link_num;
 		int prio_num_i = prio_num * tmp_vector.size()/p_link_num - prio_num_c + 1;
@@ -653,6 +663,7 @@ int CSpider::transfer()
 
 int CSpider::insert_url()
 {
+	SDLOG_INFO(SP_LOGNAME,"insert into sq " << m_select_buffer.size() << " back_o" << m_select_back_o.size() << " back_p"<<m_select_back_p.size());	
 	//push back to urlpool
 	vector<UrlInfo>::iterator it;
 	for (it = m_select_back_o.begin(); it != m_select_back_o.end(); ++it){
