@@ -212,7 +212,7 @@ void* crawl_thread(void* arg)
 
 		if (!p_level_pool->is_crawl_enabled(qi.url))  // 不符合压力控制规则
 		{
-			SDLOG_INFO(SP_LOGNAME, "DELAY\t"<<qi.url);
+			//SDLOG_INFO(SP_LOGNAME, "DELAY\t"<<qi.url);
 			psp->mp_selected_queue->push(qi);
 			continue;
 		}
