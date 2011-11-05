@@ -61,7 +61,7 @@ void* select_thread(void* arg)
 			exit(-1);
 		}
 		
-		if (psp->set_statis_to_file() < 0 ) {
+		if (psp->m_statis.set_statis_to_file() < 0 ) {
 			cerr << "save statis to files error!" << endl;
 			exit(-1);
 		}
