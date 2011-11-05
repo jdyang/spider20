@@ -54,6 +54,7 @@ void* select_thread(void* arg)
 	while(1){
 		++(psp->m_select_rounds);
 		start_time=time(NULL);
+		SDLOG_INFO(SP_LOGNAME,"start in " << start_time);
 		SDLOG_INFO(SP_LOGNAME,"start updating conf. in the round " << psp->m_select_rounds);
 		if (psp->update_conf() < 0) {
 			cerr << "load cmd conf error!" << endl;
@@ -84,10 +85,13 @@ void* select_thread(void* arg)
 		SDLOG_INFO(SP_LOGNAME,"finish inserting.");
 		now_time=time(NULL);
 		left_time=(int)(conf.min_select_interval-difftime(now_time,start_time));
-		SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
+		SDLOG_INFO(SP_LOGNAME,"start in " << start_time << " now is " << now_time << " left " << left_time);
+		
 		if(left_time>0){
+			SDLOG_INFO(SP_LOGNAME,"sleep " << left_time);
 			usleep(left_time * 1000);
 		}
+		SDLOG_INFO(SP_LOGNAME,"start going to next round.");
 	}
 	
 	return NULL;
@@ -453,7 +457,7 @@ int CSpider::select_url()
 	mp_ipq->get_url_queue().clear();
 	mp_ipq->get_url_mutex().unlock();
 	
-	tmp_que = mp_coq->get_url_queue();
+	tmp_que = mp_ioq->get_url_queue();
 	mp_ioq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 1;
