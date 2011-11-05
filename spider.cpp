@@ -1209,7 +1209,8 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 				  + strlen(page_sign2_buf)
 				  + strlen(flag_buf)
 				  + base64_content.length()
-				  + 10;                               // 10 "\t"
+				  + 10                              // 10 "\t"
+				  + 1;                              // newline
 
     if (total_len >= page_list_buf_len)
 	{
@@ -1217,10 +1218,10 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 		return -1;
 	}
 
-    strcat(page_list_buf, time_buf);
+    sprintf(page_list_buf, "%s\t", time_buf);
+
+    strcat(page_list_buf, url.c_str());
 	strcat(page_list_buf, "\t");
-    sprintf(page_list_buf, url.c_str());
-	sprintf(page_list_buf, "\t");
 	strcat(page_list_buf, domain.c_str());
 	strcat(page_list_buf, "\t");
 	strcat(page_list_buf, site.c_str());
@@ -1236,6 +1237,7 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 	strcat(page_list_buf, flag_buf);
 	strcat(page_list_buf, "\t");
 	strcat(page_list_buf, base64_content.c_str());
+	strcat(page_list_buf, "\n");
 
     if (0 != pout->append(page_list_buf, strlen(page_list_buf)))
 	{
