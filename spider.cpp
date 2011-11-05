@@ -1125,7 +1125,14 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
 			    ui.last_crawl_time = 0;
 			    ui.domain = uc_url.get_domain();
 			    ui.site = uc_url.get_site();
-
+                if (iq == mp_ioq)
+				{
+					ui.type = 0;
+				}
+				else
+				{
+					ui.type = 2;
+				}
                 iq->push_url(ui);
 			}
 		}
@@ -1137,6 +1144,14 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
 			    ui.last_crawl_time = 0;
 			    ui.domain = uc_url.get_domain();
 			    ui.site = uc_url.get_site();
+                if (cq == mp_coq)
+				{
+					ui.type = 1;
+				}
+				else
+				{
+					ui.type = 3;
+				}
 			    cq->push_url(ui);
 			}
 		}
