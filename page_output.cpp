@@ -55,7 +55,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	struct tm* p_now = localtime(&now);
 
 	int year = p_now->tm_year+1900;
-	int month = p_now->tm_mon;
+	int month = p_now->tm_mon + 1;
 	int day = p_now->tm_mday;
 	int hour = p_now->tm_hour;
 	int min = p_now->tm_min / conf.page_name_change_interval;
