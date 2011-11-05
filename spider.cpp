@@ -464,7 +464,7 @@ int CSpider::select_url()
 	tmp_que = mp_ioq->get_url_queue();
 	mp_ioq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
-		(*it).type = 1;
+		(*it).type = 0;
 		select_map[(*it).domain].push_back(*it);
 	}
 	mp_ioq->get_url_queue().clear();
@@ -707,7 +707,9 @@ int CSpider::insert_url()
 			default:item.which_queue = QUEUE_TYPE_COQ;break;
 
 		}
-		mp_selected_queue->push(item);
+		while(!mp_selected_queue->push(item)){
+			usleep(30 * 1000);
+		}
 	}
 	
 	return 0;
