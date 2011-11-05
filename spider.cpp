@@ -109,6 +109,7 @@ void* crawl_thread(void* arg)
 	CUrlOutput* p_item_output = psp->mp_item_output;
 	CUrlOutput* p_fail_output = psp->mp_fail_output;
 	CPageOutput* p_page_output = psp->mp_page_output;
+	CSpiderStatis& spider_statis = psp->m_statis;
 
 	CHttp http;
 	UTF8Converter utf8_converter;
@@ -345,8 +346,10 @@ void* crawl_thread(void* arg)
 		p_level_pool->finish_crawl(site);
 		SDLOG_INFO(SP_LOGNAME, "SUCCESS\t"<<url);
 
+
         if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue == QUEUE_TYPE_COQ)  // category写入cate.list
 		{
+			spider_statis.update_domain_cate_done(domain);
 			if (-1 == p_cate_output->append(qi.url))
 			{
 				SDLOG_WARN(SP_WFNAME, "category append error\t"<<url);
@@ -355,6 +358,7 @@ void* crawl_thread(void* arg)
 		}
 		else                           // item写入item.list
 		{
+			spider_statis.update_domain_item_done(domain);
 			if (-1 == p_item_output->append(qi.url))
 			{
 				SDLOG_WARN(SP_WFNAME, "item append error\t"<<url);
@@ -1698,3 +1702,4 @@ int CSpider::start()
 	
 	return 0;
 }
+
