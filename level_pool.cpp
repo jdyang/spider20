@@ -54,7 +54,7 @@ bool CLevelPool::is_crawl_enabled(string& site)
 		return false;
 	}
 
-    if (now - it->second.last_crawl_time < it->second.crawl_interval) // site crawl interval control
+    if (now - it->second.last_crawl_time < conf.default_site_crawl_interval) // site crawl interval control
 	{
 		pthread_mutex_unlock(&m_mutex);
 		return false;
