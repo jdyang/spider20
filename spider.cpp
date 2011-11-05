@@ -482,8 +482,8 @@ int CSpider::select_url()
 	
 	vector<string>::iterator tmp_it;
 	for (tmp_it = domain_p.begin(); tmp_it != domain_p.end(); ++tmp_it){
-		SDLOG_INFO(SP_LOGNAME, "in the round " << m_select_rounds << "doamin: " *tmp_it << " has links: " << tmp_vector.size());
 		vector<UrlInfo> tmp_vector = select_map[*tmp_it];
+		SDLOG_INFO(SP_LOGNAME, "in the round " << m_select_rounds << "doamin: "  << *tmp_it << " has links: " << tmp_vector.size());
 		int prio_num_c = (cate_percent * prio_num) * tmp_vector.size()/p_link_num;
 		int prio_num_i = prio_num * tmp_vector.size()/p_link_num - prio_num_c + 1;
 		if (prio_num_c < 10)prio_num_c = 10;
