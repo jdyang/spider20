@@ -62,3 +62,13 @@ int CSelectedQueue::size(void)
 
 	return size;
 }
+
+int CSelectedQueue::avail_count(void)
+{
+	int c = 0;
+	pthread_mutex_lock(&m_mutex);
+	c = m_size-m_count;
+	pthread_mutex_unlock(&m_mutex);
+
+	return c;
+}

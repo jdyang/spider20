@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
 	CUrlRecognizer url_recog;
 
-	if (url_recog.load_conf("../../conf/rc/url_rc.conf") != FR_OK) {
+	if (url_recog.load_conf("../../conf/strong_rule.conf") != FR_OK) {
 		cout << "load_conf error" << endl;
 	}
 

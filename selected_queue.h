@@ -32,6 +32,7 @@ public:
 	bool push(SSQItem qi);
 	bool pop(SSQItem& qi);
 	int size(void);
+    int avail_count(void);
 private:
     deque<SSQItem> m_queue;
 	pthread_mutex_t m_mutex;

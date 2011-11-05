@@ -339,6 +339,7 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 		p_level_pool->finish_crawl(site);
+		SDLOG_INFO(SP_LOGNAME, "SUCCESS\t"<<url);
 
         if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue == QUEUE_TYPE_COQ)  // category写入cate.list
 		{
@@ -961,6 +962,8 @@ int CSpider::load_seed(const char* seed_path)
 	CSpiderConf& conf = m_spider_conf;
 
 	FILE* fp = NULL;
+	FILE* bfp = NULL;
+
 	char line[conf.max_url_len+1];
 	UrlInfo ui;
 	int lineno = 0;
@@ -968,12 +971,21 @@ int CSpider::load_seed(const char* seed_path)
 
 	int count = 0;
 
-	fp = fopen(seed_path, "r");
+	fp = fopen(seed_path, "r");  // 新增种子
 	if (!fp)
 	{
 		SDLOG_WARN(SP_WFNAME, "open seed file error: "<<seed_path);
 		return -1;
 	}
+
+	bfp = fopen(conf.seed_bak_path.c_str(), "a");
+	if (!bfp)
+	{
+		SDLOG_WARN(SP_WFNAME, "open seed bak file error: " << conf.seed_bak_path);
+		return -1;
+	}
+
+	fprintf(fp, "\n"); // 每次增加种子以空行分割
 
 	while (!feof(fp))
 	{
@@ -985,6 +997,7 @@ int CSpider::load_seed(const char* seed_path)
 			SDLOG_INFO(SP_LOGNAME, "find an empty seed");
 			continue;
 		}
+
 		ucUrl uc_url(p);
 		if (uc_url.build() != FR_OK)
 		{
@@ -993,6 +1006,7 @@ int CSpider::load_seed(const char* seed_path)
 		}
 
         count++;
+		fprintf(fp, "%s\n", p); // 追加到种子备份文件中
 
 		ui.url = uc_url.get_url();
 		ui.site = uc_url.get_site();
@@ -1015,6 +1029,7 @@ int CSpider::load_seed(const char* seed_path)
 	}
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " seeds success");
 	fclose(fp);
+	fclose(bfp);
 
 	return 0;
 }
@@ -1082,6 +1097,7 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
 			continue;
 		}
 		
+		type = url_recog->get_type(it->second.link);
 		if (type == ITEM_LINK)
 		{
 			if (conf.extract_item_url)  // 需要提取item
@@ -1293,6 +1309,13 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.seed_path = str_result;
+	//种子备份路径
+	if ((str_result=conf.get_string_item("SEED_BAK_PATH")).empty())
+	{
+		printf("get item SEED_BAK_PATH error\n");
+		return -1;
+	}
+	m_spider_conf.seed_bak_path = str_result;
 	// URL输出路径
 	if ((str_result=conf.get_string_item("URL_OUTPUT_DIR")).empty())
 	{
