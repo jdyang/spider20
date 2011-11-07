@@ -419,7 +419,6 @@ int CSpider::select_url()
 	vector<string> domain_p;
 	vector<string> domain_o;
 	map<string, vector<UrlInfo>* > select_map;
-	vector<vector<UrlInfo>* > url_array;
 	map<string, DomainAttr>::iterator domain_it;
 	int i = -1;
 	
@@ -430,9 +429,8 @@ int CSpider::select_url()
 			domain_o.push_back((*domain_it).first);
 		}
 		SDLOG_INFO(SP_LOGNAME, "add domain " << (*domain_it).first);
-		vector<UrlInfo> tmp;
-		url_array.push_back(&tmp);
-		select_map.insert(make_pair((*domain_it).first, url_array[++i]));
+		vector<UrlInfo> *tmp = new vector<UrlInfo>[200000];
+		select_map.insert(make_pair((*domain_it).first, tmp));
 	}
 //	int o_domain_num = domain_o.size();
 //	int p_domain_num = domain_p.size();
@@ -488,8 +486,8 @@ int CSpider::select_url()
 	for (tmp_it = domain_p.begin(); tmp_it != domain_p.end(); ++tmp_it){
 		vector<UrlInfo>* tmp_vector = select_map[*tmp_it];
 		SDLOG_INFO(SP_LOGNAME, "in the round " << m_select_rounds << "doamin: "  << *tmp_it << " has links: " << tmp_vector->size());
-		int prio_num_c = (cate_percent * prio_num) * tmp_vector->size()/p_link_num;
-		int prio_num_i = prio_num * tmp_vector->size()/p_link_num - prio_num_c + 1;
+		int prio_num_c = p_link_num ==0 ? 0 : (cate_percent * prio_num) * tmp_vector->size()/p_link_num;
+		int prio_num_i = p_link_num ==0 ? 0 : prio_num * tmp_vector->size()/p_link_num - prio_num_c + 1;
 		if (prio_num_c < 10)prio_num_c = 10;
 		if (prio_num_i < 10)prio_num_i = 10;
 		
@@ -536,17 +534,21 @@ int CSpider::select_url()
 		
 		//clear tmp vector
 		tmp_vector->clear();
+		if (NULL != tmp_vector)
+			delete tmp_vector;
 	}
 	
 	if (prio_count < prio_num){
 		ord_num = ord_num + prio_num -prio_count;
 	}
 	
+	SDLOG_INFO(SP_LOGNAME, "priority selected " << prio_count << " ordinary wille selecte: " << ord_num);
+	
 	//ordinay queue
 	for (tmp_it = domain_o.begin(); tmp_it != domain_o.end(); ++tmp_it){
 		vector<UrlInfo>* tmp_vector = select_map[*tmp_it];
-		int ord_num_c = (cate_percent * ord_num) * tmp_vector->size()/o_link_num;
-		int ord_num_i = ord_num * tmp_vector->size()/o_link_num - ord_num_c + 1;
+		int ord_num_c = o_link_num ==0 ? 0 : (cate_percent * ord_num) * tmp_vector->size()/o_link_num;
+		int ord_num_i = o_link_num ==0 ? 0 : ord_num * tmp_vector->size()/o_link_num - ord_num_c + 1;
 		if (ord_num_c < 10)ord_num_c = 10;
 		if (ord_num_i < 10)ord_num_i = 10;
 		
@@ -587,6 +589,8 @@ int CSpider::select_url()
 		}
 		//clear tmp vector
 		tmp_vector->clear();
+		if (NULL != tmp_vector)
+			delete tmp_vector;
 	}
 	// judge if it need to go the next round
 	if (m_select_rounds > 0 && m_select_buffer.size() < (unsigned int)min_select_threshold) {
@@ -897,7 +901,7 @@ int CSpider::load_input_urls(const char* input_path)
 		ucUrl uc_url(p);
 		if (uc_url.build() != FR_OK)
 		{
-			SDLOG_INFO(SP_LOGNAME, "seed build error for\t" << p);
+			SDLOG_INFO(SP_LOGNAME, "url build error for\t" << p);
 			continue;
 		}
 
