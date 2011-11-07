@@ -203,7 +203,27 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 
+        url = "";
+		domain = "";
+		site = "";
+		ip = "";
+
+		url = qi.url;
+		ucUrl uc_url(url);
+		if (uc_url.build() != FR_OK)
+		{
+			
+			SDLOG_INFO(SP_LOGNAME, "FORMAT_ERROR\t"<<qi.url)
+			if (-1 == p_fail_output->append_error(qi.url, "FORMAT_ERROR"))
+			{
+				SDLOG_INFO(SP_LOGNAME, "fail append error\t"<<url);
+			}
+			continue;
+		}
+		site = uc_url.get_site();
+		domain = uc_url.get_domain();
 		ip = dns_client.get_ip(site);
+
 		if (ip == "NO_IP")
 		{
 			SDLOG_WARN(SP_WFNAME, "get ip fail\t"<<qi.url);
@@ -217,20 +237,6 @@ void* crawl_thread(void* arg)
 			p_selected_queue->push(qi);
 			continue;
 		}
-
-		url = qi.url;
-		ucUrl uc_url(url);
-		if (uc_url.build() != FR_OK)
-		{
-			p_level_pool->finish_crawl(site, false);
-			if (-1 == p_fail_output->append_error(qi.url, "FORMAT_ERROR"))
-			{
-				SDLOG_INFO(SP_LOGNAME, "fail append error\t"<<url);
-			}
-			continue;
-		}
-		site = uc_url.get_site();
-		domain = uc_url.get_domain();
 
         if (downloaded_file)
 		{
@@ -1631,7 +1637,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string fail_file = conf.url_output_dir + "/ " +  FAIL_LIST;
+    string fail_file = conf.url_output_dir + "/" +  FAIL_LIST;
 	if (0 != mp_fail_output->init(fail_file.c_str()))
 	{
 		cerr << "init fail output error, exit!" << endl;
