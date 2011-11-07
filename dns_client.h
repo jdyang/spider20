@@ -1,5 +1,5 @@
-#ifndef _URLPOOL_H_
-#define _URLPOOL_H_
+#ifndef __FANFAN_DNS_CLIENT_H__
+#define __FANFAN_DNS_CLIENT_H__
 
 #include "udpdns.h"
 #include "map"

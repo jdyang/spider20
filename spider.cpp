@@ -203,7 +203,27 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 
+        url = "";
+		domain = "";
+		site = "";
+		ip = "";
+
+		url = qi.url;
+		ucUrl uc_url(url);
+		if (uc_url.build() != FR_OK)
+		{
+			
+			SDLOG_INFO(SP_LOGNAME, "FORMAT_ERROR\t"<<qi.url)
+			if (-1 == p_fail_output->append_error(qi.url, "FORMAT_ERROR"))
+			{
+				SDLOG_INFO(SP_LOGNAME, "fail append error\t"<<url);
+			}
+			continue;
+		}
+		site = uc_url.get_site();
+		domain = uc_url.get_domain();
 		ip = dns_client.get_ip(site);
+
 		if (ip == "NO_IP")
 		{
 			SDLOG_WARN(SP_WFNAME, "get ip fail\t"<<qi.url);
@@ -217,20 +237,6 @@ void* crawl_thread(void* arg)
 			p_selected_queue->push(qi);
 			continue;
 		}
-
-		url = qi.url;
-		ucUrl uc_url(url);
-		if (uc_url.build() != FR_OK)
-		{
-			p_level_pool->finish_crawl(site, false);
-			if (-1 == p_fail_output->append_error(qi.url, "FORMAT_ERROR"))
-			{
-				SDLOG_INFO(SP_LOGNAME, "fail append error\t"<<url);
-			}
-			continue;
-		}
-		site = uc_url.get_site();
-		domain = uc_url.get_domain();
 
         if (downloaded_file)
 		{
@@ -420,7 +426,6 @@ int CSpider::select_url()
 	vector<string> domain_o;
 	map<string, vector<UrlInfo>* > select_map;
 	map<string, DomainAttr>::iterator domain_it;
-	int i = -1;
 	
 	for (domain_it = m_statis.m_domain.begin(); domain_it != m_statis.m_domain.end(); ++domain_it) {
 		if ((*domain_it).second.isSeed == 1 && (*domain_it).second.isShield == 0){
@@ -429,7 +434,7 @@ int CSpider::select_url()
 			domain_o.push_back((*domain_it).first);
 		}
 		SDLOG_INFO(SP_LOGNAME, "add domain " << (*domain_it).first);
-		vector<UrlInfo> *tmp = new vector<UrlInfo>[200000];
+		vector<UrlInfo> *tmp = new vector<UrlInfo>(200000);
 		select_map.insert(make_pair((*domain_it).first, tmp));
 	}
 //	int o_domain_num = domain_o.size();
@@ -1632,7 +1637,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string fail_file = conf.url_output_dir + "/ " +  FAIL_LIST;
+    string fail_file = conf.url_output_dir + "/" +  FAIL_LIST;
 	if (0 != mp_fail_output->init(fail_file.c_str()))
 	{
 		cerr << "init fail output error, exit!" << endl;
