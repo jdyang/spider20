@@ -1016,7 +1016,7 @@ int CSpider::load_seed(const char* seed_path)
 		return -1;
 	}
 
-	fprintf(fp, "\n"); // 每次增加种子以空行分割
+	fprintf(bfp, "\n"); // 每次增加种子以空行分割
 
 	while (!feof(fp))
 	{
@@ -1037,7 +1037,7 @@ int CSpider::load_seed(const char* seed_path)
 		}
 
         count++;
-		fprintf(fp, "%s\n", p); // 追加到种子备份文件中
+		fprintf(bfp, "%s\n", p); // 追加到种子备份文件中
 
 		ui.url = uc_url.get_url();
 		ui.site = uc_url.get_site();
