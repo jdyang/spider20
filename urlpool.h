@@ -46,7 +46,7 @@ public:
 	void set_conf(CSpiderConf *conf);
     deque<UrlInfo>& get_url_queue();
 	set<string>& get_url_set();
-	ncMutex& get_url_mutex(){return m_url_mutex;}
+	ncMutex get_url_mutex(){return m_url_mutex;}
 
 	bool url_empty();
 	void push_url(UrlInfo ui);
