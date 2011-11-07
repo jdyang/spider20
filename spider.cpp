@@ -208,7 +208,7 @@ void* crawl_thread(void* arg)
 		{
 			SDLOG_WARN(SP_WFNAME, "get ip fail\t"<<qi.url);
 			qi.dns_count++;
-			sq.push(qi);
+			p_selected_queue->push(qi);
 		}
 
 		if (!p_level_pool->is_crawl_enabled(qi.url))  // 不符合压力控制规则
