@@ -426,7 +426,6 @@ int CSpider::select_url()
 	vector<string> domain_o;
 	map<string, vector<UrlInfo>* > select_map;
 	map<string, DomainAttr>::iterator domain_it;
-	int i = -1;
 	
 	for (domain_it = m_statis.m_domain.begin(); domain_it != m_statis.m_domain.end(); ++domain_it) {
 		if ((*domain_it).second.isSeed == 1 && (*domain_it).second.isShield == 0){
@@ -435,7 +434,7 @@ int CSpider::select_url()
 			domain_o.push_back((*domain_it).first);
 		}
 		SDLOG_INFO(SP_LOGNAME, "add domain " << (*domain_it).first);
-		vector<UrlInfo> *tmp = new vector<UrlInfo>[200000];
+		vector<UrlInfo> *tmp = new vector<UrlInfo>(200000);
 		select_map.insert(make_pair((*domain_it).first, tmp));
 	}
 //	int o_domain_num = domain_o.size();
