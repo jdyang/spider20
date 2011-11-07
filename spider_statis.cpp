@@ -54,7 +54,7 @@ int CSpiderStatis::init(const char* file_path)
 		return -1;
 	}
 
-	m_fp = fopen(file_path, "a");
+	m_fp = fopen(file_path, "w");
 	if(m_fp == NULL)
 	{
 		cerr<< "set_statis_to_file error: can not open/create file:"<<file_path<<endl;
@@ -80,6 +80,7 @@ int CSpiderStatis::set_statis_to_file()
 					get_domain_item_done_num(map_iter->first), get_domain_item_select_num(map_iter->first));
 	}
 	fprintf(m_fp, "\n");
+	fflush(m_fp);
 	return 0;
 }
 
