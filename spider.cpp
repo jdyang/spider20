@@ -1061,6 +1061,7 @@ int CSpider::load_seed(const char* seed_path)
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " seeds success");
 	fclose(fp);
 	fclose(bfp);
+	unlink(conf.seed_path.c_str());
 
 	return 0;
 }
