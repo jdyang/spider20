@@ -101,7 +101,7 @@ void* crawl_thread(void* arg)
 {
 	CSpider* psp = (CSpider*)arg;
 	CSpiderConf& conf = (psp->m_spider_conf);
-	CSelectedQueue& sq = *(psp->mp_selected_queue);
+	CSelectedQueue* p_selected_queue = psp->mp_selected_queue;
 	CDnsClient& dns_client = psp->m_dns_client;
 	CLevelPool* p_level_pool = psp->mp_level_pool;
 
@@ -174,7 +174,7 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 
-        if (!psp->mp_selected_queue->pop(qi))  // SelectedQueue为空
+        if (!p_selected_queue->pop(qi))  // SelectedQueue为空
 		{
 			if (-1 == p_page_output->append(NULL, 0, false)) // 为了满足即使没有抓到网页也写一个page.list空文件
 			{
@@ -214,7 +214,7 @@ void* crawl_thread(void* arg)
 		if (!p_level_pool->is_crawl_enabled(qi.url))  // 不符合压力控制规则
 		{
 			//SDLOG_INFO(SP_LOGNAME, "DELAY\t"<<qi.url);
-			psp->mp_selected_queue->push(qi);
+			p_selected_queue->push(qi);
 			continue;
 		}
 
@@ -328,7 +328,7 @@ void* crawl_thread(void* arg)
 			p_level_pool->finish_crawl(site);
 			SDLOG_INFO(SP_LOGNAME, "NET_FAIL\t"<<url);
 			qi.fail_count++;
-			psp->mp_selected_queue->push(qi);
+			p_selected_queue->push(qi);
 			continue;
 		}
 		if (file_length <= conf.min_page_len && file_length > conf.max_page_len)
