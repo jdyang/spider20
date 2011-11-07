@@ -420,7 +420,6 @@ int CSpider::select_url()
 	vector<string> domain_o;
 	map<string, vector<UrlInfo>* > select_map;
 	map<string, DomainAttr>::iterator domain_it;
-	int i = -1;
 	
 	for (domain_it = m_statis.m_domain.begin(); domain_it != m_statis.m_domain.end(); ++domain_it) {
 		if ((*domain_it).second.isSeed == 1 && (*domain_it).second.isShield == 0){
@@ -535,7 +534,7 @@ int CSpider::select_url()
 		//clear tmp vector
 		tmp_vector->clear();
 		if (NULL != tmp_vector)
-			delete tmp_vector;
+			tmp_vector = NULL;
 	}
 	
 	if (prio_count < prio_num){
@@ -590,7 +589,7 @@ int CSpider::select_url()
 		//clear tmp vector
 		tmp_vector->clear();
 		if (NULL != tmp_vector)
-			delete tmp_vector;
+			tmp_vector = NULL;
 	}
 	// judge if it need to go the next round
 	if (m_select_rounds > 0 && m_select_buffer.size() < (unsigned int)min_select_threshold) {
