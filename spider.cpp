@@ -428,7 +428,7 @@ int CSpider::select_url()
 			domain_o.push_back((*domain_it).first);
 		}
 		SDLOG_INFO(SP_LOGNAME, "add domain " << (*domain_it).first);
-		vector<UrlInfo> *tmp = new vector<UrlInfo>(200000);
+		vector<UrlInfo> *tmp = new vector<UrlInfo>();
 		select_map.insert(make_pair((*domain_it).first, tmp));
 	}
 //	int o_domain_num = domain_o.size();
