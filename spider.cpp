@@ -428,7 +428,7 @@ int CSpider::select_url()
 			domain_o.push_back((*domain_it).first);
 		}
 		SDLOG_INFO(SP_LOGNAME, "add domain " << (*domain_it).first);
-		vector<UrlInfo> *tmp = new vector<UrlInfo>[200000];
+		vector<UrlInfo> *tmp = new vector<UrlInfo>(200000);
 		select_map.insert(make_pair((*domain_it).first, tmp));
 	}
 //	int o_domain_num = domain_o.size();
@@ -534,7 +534,7 @@ int CSpider::select_url()
 		//clear tmp vector
 		tmp_vector->clear();
 		if (NULL != tmp_vector)
-			tmp_vector = NULL;
+			delete tmp_vector;
 	}
 	
 	if (prio_count < prio_num){
@@ -589,7 +589,7 @@ int CSpider::select_url()
 		//clear tmp vector
 		tmp_vector->clear();
 		if (NULL != tmp_vector)
-			tmp_vector = NULL;
+			delete tmp_vector;
 	}
 	// judge if it need to go the next round
 	if (m_select_rounds > 0 && m_select_buffer.size() < (unsigned int)min_select_threshold) {
