@@ -31,9 +31,8 @@ bool CLevelPool::is_crawl_enabled(string& site)
 {
 	CSpiderConf& conf = *mp_conf;
 
-    time_t now = get_time_now();
-
     pthread_mutex_lock(&m_mutex);
+    time_t now = get_time_now();
 
 	map<string, SLevelInfo>::iterator it = m_pool.find(site);
 	if (it == m_pool.end())
@@ -59,14 +58,14 @@ bool CLevelPool::is_crawl_enabled(string& site)
 		pthread_mutex_unlock(&m_mutex);
 		return false;
 	}
+	it->second.last_crawl_time = now;
 	it->second.crawl_thread_count++;
 	pthread_mutex_unlock(&m_mutex);
 	return true;
 }
 
-void CLevelPool::finish_crawl(string& site, bool change_time)
+void CLevelPool::finish_crawl(string& site)
 {
-    time_t now = get_time_now();
 
 	pthread_mutex_lock(&m_mutex);
 	map<string, SLevelInfo>::iterator it = m_pool.find(site);
@@ -74,10 +73,6 @@ void CLevelPool::finish_crawl(string& site, bool change_time)
 	{
 		pthread_mutex_unlock(&m_mutex);
 		return;
-	}
-	if (change_time)
-	{
-	    it->second.last_crawl_time = now;
 	}
 	it->second.crawl_thread_count--;
 	pthread_mutex_unlock(&m_mutex);
