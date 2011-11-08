@@ -231,7 +231,7 @@ void* crawl_thread(void* arg)
 			p_selected_queue->push(qi);
 		}
 
-		if (!p_level_pool->is_crawl_enabled(qi.url))  // 不符合压力控制规则
+		if (!p_level_pool->is_crawl_enabled(site))  // 不符合压力控制规则
 		{
 			//SDLOG_INFO(SP_LOGNAME, "DELAY\t"<<qi.url);
 			p_selected_queue->push(qi);
@@ -259,12 +259,12 @@ void* crawl_thread(void* arg)
 
 		if (-404 == file_length)
 		{
+			p_level_pool->finish_crawl(site);
 			SDLOG_INFO(SP_LOGNAME, "NOT_FOUND\t"<<url);
 			if (-1 == p_fail_output->append_error(url, "NOT_FOUND"))
 			{
 				SDLOG_WARN(SP_WFNAME, "fail append error\t"<<url);
 			}
-			p_level_pool->finish_crawl(site);
 			continue;
 		}
 
@@ -319,9 +319,9 @@ void* crawl_thread(void* arg)
 			redirect_count++;
 		}
 
+		p_level_pool->finish_crawl(site);
 		if (-404 == file_length) // 重定向到了一个404的页面
 		{
-			p_level_pool->finish_crawl(site);
 			SDLOG_INFO(SP_LOGNAME, "REDIRECT_NOT_FOUND\t"<<url);
 			if (p_fail_output->append_error(url, "REDIRECT_NOT_FOUND"))
 			{
@@ -331,7 +331,6 @@ void* crawl_thread(void* arg)
 		}
 
         if (file_length < 0) {
-			p_level_pool->finish_crawl(site);
 			SDLOG_INFO(SP_LOGNAME, "NET_FAIL\t"<<url);
 			qi.fail_count++;
 			p_selected_queue->push(qi);
@@ -339,7 +338,6 @@ void* crawl_thread(void* arg)
 		}
 		if (file_length <= conf.min_page_len && file_length > conf.max_page_len)
 		{
-			p_level_pool->finish_crawl(site);
 			memset(err_buf, 0, sizeof(err_buf));
 			SDLOG_INFO(SP_LOGNAME, "SIZE_FAIL\t"<<url);
 			sprintf(err_buf, "CONTENT_LEN_INVALID (%d)", file_length);
@@ -349,7 +347,6 @@ void* crawl_thread(void* arg)
 			}
 			continue;
 		}
-		p_level_pool->finish_crawl(site);
 		SDLOG_INFO(SP_LOGNAME, "SUCCESS\t"<<url);
 
 
