@@ -827,7 +827,7 @@ int CSpider::load_stop_domain(const char* stop_file)
 	map<string, DomainAttr>::iterator it = m_statis.m_domain.begin();
 	for (; it != m_statis.m_domain.end(); it++)
 	{
-		it->second.isShield = false;
+		it->second.isShield = 0;
 	}
 
     int count = 0;
@@ -847,14 +847,14 @@ int CSpider::load_stop_domain(const char* stop_file)
 		map<string, DomainAttr>::iterator dit = m_statis.m_domain.find(domain);
 		if (dit == m_statis.m_domain.end())
 		{
-			da.isShield = true;
-			da.isSeed = false;
+			da.isShield = 1;
+			da.isSeed = 0;
 			m_statis.m_domain.insert(make_pair(domain, da));
 			SDLOG_INFO(SP_LOGNAME, "stop select "<< domain);
 		}
 		else
 		{
-		    dit->second.isShield = true;
+		    dit->second.isShield = 1;
 			SDLOG_INFO(SP_LOGNAME, "stop select "<< domain);
 		}
 	}
@@ -922,8 +922,8 @@ int CSpider::load_input_urls(const char* input_path)
 		if (it == m_statis.m_domain.end())
 		{
             DomainAttr da;
-			da.isShield = false;
-			da.isSeed = false;
+			da.isShield = 0;
+			da.isSeed = 0;
 			m_statis.m_domain.insert(make_pair(ui.domain, da));
 		}
 	}
@@ -975,8 +975,8 @@ int CSpider::load_input_urls(const char* input_path)
 		if (it == m_statis.m_domain.end())
 		{
             DomainAttr da;
-			da.isShield = false;
-			da.isSeed = false;
+			da.isShield = 0;
+			da.isSeed = 0;
 			m_statis.m_domain.insert(make_pair(ui.domain, da));
 		}
 	}
@@ -1049,13 +1049,13 @@ int CSpider::load_seed(const char* seed_path)
 		if (it == m_statis.m_domain.end())
 		{
             DomainAttr da;
-			da.isShield = false;
-			da.isSeed = true;
+			da.isShield = 0;
+			da.isSeed = 1;
 			m_statis.m_domain.insert(make_pair(ui.domain, da));
 		}
 		else if (!(it->second.isSeed))
 		{
-			it->second.isSeed = true;
+			it->second.isSeed = 1;
 		}
 	}
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " seeds success");
