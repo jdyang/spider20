@@ -474,6 +474,7 @@ int CSpider::select_url()
 	mp_ioq->get_url_mutex().lock();
 	for (it = tmp_que2.begin(); it != tmp_que2.end(); ++it){
 		(*it).type = 0;
+		cout << (*it).domain << endl;
 		select_map[(*it).domain]->push_back(*it);
 	}
 	tmp_que2.clear();
