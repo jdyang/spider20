@@ -28,7 +28,7 @@ public:
 	int destroy(void);
     void insert_level_info(string& site, SLevelInfo li);
 	bool is_crawl_enabled(string& site);
-	void finish_crawl(string& site, bool change_time=true);
+	void finish_crawl(string& site);
 
 	//for debug
 	void print(void);
