@@ -897,10 +897,10 @@ int CSpider::load_input_urls(const char* input_path)
 	string cate_path = string(input_path) + "/" + CATE_LIST;
 	string item_path = string(input_path) + "/" + ITEM_LIST;
 	
-	mp_cpq->clear();
-	mp_ipq->clear();
-	mp_coq->clear();
-	mp_ioq->clear();
+	mp_cpq->get_url_queue().clear();
+	mp_ipq->get_url_queue().clear();
+	mp_coq->get_url_queue().clear();
+	mp_ioq->get_url_queue().clear();
 	
 	m_statis.m_domain.clear();
 
