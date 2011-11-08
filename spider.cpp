@@ -453,6 +453,8 @@ int CSpider::select_url()
 	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que.begin(); it != tmp_que.end(); ++it){
 		(*it).type = 3;
+		if (NULL == select_map[(*it).domain])
+			continue;
 		select_map[(*it).domain]->push_back(*it);
 	}
 	tmp_que.clear();
@@ -462,6 +464,8 @@ int CSpider::select_url()
 	mp_ipq->get_url_mutex().lock();
 	for (it = tmp_que1.begin(); it != tmp_que1.end(); ++it){
 		(*it).type = 2;
+		if (NULL == select_map[(*it).domain])
+			continue;
 		select_map[(*it).domain]->push_back(*it);
 	}
 	tmp_que1.clear();
@@ -471,6 +475,8 @@ int CSpider::select_url()
 	mp_ioq->get_url_mutex().lock();
 	for (it = tmp_que2.begin(); it != tmp_que2.end(); ++it){
 		(*it).type = 0;
+		if (NULL == select_map[(*it).domain])
+			continue;
 		select_map[(*it).domain]->push_back(*it);
 	}
 	tmp_que2.clear();
@@ -480,6 +486,8 @@ int CSpider::select_url()
 	mp_coq->get_url_mutex().lock();
 	for (it = tmp_que3.begin(); it != tmp_que3.end(); ++it){
 		(*it).type = 1;
+		if (NULL == select_map[(*it).domain])
+			continue;
 		select_map[(*it).domain]->push_back(*it);
 	}	
 	tmp_que3.clear();

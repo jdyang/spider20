@@ -57,7 +57,7 @@ int CSelectedQueue::size(void)
 {
 	int size = 0;
 	pthread_mutex_lock(&m_mutex);
-	size = m_size;
+	size = m_count;
 	pthread_mutex_unlock(&m_mutex);
 
 	return size;
@@ -67,7 +67,7 @@ int CSelectedQueue::avail_count(void)
 {
 	int c = 0;
 	pthread_mutex_lock(&m_mutex);
-	c = m_size-m_count;
+	c = m_size-m_count - 20;
 	pthread_mutex_unlock(&m_mutex);
 
 	return c;
