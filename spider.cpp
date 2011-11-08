@@ -427,7 +427,7 @@ int CSpider::select_url()
 	map<string, vector<UrlInfo>* > select_map;
 	map<string, DomainAttr>::iterator domain_it;
 	
-	for (domain_it = m_statis.m_domain.begin(); domain_it != m_statis.m_domain.end(); ++domain_it) {
+	for (domain_it = m_statis.m_domain.begin(), domain_p.clear(), domain_o.clear(); domain_it != m_statis.m_domain.end(); ++domain_it) {
 		if ((*domain_it).second.isSeed == 1 && (*domain_it).second.isShield == 0){
 			domain_p.push_back((*domain_it).first);
 		} else if ((*domain_it).second.isSeed == 0 && (*domain_it).second.isShield == 0) {
@@ -444,6 +444,12 @@ int CSpider::select_url()
 	
 	int o_link_num = mp_coq->get_url_queue().size() + mp_ioq->get_url_queue().size();
 	int p_link_num = mp_cpq->get_url_queue().size() + mp_ipq->get_url_queue().size();
+	
+	m_statis.set_cpq_url_num(mp_cpq->get_url_queue().size());
+	m_statis.set_ipq_url_num(mp_ipq->get_url_queue().size());
+	m_statis.set_coq_url_num(mp_coq->get_url_queue().size());
+	m_statis.set_ioq_url_num(mp_ioq->get_url_queue().size());
+	m_statis.set_sq_url_num(mp_selected_queue->size());
 	
 	deque<UrlInfo>& tmp_que = mp_cpq->get_url_queue();
 	deque<UrlInfo>::iterator it;
@@ -496,7 +502,7 @@ int CSpider::select_url()
 		if (prio_num_c < 10)prio_num_c = 10;
 		if (prio_num_i < 10)prio_num_i = 10;
 		
-		SDLOG_INFO(SP_LOGNAME, "priority domain " << *tmp_it << " selected cate: " << prio_num_c << " and item : " << prio_num_i);
+		SDLOG_INFO(SP_LOGNAME, "priority domain " << *tmp_it << " should select cate: " << prio_num_c << " and item : " << prio_num_i);
 		
 		int i_num = 0;
 		int c_num = 0;	
@@ -515,9 +521,13 @@ int CSpider::select_url()
 		int tmp_num = i_num;
 		int max_tmp_num = prio_num_i;
 		if (c_num < prio_num_c) {
+			// item done
+			m_statis.set_domain_item_select_num(*tmp_it, prio_num_i);
 			flag = 3;
 			tmp_num = c_num;
 			max_tmp_num = prio_num_c;
+		}else {
+			m_statis.set_domain_cate_select_num(*tmp_it, prio_num_c);
 		}
 		//the rest of c or i
 		unsigned int k = i;
@@ -529,14 +539,20 @@ int CSpider::select_url()
 				++tmp_num;
 			} else{
 				m_select_back_p.push_back((*tmp_vector)[k]);
-				++prio_count;
 			}
 		}
-		for (unsigned int l = k; l < tmp_vector->size(); ++l){
-			m_select_back_p.push_back((*tmp_vector)[l]);
-			++prio_count;
+		//update rest statis
+		if (2 == flag){
+			m_statis.set_domain_item_select_num(*tmp_it, tmp_num);
+		} else if (3 == flag){
+			m_statis.set_domain_cate_select_num(*tmp_it, tmp_num);
 		}
 		
+		
+		for (unsigned int l = k; l < tmp_vector->size(); ++l){
+			m_select_back_p.push_back((*tmp_vector)[l]);
+		}
+
 		//clear tmp vector
 		tmp_vector->clear();
 		if (NULL != tmp_vector)
@@ -557,7 +573,7 @@ int CSpider::select_url()
 		if (ord_num_c < 10)ord_num_c = 10;
 		if (ord_num_i < 10)ord_num_i = 10;
 		
-		SDLOG_INFO(SP_LOGNAME, "ordinary domain " << *tmp_it << " selected cate: " << ord_num_c << " and item : " << ord_num_i);
+		SDLOG_INFO(SP_LOGNAME, "ordinary domain " << *tmp_it << " should select cate: " << ord_num_c << " and item : " << ord_num_i);
 		
 		int i_num = 0;
 		int c_num = 0;	
@@ -575,9 +591,13 @@ int CSpider::select_url()
 		int tmp_num = i_num;
 		int max_tmp_num = ord_num_i;
 		if (c_num < ord_num_c) {
+			// item done
+			m_statis.set_domain_item_select_num(*tmp_it, ord_num_i);
 			flag = 1;
 			tmp_num = c_num;
 			max_tmp_num = ord_num_c;
+		}else {
+			m_statis.set_domain_cate_select_num(*tmp_it, ord_num_c);
 		}
 		unsigned int k = i;
 		for (; k < tmp_vector->size() && tmp_num < max_tmp_num; ++k){
@@ -589,6 +609,13 @@ int CSpider::select_url()
 				m_select_back_o.push_back((*tmp_vector)[k]);
 			}
 		}
+		
+		if (0 == flag){
+			m_statis.set_domain_item_select_num(*tmp_it, tmp_num);
+		} else if (1 == flag){
+			m_statis.set_domain_cate_select_num(*tmp_it, tmp_num);
+		}
+		
 		for (unsigned int l = k; l < tmp_vector->size(); ++l){
 			m_select_back_o.push_back((*tmp_vector)[l]);
 		}
@@ -870,6 +897,11 @@ int CSpider::load_input_urls(const char* input_path)
 	string cate_path = string(input_path) + "/" + CATE_LIST;
 	string item_path = string(input_path) + "/" + ITEM_LIST;
 	
+	mp_cpq->clear();
+	mp_ipq->clear();
+	mp_coq->clear();
+	mp_ioq->clear();
+	
 	m_statis.m_domain.clear();
 
 	FILE* fp = NULL;
@@ -984,6 +1016,58 @@ int CSpider::load_input_urls(const char* input_path)
 	real_num = m_statis.get_ioq_url_num() + count;
 	m_statis.set_ioq_url_num(real_num);
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " item success");
+	// count = 0;
+	// fp = fopen(item_path.c_str(), "r");
+	// if (!fp)
+	// {
+	// 	SDLOG_WARN(SP_WFNAME, "open item file error: "<<cate_path);
+	// 	return -1;
+	// }
+	// 
+	// while (!feof(fp))
+	// {
+	// 	memset(line, 0, sizeof(line));
+	// 	get_one_line(fp, line, sizeof(line), lineno);
+	// 	p = filter_headtail_blank(line);
+	// 	if (p[0] == '\0')
+	// 	{
+	// 		SDLOG_INFO(SP_LOGNAME, "find an empty seed");
+	// 		continue;
+	// 	}
+	// 	for (unsigned int i = 0; i< sizeof(line); ++i){
+	// 		if (p[i] == '\t'){
+	// 			p[i] = '\0';
+	// 			break;
+	// 		}
+	// 	}		
+	// 	ucUrl uc_url(p);
+	// 	if (uc_url.build() != FR_OK)
+	// 	{
+	// 		SDLOG_INFO(SP_LOGNAME, "seed build error for\t" << p);
+	// 		continue;
+	// 	}
+	// 
+	//         count++;
+	// 
+	// 	ui.url = uc_url.get_url();
+	// 	ui.site = uc_url.get_site();
+	// 	ui.domain = uc_url.get_domain();
+	// 	ui.last_crawl_time = 0;
+	// 	mp_ioq->push_url(ui);
+	// 
+	//         map<string, DomainAttr>::iterator it = m_statis.m_domain.find(ui.domain);
+	// 	if (it == m_statis.m_domain.end())
+	// 	{
+	//             DomainAttr da;
+	// 		da.isShield = false;
+	// 		da.isSeed = false;
+	// 		m_statis.m_domain.insert(make_pair(ui.domain, da));
+	// 	}
+	// }
+	// fclose(fp);
+	// real_num = m_statis.get_ioq_url_num() + count;
+	// m_statis.set_ioq_url_num(real_num);
+	// SDLOG_INFO(SP_LOGNAME, "load " << count << " item success");
 
 	return 0;
 }

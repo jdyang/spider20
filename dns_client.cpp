@@ -44,7 +44,9 @@ string CDnsClient::get_ip(string site)
 		ip = query_real_dns(site);
 		put_ip(site, ip);
 	} else {
+		m_ip_mutex.lock();
 		ip = m_ip_list[site];
+		m_ip_mutex.unlock();
 	}
 	return ip;
 }
