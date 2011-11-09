@@ -61,11 +61,6 @@ void* select_thread(void* arg)
 			exit(-1);
 		}
 		
-		if (psp->m_statis.set_statis_to_file() < 0 ) {
-			cerr << "save statis to files error!" << endl;
-			exit(-1);
-		}
-		
 		SDLOG_INFO(SP_LOGNAME,"start selecting.");
 		if (psp->select_url() < 0) {
 			SDLOG_INFO(SP_LOGNAME,"start going to next samsara.");
@@ -629,9 +624,21 @@ int CSpider::select_url()
 		if (NULL != tmp_vector)
 			delete tmp_vector;
 	}
+	
+	//save statis to file 
+	m_statis.set_statis_to_file();
+	
 	// judge if it need to go the next round
-	if (m_select_rounds > 0 && m_select_buffer.size() < (unsigned int)min_select_threshold) {
-		SDLOG_INFO(SP_LOGNAME, "go to next round, count: " << m_select_rounds);
+	if (m_select_rounds > 0 && m_select_buffer.size() + m_select_back_o.size() + m_select_back_p.size() < (unsigned int)min_select_threshold) {
+		SDLOG_INFO(SP_LOGNAME, "prepare to go to next samsara, in round : " << m_select_rounds);
+		SDLOG_INFO(SP_LOGNAME, "ordinary links: " << o_link_num << " priority links : " << p_link_num);
+		SDLOG_INFO(SP_LOGNAME, "m_select_buffer: " << m_select_buffer.size() << " m_select_back_o : " << m_select_back_o.size() << " m_select_back_p: " << m_select_back_p.size());
+		// wait for sq to finish
+		SDLOG_INFO(SP_LOGNAME, "wait for sq to finish ");
+		while (mp_selected_queue->size() > 100)
+			sleep(5);
+		SDLOG_INFO(SP_LOGNAME, "goto next samsara");
+		m_select_rounds = 0;	
 		return -1;
 	}
 	random_shuffle(m_select_buffer.begin(), m_select_buffer.end());
@@ -641,7 +648,6 @@ int CSpider::select_url()
 
 int CSpider::next_round()
 {
-	string url_path = m_spider_conf.url_output_dir;
 	m_statis.write_message_to_file("next samsara");
 	
 	mp_cate_output->destroy();
@@ -651,7 +657,7 @@ int CSpider::next_round()
 		SDLOG_WARN(SP_WFNAME,"transfer: errror");
 		return -1;
 	}
-	string path = m_spider_conf.url_output_dir + "/" + INPUT_PATH;
+	string path = m_spider_conf.url_output_dir + "/" + OUTPUT_PATH;
 	mp_cate_output->init((path+"/"+ITEM_LIST).c_str());
 	mp_item_output->init((path+"/"+CATE_LIST).c_str());
 	mp_fail_output->init((path+"/"+FAIL_LIST).c_str());
@@ -899,8 +905,8 @@ int CSpider::load_input_urls(const char* input_path)
 {
 	CSpiderConf& conf = m_spider_conf;
 	
-	string cate_path = string(input_path) + "/" + CATE_LIST;
-	string item_path = string(input_path) + "/" + ITEM_LIST;
+	string cate_path = string(input_path) + "/" +INPUT_PATH + "/" + CATE_LIST;
+	string item_path = string(input_path) + "/" +INPUT_PATH + "/" + ITEM_LIST;
 	
 	mp_cpq->get_url_queue().clear();
 	mp_ipq->get_url_queue().clear();
@@ -1702,7 +1708,7 @@ int CSpider::start()
 		cerr << "malloc cate output error, exit!" << endl;
 		return -1;
 	}
-    string cate_file = conf.url_output_dir + "/" + CATE_LIST;
+    string cate_file = conf.url_output_dir + "/" + OUTPUT_PATH + "/" + CATE_LIST;
 	if (0 != mp_cate_output->init(cate_file.c_str()))
 	{
 		cerr << "init cate output error, exit!" << endl;
@@ -1714,7 +1720,7 @@ int CSpider::start()
 		cerr << "malloc item output error, exit!" << endl;
 		return -1;
 	}
-    string item_file = conf.url_output_dir + "/" + ITEM_LIST;
+    string item_file = conf.url_output_dir + "/" + OUTPUT_PATH + "/" + ITEM_LIST;
 	if (0 != mp_item_output->init(item_file.c_str()))
 	{
 		cerr << "init item output error, exit!" << endl;
@@ -1727,7 +1733,7 @@ int CSpider::start()
 		return -1;
 	}
 
-    string fail_file = conf.url_output_dir + "/" +  FAIL_LIST;
+    string fail_file = conf.url_output_dir + "/" + OUTPUT_PATH + "/" +  FAIL_LIST;
 	if (0 != mp_fail_output->init(fail_file.c_str()))
 	{
 		cerr << "init fail output error, exit!" << endl;
