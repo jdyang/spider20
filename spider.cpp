@@ -1363,7 +1363,7 @@ int CSpider::write_page_list(CPageOutput* pout, string& url, string& domain, str
 	strcat(page_list_buf, base64_content.c_str());
 	strcat(page_list_buf, "\n");
 
-    if (0 != pout->append(page_list_buf, strlen(page_list_buf)))
+    if (0 != pout->append(page_list_buf, strlen(page_list_buf), true))
 	{
 		SDLOG_INFO(SP_LOGNAME, "write page error:\t"<<url);
 		return -1;
