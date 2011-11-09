@@ -29,7 +29,7 @@ class CSelectedQueue
 public:
     int init(int size);
 	int destroy(void);
-	int clear(void);
+	void clear(void);
 	bool push(SSQItem qi);
 	bool pop(SSQItem& qi);
 	int size(void);

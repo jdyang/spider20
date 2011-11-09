@@ -1,3 +1,4 @@
+#include "spider_common.h"
 #include "page_output.h"
 #include <cstring>
 #include <string>
@@ -6,6 +7,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
+#include <errno.h>
 
 using namespace std;
 
@@ -46,11 +48,8 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 
     char buf[4096];
 
-	if (0 != pthread_mutex_lock(&m_mutex))
-	{
-		printf("lock fail\n");
-		return -1;
-	}
+	pthread_mutex_lock(&m_mutex);
+
 	time_t now = time(NULL);
 	struct tm* p_now = localtime(&now);
 
@@ -70,7 +69,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 		{
 		    if (0 != mkdir(buf, 0777))
 		    {
-			    printf("mkdir error\n");
+			    pthread_mutex_unlock(&m_mutex);
 			    return -1;
 		    }
 		}
@@ -80,7 +79,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	{
 		memset(buf, 0, sizeof(buf));
 		sprintf(buf, "%s/%d%02d%02d/page.%s.%d%02d%02d%02d%02d", conf.page_dir.c_str(), year, month, m_cur_day, conf.spider_name.c_str(), year, month, m_cur_day, hour, min*30);
-		if (-1 == m_fd)
+		if (-1 != m_fd)
 		{
 			close(m_fd);
 			m_fd = -1;
@@ -88,7 +87,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 		m_fd = open(buf, O_RDWR | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IROTH | S_IRGRP);
 		if (-1 == m_fd)
 		{
-			printf("open file err\n");
+			pthread_mutex_unlock(&m_mutex);
 			return -1;
 		}
 		m_cur_min = min;
@@ -97,7 +96,8 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	{
 		if (-1 == write(m_fd, page, len))
 		{
-			printf("write err\n");
+			SDLOG_WARN(SP_WFNAME, "page write error: "<< strerror(errno));
+			pthread_mutex_unlock(&m_mutex);
 			return -1;
 		}
 	}

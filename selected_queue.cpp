@@ -20,7 +20,7 @@ int CSelectedQueue::destroy(void)
 	return 0;
 }
 
-int CSelectedQueue::clear(void)
+void CSelectedQueue::clear(void)
 {
 	pthread_mutex_lock(&m_mutex);
 	m_queue.clear();
