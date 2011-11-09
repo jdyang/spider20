@@ -347,7 +347,6 @@ void* crawl_thread(void* arg)
 			}
 			continue;
 		}
-		SDLOG_INFO(SP_LOGNAME, "SUCCESS\t"<<url);
 
 
         if (qi.which_queue == QUEUE_TYPE_CPQ || qi.which_queue == QUEUE_TYPE_COQ)  // category写入cate.list
@@ -404,6 +403,7 @@ void* crawl_thread(void* arg)
 			    continue;
 		    }
 		}
+		SDLOG_INFO(SP_LOGNAME, "SUCCESS\t"<<url);
 	}
 
 	return NULL;
