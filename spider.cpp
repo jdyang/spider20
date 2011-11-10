@@ -378,6 +378,8 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 		converted_content = utf8_converter.get_converted_content();
+		
+		cout << converted_content << endl;
 
 		//extract links
 		extractor.set_html(url,converted_content);
