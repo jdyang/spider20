@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
 	UTF8Converter uc;
 
-	if (-1 == uc.init("../../conf/code/"))
+	if (-1 == uc.init("../../conf/ec/code/"))
 	{
 		printf("utf8_converter");
 		return -1;
