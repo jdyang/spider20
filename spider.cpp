@@ -400,11 +400,14 @@ void* crawl_thread(void* arg)
         // write item to page list
 		if (qi.which_queue == QUEUE_TYPE_IPQ || qi.which_queue == QUEUE_TYPE_IOQ)
 		{
-		    if (-1 == psp->write_page_list(p_page_output, url, domain, site, 0, converted_content, page_list_buf, PAGE_LIST_BUF_LEN))
-		    {
-				SDLOG_WARN(SP_WFNAME, "page append error\t"<<url);
-			    continue;
-		    }
+			if (conf.write_page)
+			{
+		        if (-1 == psp->write_page_list(p_page_output, url, domain, site, 0, converted_content, page_list_buf, PAGE_LIST_BUF_LEN))
+		        {
+				    SDLOG_WARN(SP_WFNAME, "page append error\t"<<url);
+			        continue;
+		        }
+			}
 		}
 		SDLOG_INFO(SP_LOGNAME, "SUCCESS\t"<<url);
 	}
@@ -1427,6 +1430,13 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.extract_item_url = int_result;
+	// 是否写page
+	if ((int_result=conf.get_int_item("WRITE_PAGE"))<0)
+	{
+		printf("get item WRITE_PAGE error\n");
+		return -1;
+	}
+	m_spider_conf.write_page = int_result;
 	// item是否要归一化
 	if ((int_result=conf.get_int_item("NORMALIZE_URL"))<0)
 	{

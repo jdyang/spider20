@@ -24,6 +24,7 @@ public:
 	int next_round_continue;                 // 是否继续下一轮
 	int extract_cate_url;                    // 是否提取cate
 	int extract_item_url;                    // 是否提取item
+	int write_page;                          // 是否写page
 	int normalize_url;
 
 	string page_dir;                          // 网页存储的目录
