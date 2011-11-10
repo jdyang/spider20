@@ -1236,6 +1236,7 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
     UrlInfo ui;
 	for(map<string,CEcUrlLink>::iterator it = links.begin(); it != links.end(); ++it) 
     {
+		cerr << it->second.link << endl;
 		ucUrl uc_url(it->second.link);
 		if (FR_OK != uc_url.build())
 		{
