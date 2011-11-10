@@ -641,7 +641,7 @@ int CSpider::select_url()
 	m_statis.set_statis_to_file();
 	
 	// judge if it need to go the next round
-	if (m_select_rounds > 0 && m_select_back_o.size() + m_select_back_p.size() < (unsigned int)min_select_threshold) {
+	if (m_select_rounds > 1 && m_select_back_o.size() + m_select_back_p.size() < (unsigned int)min_select_threshold) {
 		SDLOG_INFO(SP_LOGNAME, "prepare to go to next samsara, in round : " << m_select_rounds);
 		SDLOG_INFO(SP_LOGNAME, "ordinary links: " << o_link_num << " priority links : " << p_link_num);
 		SDLOG_INFO(SP_LOGNAME, "m_select_buffer: " << m_select_buffer.size() << " m_select_back_o : " << m_select_back_o.size() << " m_select_back_p: " << m_select_back_p.size());
@@ -650,7 +650,7 @@ int CSpider::select_url()
 		while (mp_selected_queue->size() > m_spider_conf.min_select_threshold)
 			sleep(5);
 		SDLOG_INFO(SP_LOGNAME, "goto next samsara");
-		m_select_rounds = 0;	
+		m_select_rounds = 1;	
 		return -1;
 	}
 	random_shuffle(m_select_buffer.begin(), m_select_buffer.end());
@@ -924,6 +924,11 @@ int CSpider::load_input_urls(const char* input_path)
 	mp_ipq->get_url_queue().clear();
 	mp_coq->get_url_queue().clear();
 	mp_ioq->get_url_queue().clear();
+	
+	mp_cpq->get_url_set().clear();
+	mp_ipq->get_url_set().clear();
+	mp_coq->get_url_set().clear();
+	mp_ioq->get_url_set().clear();
 	
 	m_statis.m_domain.clear();
 
