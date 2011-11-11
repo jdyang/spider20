@@ -531,40 +531,46 @@ int CSpider::select_url()
 			m_select_buffer.push_back((*tmp_vector)[i]);
 			++prio_count;
 		}
+		
 		int flag = 2;
 		int tmp_num = i_num;
 		int max_tmp_num = prio_num_i;
-		if (c_num < prio_num_c) {
-			// item done
-			m_statis.set_domain_item_select_num(*tmp_it, prio_num_i);
-			flag = 3;
-			tmp_num = c_num;
-			max_tmp_num = prio_num_c;
-		}else {
-			m_statis.set_domain_cate_select_num(*tmp_it, prio_num_c);
-		}
-		//the rest of c or i
-		unsigned int k = i;
-		for (;k < tmp_vector->size() && tmp_num < max_tmp_num; ++k){
-			if ((*tmp_vector)[k].type == flag) {
-				m_sites.insert(make_pair((*tmp_vector)[k].site, "NO_IP"));
-				m_select_buffer.push_back((*tmp_vector)[k]);
-				++prio_count;
-				++tmp_num;
-			} else{
-				m_select_back_p.push_back((*tmp_vector)[k]);
+		
+		if (i >= tmp_vector->size()) {
+			//tmp_vecotr is done
+			m_statis.set_domain_item_select_num(*tmp_it, i_num);
+			m_statis.set_domain_cate_select_num(*tmp_it, c_num);
+		} else {
+			if (c_num < prio_num_c) {
+				// item done
+				m_statis.set_domain_item_select_num(*tmp_it, prio_num_i);
+				flag = 3;
+				tmp_num = c_num;
+				max_tmp_num = prio_num_c;
+			}else {
+				m_statis.set_domain_cate_select_num(*tmp_it, prio_num_c);
 			}
-		}
-		//update rest statis
-		if (2 == flag){
-			m_statis.set_domain_item_select_num(*tmp_it, tmp_num);
-		} else if (3 == flag){
-			m_statis.set_domain_cate_select_num(*tmp_it, tmp_num);
-		}
-		
-		
-		for (unsigned int l = k; l < tmp_vector->size(); ++l){
-			m_select_back_p.push_back((*tmp_vector)[l]);
+			//the rest of c or i
+			unsigned int k = i;
+			for (;k < tmp_vector->size() && tmp_num < max_tmp_num; ++k){
+				if ((*tmp_vector)[k].type == flag) {
+					m_sites.insert(make_pair((*tmp_vector)[k].site, "NO_IP"));
+					m_select_buffer.push_back((*tmp_vector)[k]);
+					++prio_count;
+					++tmp_num;
+				} else{
+					m_select_back_p.push_back((*tmp_vector)[k]);
+				}
+			}
+			//update rest statis
+			if (2 == flag){
+				m_statis.set_domain_item_select_num(*tmp_it, tmp_num);
+			} else if (3 == flag){
+				m_statis.set_domain_cate_select_num(*tmp_it, tmp_num);
+			}
+			for (unsigned int l = k; l < tmp_vector->size(); ++l){
+				m_select_back_p.push_back((*tmp_vector)[l]);
+			}
 		}
 
 		//clear tmp vector
@@ -601,38 +607,47 @@ int CSpider::select_url()
 			m_sites.insert(make_pair((*tmp_vector)[i].site, "NO_IP"));
 			m_select_buffer.push_back((*tmp_vector)[i]);
 		}
+		
 		int flag = 0;
 		int tmp_num = i_num;
 		int max_tmp_num = ord_num_i;
-		if (c_num < ord_num_c) {
-			// item done
-			m_statis.set_domain_item_select_num(*tmp_it, ord_num_i);
-			flag = 1;
-			tmp_num = c_num;
-			max_tmp_num = ord_num_c;
-		}else {
-			m_statis.set_domain_cate_select_num(*tmp_it, ord_num_c);
-		}
-		unsigned int k = i;
-		for (; k < tmp_vector->size() && tmp_num < max_tmp_num; ++k){
-			if ((*tmp_vector)[k].type == flag) {
-				m_sites.insert(make_pair((*tmp_vector)[k].site, "NO_IP"));
-				m_select_buffer.push_back((*tmp_vector)[k]);
-				++tmp_num;
-			} else{
-				m_select_back_o.push_back((*tmp_vector)[k]);
+		
+		if (i >= tmp_vector->size()) {
+			//tmp_vecotr is done
+			m_statis.set_domain_item_select_num(*tmp_it, i_num);
+			m_statis.set_domain_cate_select_num(*tmp_it, c_num);
+		} else {
+			if (c_num < ord_num_c) {
+				// item done
+				m_statis.set_domain_item_select_num(*tmp_it, ord_num_i);
+				flag = 1;
+				tmp_num = c_num;
+				max_tmp_num = ord_num_c;
+			}else {
+				m_statis.set_domain_cate_select_num(*tmp_it, ord_num_c);
+			}
+			unsigned int k = i;
+			for (; k < tmp_vector->size() && tmp_num < max_tmp_num; ++k){
+				if ((*tmp_vector)[k].type == flag) {
+					m_sites.insert(make_pair((*tmp_vector)[k].site, "NO_IP"));
+					m_select_buffer.push_back((*tmp_vector)[k]);
+					++tmp_num;
+				} else{
+					m_select_back_o.push_back((*tmp_vector)[k]);
+				}
+			}
+
+			if (0 == flag){
+				m_statis.set_domain_item_select_num(*tmp_it, tmp_num);
+			} else if (1 == flag){
+				m_statis.set_domain_cate_select_num(*tmp_it, tmp_num);
+			}
+
+			for (unsigned int l = k; l < tmp_vector->size(); ++l){
+				m_select_back_o.push_back((*tmp_vector)[l]);
 			}
 		}
 		
-		if (0 == flag){
-			m_statis.set_domain_item_select_num(*tmp_it, tmp_num);
-		} else if (1 == flag){
-			m_statis.set_domain_cate_select_num(*tmp_it, tmp_num);
-		}
-		
-		for (unsigned int l = k; l < tmp_vector->size(); ++l){
-			m_select_back_o.push_back((*tmp_vector)[l]);
-		}
 		//clear tmp vector
 		tmp_vector->clear();
 		if (NULL != tmp_vector)
