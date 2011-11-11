@@ -19,6 +19,7 @@ class CSpiderConf
 {
 public:
     string spider_name;                       // 该spider的名字，格式为 spiderxx
+	string user_agent; 
 	string log_conf_path;                    // log4cxx的配置文件路径
 	int spider_paused;                       // 是否暂停spider
 	int next_round_continue;                 // 是否继续下一轮

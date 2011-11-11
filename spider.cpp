@@ -117,6 +117,8 @@ void* crawl_thread(void* arg)
 	CExtractor extractor;
 	CRecognizer recognizer;
 	
+	http.set_useragent(conf.user_agent);
+
 	if (0 != utf8_converter.init(conf.converter_code_path.c_str()))
 	{
 		cerr << "utf8 init error: " << conf.converter_code_path << endl;
@@ -1355,6 +1357,13 @@ int CSpider::load_conf(const char* conf_path)
 		return -1;
 	}
 	m_spider_conf.spider_name = str_result;
+    //  USER AGENT
+	if ((str_result=conf.get_string_item("USER_AGENT")).empty())
+	{
+		printf("get item USER_AGENT error\n");
+		return -1;
+	}
+	m_spider_conf.user_agent = str_result;
     // Log4cxx配置文件路径
 	if ((str_result=conf.get_string_item("LOG_CONF_PATH")).empty())
 	{
