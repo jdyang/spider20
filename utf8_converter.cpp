@@ -83,7 +83,7 @@ int UTF8Converter::init(const char* code_path)
 		return -1;
 	}
 
-	m_output = malloc(CONVERTER_MAX_CONTENT_LEN);
+	m_output = (char*)malloc(CONVERTER_MAX_CONTENT_LEN);
 	if (!m_output)
 	{
 		printf("m_output malloc err");
