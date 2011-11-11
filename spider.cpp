@@ -379,7 +379,7 @@ void* crawl_thread(void* arg)
 		}
 		converted_content = utf8_converter.get_converted_content();
 		
-		cout << converted_content << endl;
+		//cout << converted_content << endl;
 
 		//extract links
 		extractor.set_html(url,converted_content);
@@ -995,6 +995,9 @@ int CSpider::load_input_urls(const char* input_path)
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " cate success");
 	
 	count = 0;
+	
+	
+/*	
 	fp = fopen(item_path.c_str(), "r");
 	if (!fp)
 	{
@@ -1046,58 +1049,7 @@ int CSpider::load_input_urls(const char* input_path)
 	real_num = m_statis.get_ioq_url_num() + count;
 	m_statis.set_ioq_url_num(real_num);
 	SDLOG_INFO(SP_LOGNAME, "load " << count << " item success");
-	// count = 0;
-	// fp = fopen(item_path.c_str(), "r");
-	// if (!fp)
-	// {
-	// 	SDLOG_WARN(SP_WFNAME, "open item file error: "<<cate_path);
-	// 	return -1;
-	// }
-	// 
-	// while (!feof(fp))
-	// {
-	// 	memset(line, 0, sizeof(line));
-	// 	get_one_line(fp, line, sizeof(line), lineno);
-	// 	p = filter_headtail_blank(line);
-	// 	if (p[0] == '\0')
-	// 	{
-	// 		SDLOG_INFO(SP_LOGNAME, "find an empty seed");
-	// 		continue;
-	// 	}
-	// 	for (unsigned int i = 0; i< sizeof(line); ++i){
-	// 		if (p[i] == '\t'){
-	// 			p[i] = '\0';
-	// 			break;
-	// 		}
-	// 	}		
-	// 	ucUrl uc_url(p);
-	// 	if (uc_url.build() != FR_OK)
-	// 	{
-	// 		SDLOG_INFO(SP_LOGNAME, "seed build error for\t" << p);
-	// 		continue;
-	// 	}
-	// 
-	//         count++;
-	// 
-	// 	ui.url = uc_url.get_url();
-	// 	ui.site = uc_url.get_site();
-	// 	ui.domain = uc_url.get_domain();
-	// 	ui.last_crawl_time = 0;
-	// 	mp_ioq->push_url(ui);
-	// 
-	//         map<string, DomainAttr>::iterator it = m_statis.m_domain.find(ui.domain);
-	// 	if (it == m_statis.m_domain.end())
-	// 	{
-	//             DomainAttr da;
-	// 		da.isShield = false;
-	// 		da.isSeed = false;
-	// 		m_statis.m_domain.insert(make_pair(ui.domain, da));
-	// 	}
-	// }
-	// fclose(fp);
-	// real_num = m_statis.get_ioq_url_num() + count;
-	// m_statis.set_ioq_url_num(real_num);
-	// SDLOG_INFO(SP_LOGNAME, "load " << count << " item success");
+*/
 
 	return 0;
 }
@@ -1236,7 +1188,7 @@ void CSpider::write_to_queue(int which_queue, CExtractor* extractor, CUrlRecogni
     UrlInfo ui;
 	for(map<string,CEcUrlLink>::iterator it = links.begin(); it != links.end(); ++it) 
     {
-		cerr << it->second.link << endl;
+	//	cerr << it->second.link << endl;
 		ucUrl uc_url(it->second.link);
 		if (FR_OK != uc_url.build())
 		{
@@ -1652,7 +1604,7 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.select_nums_per_time = int_result;
     // 每轮最少选取数
-	if ((int_result=conf.get_int_item("MIN_SELECT_THRESHOLD")) <= 0)
+	if ((int_result=conf.get_int_item("MIN_SELECT_THRESHOLD")) < 0)
 	{
 		printf("get item MIN_SELECT_THRESHOLD error\n");
 		return -1;
