@@ -1,0 +1,14 @@
+site<+>blog	:	100
+site<+>bbs	:	100
+site<+>club	:	100
+site<+>commu	:	100
+site<+>forum	:	100
+site<+>support	:	50
+url<+>help	:	80
+url<+>advice	:	80
+url<+>message	:	50
+url<+>news	:	50
+url<+>music	:	50
+url<+>movie	:	50
+title<+>访问的页面不存在	 :	100
+title<+>域名不存在	:	100
