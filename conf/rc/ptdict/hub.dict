@@ -1,0 +1,12 @@
+site<+>list	:	50
+url<+>category	:	50
+url<+>book	:	40
+url<+>sitemap	:	100
+path<+>list	:	50
+path<+>product	:	10
+path<+>class	:	20
+path<+>index	:	50
+path<+>product_id	:	-80
+path<+>detail	:	-30
+path<+>/html/type/	:	40
+path<+>/html/rank/	£º	40
