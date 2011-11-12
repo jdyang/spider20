@@ -32,7 +32,7 @@ private:
     string* mp_html_content;
 	string m_converted_content;
 
-	char m_output[CONVERTER_MAX_CONTENT_LEN];
+	char *m_output;
 	const char* m_input;
 	int m_input_len;
 

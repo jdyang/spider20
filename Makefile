@@ -21,10 +21,11 @@ LIB     = -L./	\
 	      -lurl \
 		  -lextractor \
 	      -lnet \
+		  -lcode	\
 	      -lutil \
 		  -ltse \
-		    -lfdb\
-					  -lcmysql \
+		  -lfdb\
+		  -lcmysql \
 	      -L/usr/local/lib -llog4cxx \
 	      -L/usr/local/lib -lapr-1\
 	      -L/usr/local/lib -laprutil-1\
@@ -36,9 +37,8 @@ LIB     = -L./	\
 		  -lhtml \
 		  -lhtmlcxx \
 		  -lurl \
-		   -lurlpattern \
+		  -lurlpattern \
 		  -lcrypto	\
-		  -lcode	\
 		  -lboost_regex-gcc41-mt \
 		  -L/usr/local/lib -lmysqlclient \
 		  -lurlpattern \

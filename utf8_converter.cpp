@@ -15,6 +15,7 @@ UTF8Converter::UTF8Converter(void)
 	mp_code_recognizer = NULL;
 	mp_gb2utf8_converter = NULL;
 	mp_big2utf8_converter = NULL;
+	m_output = NULL;
 }
 
 UTF8Converter::~UTF8Converter(void)
@@ -33,6 +34,11 @@ UTF8Converter::~UTF8Converter(void)
 	{
 		delete mp_big2utf8_converter;
 		mp_big2utf8_converter = NULL;
+	}
+
+	if (m_output) {
+		free(m_output);
+		m_output = NULL;
 	}
 }
 
@@ -76,6 +82,14 @@ int UTF8Converter::init(const char* code_path)
 		printf("gb2uf8 converter initial error");
 		return -1;
 	}
+
+	m_output = (char*)malloc(CONVERTER_MAX_CONTENT_LEN);
+	if (!m_output)
+	{
+		printf("m_output malloc err");
+		return -1;
+	}
+
     return 0;
 }
 
@@ -108,12 +122,12 @@ int UTF8Converter::to_utf8(void)
 	m_converted_content = "";
 	int real_len = -1;
 
-	memset(m_output, 0, sizeof(m_output));
+	memset(m_output, 0, CONVERTER_MAX_CONTENT_LEN);
 	CodeType code_type = detect_code_type();
 	switch (code_type)
 	{
 		case EN_GB:
-		    real_len = mp_gb2utf8_converter->convert((char*)m_input, m_input_len, m_output, sizeof(m_output)-1);
+		    real_len = mp_gb2utf8_converter->convert((char*)m_input, m_input_len, m_output, CONVERTER_MAX_CONTENT_LEN-1);
 			if (-1 == real_len)
 			{
 				return -1;
@@ -121,7 +135,7 @@ int UTF8Converter::to_utf8(void)
 			m_converted_content = m_output;
 			return 0;
 		case EN_BIG5:
-		    real_len = mp_big2utf8_converter->convert((char*)m_input, m_input_len, m_output, sizeof(m_output)-1);
+		    real_len = mp_big2utf8_converter->convert((char*)m_input, m_input_len, m_output, CONVERTER_MAX_CONTENT_LEN-1);
 			if (-1 == real_len )
 			{
 				return -1;
