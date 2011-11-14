@@ -1579,7 +1579,7 @@ int CSpider::load_conf(const char* conf_path)
 	}
 	m_spider_conf.selected_queue_empty_sleep_time = int_result;
     // DNS服务器地址
-	if ((str_result=conf.get_int_item("DNS_HOST")).empty())
+	if ((str_result=conf.get_string_item("DNS_HOST")).empty())
 	{
 		printf("get item DNS error\n");
 		return -1;
