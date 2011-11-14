@@ -38,10 +38,10 @@ int main(int argc, char** argv)
 	conf.dns_sleep_interval = 300;
 	
 	g_site_set.insert("0591.doido.com");
-	g_site_set.insert("search.paipai.com");
-	g_site_set.insert("map.baidu.com");
-	g_site_set.insert("list.m18.com");
-	g_site_set.insert("categoryb.dangdang.com");
+	g_site_set.insert("cdn01.mbbimg.cn");
+	g_site_set.insert("res2.e-lining.com");
+	g_site_set.insert("images.easy361.com");
+	g_site_set.insert("www.colagou.com");
 	
 	set<string>::iterator it;
 	it = g_site_set.begin();
