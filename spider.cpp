@@ -573,6 +573,17 @@ int CSpider::select_url()
 			for (unsigned int l = k; l < tmp_vector->size(); ++l){
 				m_select_back_p.push_back((*tmp_vector)[l]);
 			}
+			
+			//get max use of select q, so take use of the empty and select from the back_q
+			int total_select = m_statis.get_domain_item_select_num(*tmp_it) + m_statis.get_domain_cate_select_num(*tmp_it);
+			if (total_select >= prio_num_c + prio_num_c - 20)
+				continue;
+			total_select = prio_num_c + prio_num_c - total_select;
+			while (total_select > 0 && m_select_back_p.size() > 5){
+				m_select_buffer.push_back(m_select_back_p.back());
+				m_select_back_p.pop_back();
+				--total_select;
+			}
 		}
 
 		//clear tmp vector
@@ -648,6 +659,17 @@ int CSpider::select_url()
 			for (unsigned int l = k; l < tmp_vector->size(); ++l){
 				m_select_back_o.push_back((*tmp_vector)[l]);
 			}
+			
+			//get max use of select q, so take use of the empty and select from the back_q
+			int total_select = m_statis.get_domain_item_select_num(*tmp_it) + m_statis.get_domain_cate_select_num(*tmp_it);
+			if (total_select >= ord_num_c + ord_num_i - 20)
+				continue;
+			total_select = ord_num_c + ord_num_i - total_select;
+			while (total_select > 0 && m_select_back_o.size() > 5){
+				m_select_buffer.push_back(m_select_back_o.back());
+				m_select_back_o.pop_back();
+				--total_select;
+			}
 		}
 		
 		//clear tmp vector
@@ -659,8 +681,8 @@ int CSpider::select_url()
 	//save statis to file 
 	m_statis.set_statis_to_file();
 	
-	// judge if it need to go the next round
-	if (m_select_rounds > 1 && m_select_buffer.size() + m_select_back_o.size() + m_select_back_p.size() < (unsigned int)min_select_threshold) {
+	// judge if it need to go the next round, at least judge for 3 rounds
+	if (m_select_rounds > 3 && m_select_buffer.size() + m_select_back_o.size() + m_select_back_p.size() < (unsigned int)min_select_threshold) {
 		SDLOG_INFO(SP_LOGNAME, "prepare to go to next samsara, in round : " << m_select_rounds);
 		SDLOG_INFO(SP_LOGNAME, "ordinary links: " << o_link_num << " priority links : " << p_link_num);
 		SDLOG_INFO(SP_LOGNAME, "m_select_buffer: " << m_select_buffer.size() << " m_select_back_o : " << m_select_back_o.size() << " m_select_back_p: " << m_select_back_p.size());
@@ -669,7 +691,7 @@ int CSpider::select_url()
 		while (mp_selected_queue->size() > m_spider_conf.min_select_threshold)
 			sleep(5);
 		SDLOG_INFO(SP_LOGNAME, "goto next samsara");
-		m_select_rounds = 1;	
+		m_select_rounds = 0;	
 		return -1;
 	}
 	random_shuffle(m_select_buffer.begin(), m_select_buffer.end());
@@ -1004,6 +1026,10 @@ int CSpider::load_input_urls(const char* input_path)
 			da.isShield = 0;
 			da.isSeed = 0;
 			m_statis.m_domain.insert(make_pair(ui.domain, da));
+			m_statis.set_domain_cate_done_num(0);
+			m_statis.set_domain_item_done_num(0);
+			m_statis.set_domain_cate_select_num(0);
+			m_statis.set_domain_item_select_num(0);
 		}
 	}
 	fclose(fp);
