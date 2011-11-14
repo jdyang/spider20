@@ -227,7 +227,7 @@ void* crawl_thread(void* arg)
 		}
 		site = uc_url.get_site();
 		domain = uc_url.get_domain();
-		ip = dns_client.get_ip(site);
+		ip = dns_client.get_ip(site.c_str());
 
 		if (ip == "NO_IP")
 		{
@@ -294,7 +294,7 @@ void* crawl_thread(void* arg)
 				}
 				if (red_url.get_site() != site)
 				{
-					ip = dns_client.get_ip(red_url.get_site());
+					ip = dns_client.get_ip(red_url.get_site().c_str());
 					if (ip == "NO_IP")
 					{
 						break;
@@ -771,7 +771,7 @@ int CSpider::insert_url()
 	m_dns_client.clear_map();
 	map<string, string>::iterator site_it;
 	for (site_it = m_sites.begin(); site_it != m_sites.end(); ++site_it){
-		string ip = m_dns_client.get_ip((*site_it).first);
+		string ip = m_dns_client.get_ip((*site_it).first.c_str());
 		(*site_it).second = ip;
 	}
 	//clear m_select_back
