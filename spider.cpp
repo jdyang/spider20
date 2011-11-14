@@ -574,6 +574,9 @@ int CSpider::select_url()
 				m_select_back_p.push_back((*tmp_vector)[l]);
 			}
 			
+			int item_num = m_statis.get_domain_item_select_num(*tmp_it);
+			int cate_num = m_statis.get_domain_cate_select_num(*tmp_it);
+			
 			//get max use of select q, so take use of the empty and select from the back_q
 			int total_select = m_statis.get_domain_item_select_num(*tmp_it) + m_statis.get_domain_cate_select_num(*tmp_it);
 			if (total_select >= prio_num_c + prio_num_c - 20)
@@ -581,9 +584,15 @@ int CSpider::select_url()
 			total_select = prio_num_c + prio_num_c - total_select;
 			while (total_select > 0 && m_select_back_p.size() > 5){
 				m_select_buffer.push_back(m_select_back_p.back());
+				if (m_select_back_p.back().type == 0)
+					++item_num;
+				else
+					++cate_num;
 				m_select_back_p.pop_back();
 				--total_select;
 			}
+			m_statis.set_domain_item_select_num(*tmp_it, item_num);
+			m_statis.set_domain_cate_select_num(*tmp_it, cate_num);
 		}
 
 		//clear tmp vector
@@ -660,6 +669,9 @@ int CSpider::select_url()
 				m_select_back_o.push_back((*tmp_vector)[l]);
 			}
 			
+			int item_num = m_statis.get_domain_item_select_num(*tmp_it);
+			int cate_num = m_statis.get_domain_cate_select_num(*tmp_it);
+			
 			//get max use of select q, so take use of the empty and select from the back_q
 			int total_select = m_statis.get_domain_item_select_num(*tmp_it) + m_statis.get_domain_cate_select_num(*tmp_it);
 			if (total_select >= ord_num_c + ord_num_i - 20)
@@ -667,9 +679,15 @@ int CSpider::select_url()
 			total_select = ord_num_c + ord_num_i - total_select;
 			while (total_select > 0 && m_select_back_o.size() > 5){
 				m_select_buffer.push_back(m_select_back_o.back());
+				if (m_select_back_o.back().type == 0)
+					++item_num;
+				else
+					++cate_num;
 				m_select_back_o.pop_back();
 				--total_select;
 			}
+			m_statis.set_domain_item_select_num(*tmp_it, item_num);
+			m_statis.set_domain_cate_select_num(*tmp_it, cate_num);
 		}
 		
 		//clear tmp vector
