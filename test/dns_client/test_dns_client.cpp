@@ -59,6 +59,11 @@ int main(int argc, char** argv)
 	}
 	signal(SIGINT, end_handler);
     printf("start in %ld\n", time(NULL));
+
+	string tmp_str = "0591.doido.com";
+	cout << "0591.doido.com : " << dns_client.get_ip(tmp_str.c_str()) << endl;
+
+
 	write_thread(&dns_client);
 
 	for (i=0; i<5; i++)
@@ -83,7 +88,7 @@ void* write_thread(void* arg)
 	{
 		usleep(300000);
 		int i = rand()%g_site_vector.size();
-		cout << i << " : " << g_site_vector[i] << " ip: " << dns->get_ip(g_site_vector[i]) << endl;
+		cout << i << " : " << g_site_vector[i] << " ip: " << dns->get_ip(g_site_vector[i].c_str()) << endl;
 		
 	}
 

@@ -35,15 +35,16 @@ void CDnsClient::put_ip(string site, string ip)
 	m_ip_mutex.unlock();
 }
 
-string CDnsClient::get_ip(string site)
+string CDnsClient::get_ip(const char* site_char)
 {
-	if (site.length() < 3)
+	if (NULL == site_char)
 		return "NO_IP";
 	string ip;
+	string site(site_char);
 	m_ip_mutex.lock();
 	if (m_ip_list.find(site) == m_ip_list.end()){
 		m_ip_mutex.unlock();
-		ip = query_real_dns(site);
+		ip = query_real_dns(site_char);
 		put_ip(site, ip);
 	} else {
 		ip = m_ip_list[site];
@@ -58,7 +59,7 @@ int CDnsClient::query_site_ip(set<string> *sites)
 	set<string>::iterator it;
 	string ip;
 	for (it = sites->begin(); it != sites->end(); ++it){
-		ip = query_real_dns(*it);
+		ip = query_real_dns((*it).c_str());
 		put_ip(*it, ip);
 		usleep(100*1000);
 	}
@@ -66,7 +67,7 @@ int CDnsClient::query_site_ip(set<string> *sites)
 }
 
 //singleton query
-string CDnsClient::query_real_dns(string site)
+string CDnsClient::query_real_dns(const char* site_char)
 {
 	string ret = "NO_IP";
 	
@@ -75,11 +76,11 @@ string CDnsClient::query_real_dns(string site)
 	
 	char dns_host[32];
 	strncpy(dns_host, m_conf->dns_host.c_str(), strlen(m_conf->dns_host.c_str()));
-	
+	dns_host[strlen(m_conf->dns_host.c_str())] = '\0';	
 	
 	for (int i = 3; i < 6 ; ++i){
 		m_singleton_mutex.lock();
-		if (udp_dns.gethostipbyname_r_o(dns_host, m_conf->dns_port, site.c_str(), ip, i, 0) >=0 ){
+		if (udp_dns.gethostipbyname_r_o(dns_host, m_conf->dns_port, site_char, ip, i, 0) >=0 ){
 			m_singleton_mutex.unlock();
 			break;
 		}
