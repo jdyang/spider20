@@ -1026,10 +1026,10 @@ int CSpider::load_input_urls(const char* input_path)
 			da.isShield = 0;
 			da.isSeed = 0;
 			m_statis.m_domain.insert(make_pair(ui.domain, da));
-			m_statis.set_domain_cate_done_num(0);
-			m_statis.set_domain_item_done_num(0);
-			m_statis.set_domain_cate_select_num(0);
-			m_statis.set_domain_item_select_num(0);
+			m_statis.set_domain_cate_done_num(ui.domain,0);
+			m_statis.set_domain_item_done_num(ui.domain,0);
+			m_statis.set_domain_cate_select_num(ui.domain,0);
+			m_statis.set_domain_item_select_num(ui.domain,0);
 		}
 	}
 	fclose(fp);
