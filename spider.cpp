@@ -978,6 +978,7 @@ int CSpider::load_input_urls(const char* input_path)
 	
 	string cate_path = string(input_path) + "/" +INPUT_PATH + "/" + CATE_LIST;
 	string item_path = string(input_path) + "/" +INPUT_PATH + "/" + ITEM_LIST;
+	string md5_file = item_path + ".md5";
 	
 	mp_cpq->get_url_queue().clear();
 	mp_ipq->get_url_queue().clear();
@@ -1057,6 +1058,12 @@ int CSpider::load_input_urls(const char* input_path)
 	
 	count = 0;
 	
+	//system md5sum
+	string cmd = "md5sum " + item_path + " > " + md5_file;
+	if (0 != system(cmd)) {
+		cerr << cmd << " error " << endl;
+		SDLOG_WARN(SP_WFNAME, cmd << " error!");
+	}
 	
 /*	
 	fp = fopen(item_path.c_str(), "r");
