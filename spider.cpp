@@ -1062,7 +1062,7 @@ int CSpider::load_input_urls(const char* input_path)
 	
 	//system md5sum
 	string cmd = "md5sum " + item_path + " > " + md5_file;
-	if (0 != system(cmd)) {
+	if (0 != system(cmd.c_str())) {
 		cerr << cmd << " error " << endl;
 		SDLOG_WARN(SP_WFNAME, cmd << " error!");
 	}
