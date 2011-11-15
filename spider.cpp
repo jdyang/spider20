@@ -708,6 +708,8 @@ int CSpider::select_url()
 		SDLOG_INFO(SP_LOGNAME, "wait for sq to finish ");
 		while (mp_selected_queue->size() > m_spider_conf.min_select_threshold)
 			sleep(5);
+			
+		mp_selected_queue->clear();
 		SDLOG_INFO(SP_LOGNAME, "goto next samsara");
 		m_select_rounds = 0;	
 		return -1;
