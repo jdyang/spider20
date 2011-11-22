@@ -982,15 +982,11 @@ int CSpider::load_input_urls(const char* input_path)
 	string item_path = string(input_path) + "/" +INPUT_PATH + "/" + ITEM_LIST;
 	string md5_file = item_path + ".md5";
 	
-	mp_cpq->get_url_queue().clear();
-	mp_ipq->get_url_queue().clear();
-	mp_coq->get_url_queue().clear();
-	mp_ioq->get_url_queue().clear();
-	
-	mp_cpq->get_url_set().clear();
-	mp_ipq->get_url_set().clear();
-	mp_coq->get_url_set().clear();
-	mp_ioq->get_url_set().clear();
+	//clear url_pool	
+	mp_cpq->clear_urls();
+	mp_ipq->clear_urls();
+	mp_coq->clear_urls();
+	mp_ioq->clear_urls();
 	
 	m_statis.m_domain.clear();
 
@@ -1062,7 +1058,7 @@ int CSpider::load_input_urls(const char* input_path)
 	
 	//system md5sum
 	string cmd = "md5sum " + item_path + " > " + md5_file;
-	if (0 != system(cmd.c_str())) {
+	if (-1 == system(cmd.c_str())) {
 		cerr << cmd << " error " << endl;
 		SDLOG_WARN(SP_WFNAME, cmd << " error!");
 	}

@@ -47,8 +47,10 @@ public:
     deque<UrlInfo>& get_url_queue();
 	set<string>& get_url_set();
 	ncMutex get_url_mutex(){return m_url_mutex;}
+	ncMutex get_url_set_mutex(){return m_url_set_mutex;}
 
 	bool url_empty();
+	void clear_urls();
 	void push_url(UrlInfo ui);
 	UrlInfo pop_url();
 	int print_pool();

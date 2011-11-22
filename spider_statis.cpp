@@ -1,6 +1,6 @@
 /*
  @file: spider_statis.cpp
- @brief: spider2.0 统计接口实现
+ @brief: spider2.0 脥鲁录脝陆脫驴脷脢碌脧脰
  @author: stanshen
  @create date: 2011.10.25
 */
@@ -80,6 +80,8 @@ int CSpiderStatis::set_statis_to_file()
 		            get_domain_cate_done_num(map_iter->first), get_domain_cate_select_num(map_iter->first),
 					get_domain_item_done_num(map_iter->first), get_domain_item_select_num(map_iter->first));
 		fflush(m_fp);
+		set_domain_cate_select_num(map_iter->first, 0);
+		set_domain_item_select_num(map_iter->first, 0);
 	}
 	fprintf(m_fp, "\n");
 	return 0;

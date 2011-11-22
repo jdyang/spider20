@@ -30,6 +30,18 @@ bool CUrlPool::url_empty() {
 	return m_url_queue.empty();
 }
 
+void CUrlPool::clear_urls(){
+	
+	m_url_mutex.lock();
+	m_url_queue.clear();
+	m_url_mutex.unlock();
+	
+	m_url_set_mutex.lock();
+	m_url_set.clear();
+	m_url_set_mutex.unlock();
+	
+}
+
 
 void CUrlPool::push_url(UrlInfo ui) {
 	
