@@ -78,7 +78,7 @@ int CPageOutput::append(const char*page, int len, bool need_write)
 	if (min != m_cur_min)
 	{
 		memset(buf, 0, sizeof(buf));
-		sprintf(buf, "%s/%d%02d%02d/page.%s.%d%02d%02d%02d%02d", conf.page_dir.c_str(), year, month, m_cur_day, conf.spider_name.c_str(), year, month, m_cur_day, hour, min*30);
+		sprintf(buf, "%s/%d%02d%02d/page.%s.%d%02d%02d%02d%02d", conf.page_dir.c_str(), year, month, m_cur_day, conf.spider_name.c_str(), year, month, m_cur_day, hour, min*conf.page_name_change_interval);
 		if (-1 != m_fd)
 		{
 			close(m_fd);

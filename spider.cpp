@@ -179,12 +179,15 @@ void* crawl_thread(void* arg)
 			continue;
 		}
 
+		if (-1 == p_page_output->append(NULL, 0, false)) // 为了满足即使没有抓到网页也写一个page.list空文件
+		{
+			SDLOG_WARN(SP_WFNAME, "write null page error");
+			usleep(300);
+			continue;
+		}
+
         if (!p_selected_queue->pop(qi))  // SelectedQueue为空
 		{
-			if (-1 == p_page_output->append(NULL, 0, false)) // 为了满足即使没有抓到网页也写一个page.list空文件
-			{
-				SDLOG_WARN(SP_WFNAME, "write null page error");
-			}
 			usleep(conf.selected_queue_empty_sleep_time*1000);
 			continue;
 		}
